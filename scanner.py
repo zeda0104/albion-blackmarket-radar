@@ -43,7 +43,8 @@ class MarketScanner:
         self.inner_spec = 100         # 內圈母節點專精 (0~100)
         self.outer_spec = 100         # 外圈單品專精 (0~100)
         self.food = "potato"          # 'none', 'potato' (+100), 'kraken' (+200)
-        self.safe_batch_pct = 0.30    # 安全批量比例 (預設 30% 日均消化量)
+        self.safe_batch_pct = 0.15    # 安全批量基準比例
+        self.safe_batch_cap = 25      # 安全批量單品上限封頂 (預設 25 件，防範爆倉賣不完)
         self.bubble_threshold = 0.35  # 暴漲 / 泡泡 / 壓單風險警示門檻 (+35%)
         
         # 快取
@@ -66,6 +67,7 @@ class MarketScanner:
                    outer_spec: Optional[int] = None,
                    food: Optional[str] = None,
                    safe_batch_pct: Optional[float] = None,
+                   safe_batch_cap: Optional[int] = None,
                    bubble_threshold: Optional[float] = None):
         if server_key and server_key in SERVERS:
             self.server_key = server_key
@@ -93,9 +95,29 @@ class MarketScanner:
         if food in ["none", "potato", "kraken"]:
             self.food = food
         if safe_batch_pct is not None:
-            self.safe_batch_pct = max(0.05, min(1.0, float(safe_batch_pct)))
+            self.safe_batch_pct = max(0.01, min(1.0, float(safe_batch_pct)))
+        if safe_batch_cap is not None:
+            self.safe_batch_cap = max(0, int(safe_batch_cap))
         if bubble_threshold is not None:
             self.bubble_threshold = max(0.10, min(2.0, float(bubble_threshold)))
+
+    def calculate_safe_batch(self, daily_vol: float) -> int:
+        """依黑市真實消化量與日銷階梯計算安全批量，並加入上限封頂保護"""
+        if daily_vol <= 0:
+            return 1
+        if daily_vol <= 20:
+            qty = int(round(daily_vol * 0.25))
+        elif daily_vol <= 100:
+            qty = int(round(daily_vol * 0.15))
+        elif daily_vol <= 500:
+            qty = int(round(daily_vol * 0.08))
+        else:
+            qty = int(round(daily_vol * 0.02))
+        
+        qty = max(1, qty)
+        if hasattr(self, 'safe_batch_cap') and self.safe_batch_cap > 0:
+            qty = min(qty, self.safe_batch_cap)
+        return qty
 
     def fetch_materials(self) -> Dict[tuple, Dict[str, Any]]:
         mat_map = get_all_material_ids()
@@ -507,11 +529,24 @@ class MarketScanner:
                 order_sell_price = max(base_order_price, breakeven_order_price) if base_order_price > 0 else breakeven_order_price
                 instant_sell_price = compat_max_price
 
-                # 預設基準價格：若為掛單模式以穩健掛單價為準，否則採用向下相容後最高價
+                # 基準價格判定：
+                # 1. 若為掛單模式以穩健掛單價為準
+                # 2. 若為即時模式：優先採向下相容即時買單 (compat_max_price)
+                #    若無即時買單 (或即時買單為0)，但有歷史週均價 (common_7d_avg)，
+                #    則自動以週均價為保底基準價計算利潤，防範漏掉穩定獲利裝備與避免暴漲虛高！
+                price_is_history = False
                 if self.sell_mode == "order":
                     benchmark_price = order_sell_price
                 else:
-                    benchmark_price = compat_max_price if compat_max_price > 0 else common_max_price
+                    if compat_max_price > 0:
+                        benchmark_price = compat_max_price
+                    elif common_7d_avg > 0:
+                        benchmark_price = common_7d_avg
+                        price_is_history = True
+                    elif common_max_price > 0:
+                        benchmark_price = common_max_price
+                    else:
+                        benchmark_price = 0
                 
                 # 計算基準利潤 (扣除當前模式手續費)
                 profit_no_focus = int(round(benchmark_price * fee_factor - cost_no_focus)) if benchmark_price > 0 and cost_no_focus > 0 else 0
@@ -520,14 +555,24 @@ class MarketScanner:
                 roi_no_focus = round((profit_no_focus / cost_no_focus) * 100, 1) if cost_no_focus > 0 and benchmark_price > 0 else 0.0
                 roi_focus = round((profit_focus / cost_focus) * 100, 1) if cost_focus > 0 and benchmark_price > 0 else 0.0
                 
-                # 每日暴利潛力指數 (日均消化量 × 單件利潤，日誌補貼以市場真實折現計算)
+                # 日誌補貼
                 unit_subsidy = journal_info.get("market_subsidy", 0) if self.journal_mode != "off" else 0
                 net_unit_profit = profit_no_focus + unit_subsidy
+
+                # 動態安全批量 (依黑市銷量階梯與自訂上限封頂，防範上千件庫存賣不完)
+                safe_batch_qty = self.calculate_safe_batch(daily_avg_vol)
+
+                # 單批安全利潤 (Safe Batch Profit = 單件淨利 × 安全批量)
+                safe_batch_profit = int(round(net_unit_profit * safe_batch_qty)) if net_unit_profit > 0 else 0
+
+                # 穩健單日潛力：估計個人單日平穩消化 2 批安全批量 (約佔黑市日銷 5%~10%)
+                realistic_daily_potential = safe_batch_profit * 2
+
+                # 伺服器理論上限 (日均消化量 × 單件利潤，假定吃下整個伺服器100%銷量)
                 daily_profit_potential = int(round(net_unit_profit * daily_avg_vol)) if net_unit_profit > 0 and daily_avg_vol > 0 else 0
 
-                # 穩健估算：以穩健掛單價為基準 (扣6.5%掛單稅費)，防範盲目砸單回落，且保證不為負
-                profit_hist = int(round(order_sell_price * order_fee_factor - cost_no_focus)) if order_sell_price > 0 and cost_no_focus > 0 else 0
-                realistic_daily_potential = int(round((profit_hist + unit_subsidy) * daily_avg_vol)) if (profit_hist + unit_subsidy) > 0 and daily_avg_vol > 0 else 0
+                # 均價後淨利 (當即時價格暴漲時，一旦被壓回均價後的單件實質淨利)
+                weekly_unit_profit_nf = int(round(common_7d_avg * fee_factor - cost_no_focus + unit_subsidy)) if common_7d_avg > 0 and cost_no_focus > 0 else 0
 
                 # ================== 皇家五大城市製造收益 (無運費/物流扣除) ==================
                 royal_profit_no_focus = int(round(benchmark_price * fee_factor - royal_cost_no_focus)) if benchmark_price > 0 and royal_cost_no_focus > 0 else 0
@@ -542,13 +587,16 @@ class MarketScanner:
                 cost_saving_pct = round((cost_saving_silver / cost_no_focus) * 100, 1) if cost_no_focus > 0 and cost_saving_silver > 0 else 0.0
                 profit_boost_pct = round((extra_profit_no_focus / abs(profit_no_focus)) * 100, 1) if profit_no_focus != 0 else (100.0 if royal_profit_no_focus > 0 else 0.0)
 
-                # 皇家每日暴利潛力 (以皇家淨利 × 日銷量)
+                # 皇家單批利潤與實質日潛力
+                royal_safe_batch_profit = int(round((royal_profit_no_focus + unit_subsidy) * safe_batch_qty)) if (royal_profit_no_focus + unit_subsidy) > 0 else 0
+                royal_realistic_potential = royal_safe_batch_profit * 2
                 royal_daily_potential = int(round((royal_profit_no_focus + unit_subsidy) * daily_avg_vol)) if (royal_profit_no_focus + unit_subsidy) > 0 and daily_avg_vol > 0 else 0
+                royal_weekly_unit_profit_nf = int(round(common_7d_avg * fee_factor - royal_cost_no_focus + unit_subsidy)) if common_7d_avg > 0 and royal_cost_no_focus > 0 else 0
 
                 if benchmark_price == 0:
                     royal_status = "無收單"
                 elif royal_profit_no_focus > 0:
-                    royal_status = "無專注可賺"
+                    royal_status = "週均可賺" if price_is_history else "無專注可賺"
                 elif royal_profit_focus > 0:
                     royal_status = "下專注才賺"
                 else:
@@ -558,7 +606,7 @@ class MarketScanner:
                 if benchmark_price == 0:
                     status = "無收單"
                 elif profit_no_focus > 0:
-                    status = "無專注可賺"
+                    status = "週均可賺" if price_is_history else "無專注可賺"
                 elif profit_focus > 0:
                     status = "下專注才賺"
                 else:
@@ -590,9 +638,7 @@ class MarketScanner:
                         "hist_vol": q_hist.get("vol", 0)
                     })
                 
-                # 安全批量與泡泡風險分析
-                safe_batch_qty = max(1, int(round(daily_avg_vol * self.safe_batch_pct))) if daily_avg_vol >= 1.0 else 1
-                
+                # 泡泡風險分析
                 bubble_ratio = 0.0
                 bubble_risk = "stable"
                 bubble_badge = "🟢 價格穩健"
@@ -672,9 +718,12 @@ class MarketScanner:
                     # 4. 製作日誌與紅城島工人產出
                     "journal": journal_info,
                     
-                    # 暴利綜合指標
+                    # 暴利與實戰綜合指標
                     "daily_profit_potential": daily_profit_potential,
                     "realistic_daily_potential": realistic_daily_potential,
+                    "safe_batch_profit": safe_batch_profit,
+                    "weekly_unit_profit_nf": weekly_unit_profit_nf,
+                    "price_is_history": price_is_history,
                     
                     # 利潤 (無專注 vs 專注)
                     "profit_no_focus": profit_no_focus,
@@ -724,6 +773,9 @@ class MarketScanner:
                     "cost_saving_pct": cost_saving_pct,
                     "profit_boost_pct": profit_boost_pct,
                     "royal_daily_potential": royal_daily_potential,
+                    "royal_safe_batch_profit": royal_safe_batch_profit,
+                    "royal_realistic_potential": royal_realistic_potential,
+                    "royal_weekly_unit_profit_nf": royal_weekly_unit_profit_nf,
                     "royal_status": royal_status,
                     "royal_mats_breakdown": royal_mats_breakdown
                 })

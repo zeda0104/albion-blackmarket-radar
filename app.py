@@ -89,6 +89,7 @@ class ConfigRequest(BaseModel):
     outer_spec: Optional[int] = None
     food: Optional[str] = None
     safe_batch_pct: Optional[float] = None
+    safe_batch_cap: Optional[int] = None
     bubble_threshold: Optional[float] = None
 
 class LedgerRequest(BaseModel):
@@ -129,6 +130,7 @@ def get_status():
         "food": scanner.food,
         "price_basis": scanner.price_basis,
         "safe_batch_pct": scanner.safe_batch_pct,
+        "safe_batch_cap": scanner.safe_batch_cap,
         "bubble_threshold": scanner.bubble_threshold,
         "is_scanning": scanner.is_scanning,
         "scan_progress": scanner.scan_progress,
@@ -161,6 +163,7 @@ def get_radar_data():
         "outer_spec": scanner.outer_spec,
         "food": scanner.food,
         "safe_batch_pct": scanner.safe_batch_pct,
+        "safe_batch_cap": scanner.safe_batch_cap,
         "bubble_threshold": scanner.bubble_threshold,
         "quality_stats": calculate_quality_chances(scanner.inner_spec, scanner.outer_spec, scanner.food, False),
         "materials": scanner.materials_cache,
@@ -184,6 +187,7 @@ def get_config():
         "food": scanner.food,
         "price_basis": scanner.price_basis,
         "safe_batch_pct": scanner.safe_batch_pct,
+        "safe_batch_cap": scanner.safe_batch_cap,
         "bubble_threshold": scanner.bubble_threshold
     }
 
@@ -206,6 +210,7 @@ def update_config(cfg: ConfigRequest):
         outer_spec=cfg.outer_spec,
         food=cfg.food,
         safe_batch_pct=cfg.safe_batch_pct,
+        safe_batch_cap=cfg.safe_batch_cap,
         bubble_threshold=cfg.bubble_threshold
     )
     
@@ -246,11 +251,20 @@ def update_config(cfg: ConfigRequest):
             eq["instant_sell_price"] = c_max
             eq["order_sell_price"] = order_sell_price
             
-            # 依銷售模式取基準價 (掛單模式以穩健掛單價為準，即時模式以向下相容價為準)
+            # 依銷售模式取基準價 (掛單模式以穩健掛單價為準，即時模式優先向下相容價，無單時自動回退週均價保底)
+            price_is_history = False
             if scanner.sell_mode == "order":
                 bm = order_sell_price
             else:
-                bm = c_max or eq.get("common_max_price", 0)
+                if c_max > 0:
+                    bm = c_max
+                elif c_7d > 0:
+                    bm = c_7d
+                    price_is_history = True
+                elif eq.get("common_max_price", 0) > 0:
+                    bm = eq.get("common_max_price", 0)
+                else:
+                    bm = 0
                 
             p_nf = int(round(bm * fee_factor - c_nf)) if bm > 0 and c_nf > 0 else 0
             p_f = int(round(bm * fee_factor - c_f)) if bm > 0 and c_f > 0 else 0
@@ -259,17 +273,27 @@ def update_config(cfg: ConfigRequest):
             eq["roi_no_focus"] = round((p_nf / c_nf) * 100, 1) if c_nf > 0 and bm > 0 else 0.0
             eq["roi_focus"] = round((p_f / c_f) * 100, 1) if c_f > 0 and bm > 0 else 0.0
             daily_vol = eq.get("daily_avg_vol", 0.0)
-            eq["daily_profit_potential"] = int(round(p_nf * daily_vol)) if p_nf > 0 and daily_vol > 0 else 0
+            
+            unit_sub = eq.get("journal", {}).get("market_subsidy", 0) if scanner.journal_mode != "off" else 0
+            net_u_prof = p_nf + unit_sub
+
+            # 重新計算安全批量 (階梯比例 + 上限封頂)
+            safe_qty = scanner.calculate_safe_batch(daily_vol)
+            eq["safe_batch_qty"] = safe_qty
+            
+            # 單批安全利潤與穩健日潛力
+            safe_profit = int(round(net_u_prof * safe_qty)) if net_u_prof > 0 else 0
+            eq["safe_batch_profit"] = safe_profit
+            eq["realistic_daily_potential"] = safe_profit * 2
+            eq["daily_profit_potential"] = int(round(net_u_prof * daily_vol)) if net_u_prof > 0 and daily_vol > 0 else 0
+            eq["price_is_history"] = price_is_history
+            eq["weekly_unit_profit_nf"] = int(round(c_7d * fee_factor - c_nf + unit_sub)) if c_7d > 0 and c_nf > 0 else 0
 
             # 重新計算專注效率 (銀/點)
             f_cost = get_item_focus_cost(eq["tier"], eq.get("recipe", {}), scanner.inner_spec, scanner.outer_spec)
             eq["focus_cost"] = f_cost
             marg = p_f - p_nf
             eq["silver_per_focus"] = round(marg / f_cost, 1) if (f_cost > 0 and marg > 0) else 0.0
-
-            # 重新計算安全批量與風控
-            safe_qty = max(1, int(round(daily_vol * scanner.safe_batch_pct))) if daily_vol >= 1.0 else 1
-            eq["safe_batch_qty"] = safe_qty
             
             if c_max > 0 and c_7d > 0:
                 b_ratio = round((c_max - c_7d) / float(c_7d), 3)
@@ -301,7 +325,7 @@ def update_config(cfg: ConfigRequest):
             if bm == 0:
                 eq["status"] = "無收單"
             elif p_nf > 0:
-                eq["status"] = "無專注可賺"
+                eq["status"] = "週均可賺" if price_is_history else "無專注可賺"
             elif p_f > 0:
                 eq["status"] = "下專注才賺"
             else:
@@ -333,11 +357,15 @@ def update_config(cfg: ConfigRequest):
 
             unit_subsidy = eq.get("journal", {}).get("market_subsidy", 0) if scanner.journal_mode != "off" else 0
             eq["royal_daily_potential"] = int(round((r_p_nf + unit_subsidy) * daily_vol)) if (r_p_nf + unit_subsidy) > 0 and daily_vol > 0 else 0
+            r_safe_profit = int(round((r_p_nf + unit_subsidy) * safe_qty)) if (r_p_nf + unit_subsidy) > 0 else 0
+            eq["royal_safe_batch_profit"] = r_safe_profit
+            eq["royal_realistic_potential"] = r_safe_profit * 2
+            eq["royal_weekly_unit_profit_nf"] = int(round(c_7d * fee_factor - r_c_nf + unit_subsidy)) if c_7d > 0 and r_c_nf > 0 else 0
 
             if bm == 0:
                 eq["royal_status"] = "無收單"
             elif r_p_nf > 0:
-                eq["royal_status"] = "無專注可賺"
+                eq["royal_status"] = "週均可賺" if price_is_history else "無專注可賺"
             elif r_p_f > 0:
                 eq["royal_status"] = "下專注才賺"
             else:

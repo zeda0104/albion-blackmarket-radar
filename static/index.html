@@ -448,9 +448,10 @@
               <span class="text-gray-400 shrink-0">收單基準:</span>
               <select v-model="qualityBenchmark" 
                       class="w-full py-1.5 px-2 bg-albion-card border border-albion-border rounded text-gray-200 focus:outline-none focus:border-indigo-500 font-medium">
-                <option value="compat_max">⬇️ 向下相容最高價 (實戰保底首選)</option>
+                <option value="compat_max">⬇️ 向下相容最高價 (無單自動保底週均價)</option>
+                <option value="compat_safe">🛡️ 穩健防暴漲模式 (暴漲與無單採週均價)</option>
+                <option value="history_7d">📈 7天黑市成交均價 (一週深度均價，徹底防被壓回)</option>
                 <option value="expected">📊 批量加權期望價 (Q1~Q4綜合)</option>
-                <option value="history_7d">📈 7天黑市成交均價 (一週深度均價)</option>
                 <option value="common_max">一般/優良 最高價 (原始收單)</option>
                 <option value="common_avg">一般/優良 平均價</option>
                 <option value="normal">只看 一般 (Normal Q1)</option>
@@ -474,7 +475,8 @@
               <span class="text-gray-400 shrink-0">排序:</span>
               <select v-model="sortBy" 
                       class="w-full py-1.5 px-2 bg-albion-card border border-albion-border rounded text-gray-200 focus:outline-none focus:border-indigo-500 font-medium">
-                <option value="potential_desc">🚀 每日暴利潛力 (日銷量×淨利)</option>
+                <option value="batch_profit_desc">💰 單批安全利潤 (推薦實戰)</option>
+                <option value="potential_desc">🚀 理論暴利潛力 (日銷量×淨利)</option>
                 <option value="focus_efficiency_desc">🎯 專注銀/點邊際效益 (高 → 低)</option>
                 <option value="bubble_desc">⚠️ 暴漲泡泡溢價率 (高 → 低)</option>
                 <option value="safe_batch_desc">🛡️ 安全批量建議 (大 → 小)</option>
@@ -646,10 +648,14 @@
 
                     <!-- 黑市收購價 (依基準與泡泡狀態) -->
                     <td class="py-2.5 px-2 text-right font-bold whitespace-nowrap min-w-[115px]"
-                        :class="getItemPrice(item) > 0 ? 'text-white' : 'text-gray-500'">
+                        :class="isItemPriceFromHistory(item) ? 'text-amber-300' : (getItemPrice(item) > 0 ? 'text-white' : 'text-gray-500')">
                       <div>{{ getItemPrice(item) > 0 ? formatNumber(getItemPrice(item)) : '-' }}</div>
+                      <div v-if="isItemPriceFromHistory(item)" class="text-[9px] text-amber-400 font-sans flex items-center justify-end space-x-0.5 mt-0.5">
+                        <span class="px-1 py-0.2 rounded bg-amber-500/20 text-amber-300 font-normal">週均保底</span>
+                        <span class="text-gray-400 font-normal">(無即時單)</span>
+                      </div>
                       <!-- 暴漲泡泡或低谷徽章 -->
-                      <div v-if="item.bubble_risk && item.bubble_risk !== 'stable' && item.bubble_risk !== 'normal'" class="mt-0.5">
+                      <div v-else-if="item.bubble_risk && item.bubble_risk !== 'stable' && item.bubble_risk !== 'normal'" class="mt-0.5">
                         <span class="text-[9px] px-1.5 py-0.5 rounded font-bold inline-block cursor-help whitespace-nowrap shrink-0" :class="getBubbleBadgeClass(item.bubble_risk)" :title="item.bubble_tip">
                           {{ item.bubble_badge }}
                         </span>
@@ -667,6 +673,14 @@
                         </span>
                         <span class="text-[10px] block" :class="getItemProfit(item) > 0 ? 'text-emerald-500' : 'text-rose-500'">
                           ({{ getItemRoi(item) }}%)
+                          <span v-if="isItemPriceFromHistory(item)" class="text-[9px] text-amber-400 font-normal ml-0.5">均價預估</span>
+                        </span>
+                        <!-- 暴漲時提示壓回均價後的淨利 -->
+                        <span v-if="item.bubble_risk === 'high_risk' && !isItemPriceFromHistory(item)" 
+                              class="text-[9px] block font-mono"
+                              :class="getWeeklyAvgProfit(item) > 0 ? 'text-amber-300' : 'text-rose-400'"
+                              :title="`若黑市價格跌回一週均價 (${formatNumber(item.common_7d_avg)} 銀)，實質淨利將變為 ${formatNumber(getWeeklyAvgProfit(item))} 銀`">
+                          均價後: {{ getWeeklyAvgProfit(item) > 0 ? '+' : '' }}{{ formatNumber(getWeeklyAvgProfit(item)) }} ({{ getWeeklyAvgProfit(item) > 0 ? '穩賺' : '壓回即虧' }})
                         </span>
                         <span v-if="journalSubsidyMode !== 'off' && getItemJournalSubsidy(item) > 0" class="text-[9px] text-sky-400 font-sans block">
                           含日誌 +{{ formatNumber(getItemJournalSubsidy(item)) }}
@@ -689,31 +703,33 @@
                       <span v-else class="text-gray-600">-</span>
                     </td>
 
-                    <!-- 每日暴利潛力指數 (日銷量 × 淨利) -->
-                    <td class="py-2.5 px-2 text-right font-mono whitespace-nowrap min-w-[120px]"
-                        :title="`💡 理論上限 (當前收單價 × 日均量): +${formatNumber(getItemDailyPotential(item))} 銀/日\n📊 穩健預估 (穩健掛單價 × 日均量): +${formatNumber(getRealisticDailyPotential(item))} 銀/日\n🎯 實戰建議: 散戶工匠每日吃下 10%~20% 份額 (約 ${Math.round((item.daily_avg_vol || 0) * 0.15)} 件/日) 較不易砸崩市場`">
-                      <div v-if="getItemDailyPotential(item) > 0">
-                        <span class="font-extrabold text-amber-400">
-                          +{{ formatNumber(getItemDailyPotential(item)) }}
+                    <!-- 單批安全利潤與穩健日收 (取代不切實際的理論暴利) -->
+                    <td class="py-2.5 px-2 text-right font-mono whitespace-nowrap min-w-[125px]"
+                        :title="`🎯 實戰建議: 單批安全量 ${getSafeBatchQty(item)} 件，預期單批獲利 +${formatNumber(getBatchProfit(item))} 銀\n📈 穩健單日估計 (平穩消化 2 批): +${formatNumber(getRealisticDailyPotential(item))} 銀/日\n💡 全伺服器理論上限 (日均量 100% 全部賣出): +${formatNumber(getItemDailyPotential(item))} 銀/日`">
+                      <div v-if="getBatchProfit(item) > 0">
+                        <span class="font-extrabold text-amber-400 text-sm">
+                          +{{ formatNumber(getBatchProfit(item)) }}
                         </span>
-                        <span v-if="getRealisticDailyPotential(item) > 0 && Math.abs(getRealisticDailyPotential(item) - getItemDailyPotential(item)) > 1000" 
-                              class="text-[10px] text-emerald-400/90 block font-sans">
-                          穩健 +{{ formatNumber(getRealisticDailyPotential(item)) }}
+                        <span class="text-[10px] text-gray-400 block font-sans">
+                          單批 ({{ getSafeBatchQty(item) }}件)
                         </span>
-                        <span v-else class="text-[10px] text-gray-400 block font-sans">銀 / 日</span>
+                        <span v-if="getRealisticDailyPotential(item) > 0" 
+                              class="text-[10px] text-emerald-400/90 block font-mono">
+                          穩健 +{{ formatNumber(getRealisticDailyPotential(item)) }}/日
+                        </span>
                       </div>
                       <span v-else class="text-gray-600">-</span>
                     </td>
 
                     <!-- 🛡️ 安全批量與加入按鈕 -->
                     <td class="py-2.5 px-2 text-center font-sans whitespace-nowrap min-w-[90px]" @click.stop>
-                      <button @click="addToBatch(item, item.safe_batch_qty || 5)"
-                              :title="`加入推薦安全批量 (${item.safe_batch_qty || 5} 件，依日均消化量計算)`"
+                      <button @click="addToBatch(item, getSafeBatchQty(item))"
+                              :title="`加入推薦安全批量 (${getSafeBatchQty(item)} 件，受上限 ${safeBatchCap} 件保護)`"
                               class="px-2 py-1 rounded bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-bold transition shadow-sm flex items-center justify-center space-x-1 mx-auto whitespace-nowrap">
                         <span>🛡️</span>
-                        <span>+{{ item.safe_batch_qty || 5 }}</span>
+                        <span>+{{ getSafeBatchQty(item) }}</span>
                       </button>
-                      <div class="text-[9px] text-gray-400 font-mono mt-0.5 whitespace-nowrap">安全批量</div>
+                      <div class="text-[9px] text-gray-400 font-mono mt-0.5 whitespace-nowrap">安全批量 (封頂{{ safeBatchCap }})</div>
                     </td>
 
                     <!-- 狀態 -->
@@ -1046,7 +1062,7 @@
 
         <!-- 篩選與排序控制欄 -->
         <div class="bg-albion-panel border border-albion-border rounded-lg p-3 space-y-3">
-          <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 text-xs">
+          <div class="grid grid-cols-2 sm:grid-cols-6 gap-2.5 text-xs">
             
             <!-- 關鍵字搜尋 -->
             <div class="col-span-2 sm:col-span-1">
@@ -1076,6 +1092,17 @@
               </select>
             </div>
 
+            <!-- 收單基準 (支援無單週均保底與防暴漲) -->
+            <div>
+              <label class="block text-gray-400 mb-1 text-[11px]">收單基準</label>
+              <select v-model="qualityBenchmark" class="w-full py-1.5 px-2 bg-albion-card border border-albion-border rounded text-white focus:outline-none">
+                <option value="compat_max">⬇️ 即時(無單轉週均)</option>
+                <option value="compat_safe">🛡️ 穩健防暴漲</option>
+                <option value="history_7d">📈 7天黑市均價</option>
+                <option value="expected">📊 批量期望價</option>
+              </select>
+            </div>
+
             <!-- 獲利狀態 -->
             <div>
               <label class="block text-gray-400 mb-1 text-[11px]">獲利篩選</label>
@@ -1092,8 +1119,9 @@
             <div>
               <label class="block text-gray-400 mb-1 text-[11px]">排序方式</label>
               <select v-model="royalSortBy" class="w-full py-1.5 px-2 bg-albion-card border border-albion-border rounded text-amber-300 font-bold focus:outline-none">
-                <option value="royal_profit_desc">💰 皇家淨利潤最高 (預設)</option>
-                <option value="royal_potential_desc">🌟 皇家每日暴利潛力最高</option>
+                <option value="royal_batch_profit_desc">💰 皇家單批安全利潤最高 (推薦)</option>
+                <option value="royal_profit_desc">💵 單件淨利潤最高</option>
+                <option value="royal_potential_desc">🌟 理論每日暴利最高</option>
                 <option value="royal_roi_desc">📈 皇家投報率 (ROI) 最高</option>
                 <option value="daily_vol_desc">🌊 黑市日銷量最高</option>
                 <option value="journal_desc">📘 隨身日誌產出最高</option>
@@ -1234,10 +1262,17 @@
 
                     <!-- 黑市收購價 -->
                     <td class="py-2.5 px-2 text-right whitespace-nowrap">
-                      <div class="font-bold text-white">
+                      <div class="font-bold" :class="isItemPriceFromHistory(item) ? 'text-amber-300' : (getItemPrice(item) > 0 ? 'text-white' : 'text-gray-500')">
                         {{ getItemPrice(item) > 0 ? formatNumber(getItemPrice(item)) : '-' }}
                       </div>
-                      <div class="text-[10px] text-gray-400 font-sans" v-if="item.common_7d_avg > 0">
+                      <div v-if="isItemPriceFromHistory(item)" class="text-[9px] text-amber-400 font-sans flex items-center justify-end space-x-0.5 mt-0.5">
+                        <span class="px-1 py-0.2 rounded bg-amber-500/20 text-amber-300 font-normal">週均保底</span>
+                        <span class="text-gray-400 font-normal">(無即時單)</span>
+                      </div>
+                      <div v-else-if="item.bubble_risk && item.bubble_risk === 'high_risk'" class="text-[9px] text-rose-400 font-sans mt-0.5">
+                        <span>⚠️ 暴漲 +{{ Math.round((item.bubble_ratio || 0) * 100) }}%</span>
+                      </div>
+                      <div class="text-[10px] text-gray-400 font-sans" v-else-if="item.common_7d_avg > 0">
                         週均 {{ formatNumber(item.common_7d_avg) }}
                       </div>
                     </td>
@@ -1250,30 +1285,43 @@
                         </span>
                         <span class="text-[10px] block font-bold" :class="getRoyalItemProfit(item) > 0 ? 'text-emerald-500' : 'text-rose-500'">
                           ROI: {{ getRoyalItemRoi(item) }}%
+                          <span v-if="isItemPriceFromHistory(item)" class="text-[9px] text-amber-400 font-normal ml-0.5">(均價預估)</span>
+                        </span>
+                        <!-- 暴漲時顯示壓回均價後的預估淨利 -->
+                        <span v-if="item.bubble_risk === 'high_risk' && !isItemPriceFromHistory(item)" 
+                              class="text-[9px] block font-mono" 
+                              :class="getWeeklyAvgProfit(item, true) > 0 ? 'text-amber-300' : 'text-rose-400'"
+                              :title="`若此裝備售價被壓回一週均價 (${formatNumber(item.common_7d_avg)} 銀)，單件利潤預計為 ${formatNumber(getWeeklyAvgProfit(item, true))} 銀`">
+                          均價後: {{ getWeeklyAvgProfit(item, true) > 0 ? '+' : '' }}{{ formatNumber(getWeeklyAvgProfit(item, true)) }} ({{ getWeeklyAvgProfit(item, true) > 0 ? '穩賺' : '壓回即虧' }})
                         </span>
                       </div>
                       <div v-else class="text-gray-500 text-[11px]">-</div>
                     </td>
 
-                    <!-- 黑市日銷量與潛力 -->
+                    <!-- 黑市銷量與利潤 (實戰單批利潤 + 穩健日收) -->
                     <td class="py-2.5 px-2 text-center font-sans whitespace-nowrap">
                       <div class="text-white font-mono font-bold text-xs" v-if="item.daily_avg_vol > 0">
                         {{ Math.round(item.daily_avg_vol) }} 件/日
                       </div>
-                      <div v-if="getRoyalDailyPotential(item) > 0" class="text-[10px] text-amber-300 font-mono font-bold">
-                        +{{ formatNumber(getRoyalDailyPotential(item)) }}/日
+                      <div v-if="getRoyalBatchProfit(item) > 0" 
+                           class="text-[11px] text-amber-300 font-mono font-bold mt-0.5"
+                           :title="`🎯 單批安全獲利 (${getSafeBatchQty(item)}件 × 單件淨利 ${formatNumber(getRoyalItemProfit(item))})\n📈 穩健單日估計 (平穩消化 2 批): +${formatNumber(getRoyalRealisticPotential(item))} 銀/日\n💡 全伺服器理論極限 (100%全銷): +${formatNumber(getRoyalDailyPotential(item))} 銀/日`">
+                        單批 +{{ formatNumber(getRoyalBatchProfit(item)) }}
                       </div>
-                      <span v-else class="text-gray-500 text-[10px]">無近期交易</span>
+                      <div v-if="getRoyalRealisticPotential(item) > 0" class="text-[10px] text-emerald-400 font-mono">
+                        穩健 +{{ formatNumber(getRoyalRealisticPotential(item)) }}/日
+                      </div>
+                      <span v-else-if="!item.daily_avg_vol" class="text-gray-500 text-[10px]">無近期交易</span>
                     </td>
 
                     <!-- 快捷操作 -->
                     <td class="py-2.5 px-3 text-center whitespace-nowrap" @click.stop>
                       <div class="flex items-center justify-center space-x-1">
-                        <button @click="addToBatchFromRoyal(item, item.safe_batch_qty || 5)"
+                        <button @click="addToBatchFromRoyal(item, getSafeBatchQty(item))"
                                 class="px-2 py-1 rounded bg-amber-600 hover:bg-amber-500 text-black font-extrabold text-[11px] transition shadow flex items-center space-x-0.5"
-                                title="將此裝備加入批量清單 (標記皇家城製作)">
+                                :title="`將推薦安全批量 (${getSafeBatchQty(item)} 件) 加入批量清單`">
                           <span>📋</span>
-                          <span>+批量</span>
+                          <span>+批量({{ getSafeBatchQty(item) }})</span>
                         </button>
                         <button @click="openFastLedger(item, item.qualities ? item.qualities[1] : { quality_name: '優良', eff_price: getItemPrice(item) })"
                                 class="px-2 py-1 rounded bg-albion-card hover:bg-albion-hover text-gray-300 hover:text-white border border-albion-border text-[11px] transition"
@@ -2360,6 +2408,24 @@
           </label>
         </div>
 
+        <div>
+          <label class="block text-gray-400 mb-1">🛡️ 安全批量單品上限封頂 (預設 25 件)</label>
+          <div class="flex items-center space-x-2">
+            <input type="number" step="5" min="0" max="500" v-model.number="safeBatchCap" class="w-2/3 p-1.5 bg-albion-card border border-albion-border rounded text-white font-mono">
+            <span class="text-gray-400 text-xs">件 (填 0 為不限)</span>
+          </div>
+          <span class="text-[10px] text-gray-500 mt-0.5 block">防止高銷量裝備（如背包、火炬）產生幾百上千件不切實際的安全批量</span>
+        </div>
+
+        <div>
+          <label class="block text-gray-400 mb-1">⚠️ 暴漲風險警示門檻 (高於週均價)</label>
+          <div class="flex items-center space-x-2">
+            <input type="number" step="5" min="10" max="100" v-model.number="bubbleThresholdPct" class="w-2/3 p-1.5 bg-albion-card border border-albion-border rounded text-white font-mono">
+            <span class="text-gray-400 text-xs">% (預設 +35%)</span>
+          </div>
+          <span class="text-[10px] text-gray-500 mt-0.5 block">即時買單超出此比例時標註暴漲警示，防範做完被壓回均價賠錢</span>
+        </div>
+
                 <div class="flex space-x-2 pt-2 border-t border-albion-border">
           <button @click="showSettingsModal = false" class="w-1/2 py-1.5 rounded bg-albion-card text-gray-300">取消</button>
           <button @click="saveSettings" class="w-1/2 py-1.5 rounded bg-indigo-600 text-white font-bold">儲存</button>
@@ -2400,12 +2466,21 @@
         const batchDeductLaborer = ref(localStorage.getItem('albion_batch_deduct_laborer') !== 'false');
 
         // 🛡️ 黑市風控與安全批量參數
-        const safeBatchPct = ref(parseFloat(localStorage.getItem('albion_safe_batch_pct') || '0.3'));
+        const safeBatchPct = ref(parseFloat(localStorage.getItem('albion_safe_batch_pct') || '0.15'));
+        const safeBatchCap = ref(parseInt(localStorage.getItem('albion_safe_batch_cap') || '25'));
         const bubbleThreshold = ref(parseFloat(localStorage.getItem('albion_bubble_threshold') || '0.35'));
+        const bubbleThresholdPct = ref(Math.round(bubbleThreshold.value * 100));
         const copiedTip = ref('');
 
         watch(safeBatchPct, (val) => localStorage.setItem('albion_safe_batch_pct', val.toString()));
-        watch(bubbleThreshold, (val) => localStorage.setItem('albion_bubble_threshold', val.toString()));
+        watch(safeBatchCap, (val) => localStorage.setItem('albion_safe_batch_cap', val.toString()));
+        watch(bubbleThreshold, (val) => {
+          bubbleThresholdPct.value = Math.round(val * 100);
+          localStorage.setItem('albion_bubble_threshold', val.toString());
+        });
+        watch(bubbleThresholdPct, (val) => {
+          bubbleThreshold.value = (val || 35) / 100.0;
+        });
 
         // 🦣 猛獁之路任務系統狀態
         const userBaseCapital = ref(parseInt(localStorage.getItem('albion_base_capital') || '20000000'));
@@ -2980,16 +3055,41 @@
           return 'Q1~Q3均價';
         });
 
-        // 取得單品對應品質基準價格 (含向下相容、歷史一週均價與多重擲骰期望值)
+        // 取得單品對應品質基準價格 (含向下相容、歷史一週均價保底與多重擲骰期望值)
         const getItemPrice = (item) => {
-          if (qualityBenchmark.value === 'compat_max') return item.compat_max_price || item.common_max_price || 0;
+          if (!item) return 0;
+          if (qualityBenchmark.value === 'compat_max') {
+            const p = item.compat_max_price || item.common_max_price || 0;
+            // 當即時收單為空 (0)，若有一週均價 (common_7d_avg 或 avg_price_7d)，自動以週均價保底！
+            if (p <= 0 && (item.common_7d_avg > 0 || item.avg_price_7d > 0)) {
+              return item.common_7d_avg || item.avg_price_7d;
+            }
+            return p;
+          }
+          if (qualityBenchmark.value === 'compat_safe') {
+            // 穩健防暴漲模式：若暴漲 (high_risk) 或無即時單，採用週均價；平穩時採用即時買單
+            if ((item.bubble_risk === 'high_risk' || !item.compat_max_price) && (item.common_7d_avg > 0 || item.avg_price_7d > 0)) {
+              return item.common_7d_avg || item.avg_price_7d;
+            }
+            return item.compat_max_price || item.common_max_price || item.common_7d_avg || 0;
+          }
+          if (qualityBenchmark.value === 'history_7d') {
+            return item.common_7d_avg || item.avg_price_7d || item.compat_max_price || 0;
+          }
           if (qualityBenchmark.value === 'expected') {
             const odds = getItemCraftingOdds(item);
-            const eff_q1 = item.eff_normal || item.p_normal || 0;
-            const eff_q2 = item.eff_good || Math.max(eff_q1, item.p_good || 0);
-            const eff_q3 = item.eff_outstanding || Math.max(eff_q2, item.p_outstanding || 0);
-            const eff_q4 = item.eff_excellent || Math.max(eff_q3, item.p_excellent || 0);
-            const eff_q5 = item.eff_masterpiece || Math.max(eff_q4, item.p_masterpiece || 0);
+            let eff_q1 = item.eff_normal || item.p_normal || 0;
+            let eff_q2 = item.eff_good || Math.max(eff_q1, item.p_good || 0);
+            let eff_q3 = item.eff_outstanding || Math.max(eff_q2, item.p_outstanding || 0);
+            let eff_q4 = item.eff_excellent || Math.max(eff_q3, item.p_excellent || 0);
+            let eff_q5 = item.eff_masterpiece || Math.max(eff_q4, item.p_masterpiece || 0);
+            if (eff_q1 <= 0 && item.common_7d_avg > 0) {
+              eff_q1 = item.common_7d_avg;
+              eff_q2 = Math.max(eff_q2, eff_q1);
+              eff_q3 = Math.max(eff_q3, eff_q2);
+              eff_q4 = Math.max(eff_q4, eff_q3);
+              eff_q5 = Math.max(eff_q5, eff_q4);
+            }
             const exp = Math.round(
               eff_q1 * odds.q1 +
               eff_q2 * odds.q2 +
@@ -2997,14 +3097,75 @@
               eff_q4 * odds.q4 +
               eff_q5 * odds.q5
             );
-            return exp > 0 ? exp : (item.compat_max_price || 0);
+            return exp > 0 ? exp : (item.compat_max_price || item.common_7d_avg || 0);
           }
-          if (qualityBenchmark.value === 'history_7d') return item.common_7d_avg || item.avg_price_7d || item.compat_max_price || 0;
-          if (qualityBenchmark.value === 'common_max') return item.common_max_price || 0;
-          if (qualityBenchmark.value === 'common_avg') return item.common_avg_price || 0;
-          if (qualityBenchmark.value === 'normal') return item.eff_normal || item.p_normal || 0;
-          if (qualityBenchmark.value === 'good') return item.eff_good || item.p_good || 0;
-          return item.top3_avg_price || 0;
+          if (qualityBenchmark.value === 'common_max') return item.common_max_price || item.common_7d_avg || 0;
+          if (qualityBenchmark.value === 'common_avg') return item.common_avg_price || item.common_7d_avg || 0;
+          if (qualityBenchmark.value === 'normal') return item.eff_normal || item.p_normal || item.common_7d_avg || 0;
+          if (qualityBenchmark.value === 'good') return item.eff_good || item.p_good || item.common_7d_avg || 0;
+          return item.top3_avg_price || item.common_7d_avg || 0;
+        };
+
+        // 判斷此裝備價格是否來自週均價保底（無即時收單或防暴漲回退）
+        const isItemPriceFromHistory = (item) => {
+          if (!item) return false;
+          if (qualityBenchmark.value === 'history_7d') return true;
+          if (qualityBenchmark.value === 'compat_safe' && item.bubble_risk === 'high_risk') return true;
+          const instant = item.compat_max_price || item.common_max_price || 0;
+          return instant <= 0 && (item.common_7d_avg > 0 || item.avg_price_7d > 0);
+        };
+
+        // 暴漲裝備被壓回週均價後的單件預估淨利
+        const getWeeklyAvgProfit = (item, isRoyal = false) => {
+          if (!item) return 0;
+          const avg = item.common_7d_avg || item.avg_price_7d || 0;
+          if (avg <= 0) return 0;
+          const cost = isRoyal 
+            ? getRoyalItemCost(item, costMode.value === 'focus') 
+            : getItemCost(item, costMode.value === 'focus');
+          if (cost <= 0) return 0;
+          const feeFactor = 1.0 - (effectiveTaxPct.value / 100.0);
+          const stationFee = isRoyal ? 0 : getItemStationFee(item);
+          const subsidy = getItemJournalSubsidy(item);
+          return Math.round(avg * feeFactor - cost - stationFee + subsidy);
+        };
+
+        // 取得合理階梯式安全批量（附上限封頂）
+        const getSafeBatchQty = (item) => {
+          if (!item) return 1;
+          const dailyVol = item.daily_avg_vol || 0;
+          if (dailyVol <= 0) return 1;
+          let qty = 1;
+          if (dailyVol <= 20) {
+            qty = Math.round(dailyVol * 0.25);
+          } else if (dailyVol <= 100) {
+            qty = Math.round(dailyVol * 0.15);
+          } else if (dailyVol <= 500) {
+            qty = Math.round(dailyVol * 0.08);
+          } else {
+            qty = Math.round(dailyVol * 0.02);
+          }
+          qty = Math.max(1, qty);
+          const cap = safeBatchCap.value;
+          if (cap && cap > 0) {
+            qty = Math.min(qty, cap);
+          }
+          return qty;
+        };
+
+        // 單批安全利潤 (安全批量 × 單件淨利)
+        const getBatchProfit = (item) => {
+          const profit = getItemProfit(item);
+          const qty = getSafeBatchQty(item);
+          if (profit <= 0 || qty <= 0) return 0;
+          return Math.round(profit * qty);
+        };
+
+        const getRoyalBatchProfit = (item) => {
+          const profit = getRoyalItemProfit(item);
+          const qty = getSafeBatchQty(item);
+          if (profit <= 0 || qty <= 0) return 0;
+          return Math.round(profit * qty);
         };
 
         // 取得單品日誌補貼金額 (真實紅城市場折現，單件補貼 = 填滿本數 × 每本市價淨賺)
@@ -3092,20 +3253,13 @@
           return parseFloat((profitDiff / fCost).toFixed(1));
         };
 
-        // 取得穩健日暴利預估 (依穩健掛單價與日均量估算，防範頂部瞬間買單被砸穿之價格回落)
+        // 取得穩健日潛力預估 (以每日出貨 2 批安全批量計算，約佔日銷 5%~10%)
         const getRealisticDailyPotential = (item) => {
-          const sellPrice = item.order_sell_price || Math.max(item.compat_max_price || 0, item.common_7d_avg || 0);
-          if (sellPrice <= 0) return getItemDailyPotential(item);
-          const cost = getItemCost(item, costMode.value === 'focus');
-          if (cost <= 0) return 0;
-          // 穩健掛單出貨扣 6.5% 手續費 (4% 稅 + 2.5% 掛單費)
-          const feeFactor = 1.0 - ((instantTaxPct.value + orderFeePct.value) / 100.0);
-          const stationFee = getItemStationFee(item);
-          const subsidy = getItemJournalSubsidy(item);
-          const orderProfit = Math.round(sellPrice * feeFactor - cost - stationFee + subsidy);
-          const dailyVol = item.daily_avg_vol || 0;
-          if (orderProfit <= 0 || dailyVol <= 0) return 0;
-          return Math.round(orderProfit * dailyVol);
+          return getBatchProfit(item) * 2;
+        };
+
+        const getRoyalRealisticPotential = (item) => {
+          return getRoyalBatchProfit(item) * 2;
         };
 
         // 取得指定品質之單品淨利 (向下相容有效售價)
@@ -3694,7 +3848,9 @@
           }
 
           list = [...list].sort((a, b) => {
-            if (royalSortBy.value === 'royal_profit_desc') {
+            if (royalSortBy.value === 'royal_batch_profit_desc') {
+              return getRoyalBatchProfit(b) - getRoyalBatchProfit(a);
+            } else if (royalSortBy.value === 'royal_profit_desc') {
               return getRoyalItemProfit(b) - getRoyalItemProfit(a);
             } else if (royalSortBy.value === 'royal_potential_desc') {
               return getRoyalDailyPotential(b) - getRoyalDailyPotential(a);
@@ -3800,7 +3956,9 @@
 
           // 排序
           list = [...list].sort((a, b) => {
-            if (sortBy.value === 'potential_desc') {
+            if (sortBy.value === 'batch_profit_desc') {
+              return getBatchProfit(b) - getBatchProfit(a);
+            } else if (sortBy.value === 'potential_desc') {
               return getItemDailyPotential(b) - getItemDailyPotential(a);
             } else if (sortBy.value === 'focus_efficiency_desc') {
               return getItemSilverPerFocus(b) - getItemSilverPerFocus(a);
@@ -4050,6 +4208,7 @@
                 journal_subsidy: journalSubsidyMode.value !== 'off',
                 journal_mode: journalSubsidyMode.value,
                 safe_batch_pct: safeBatchPct.value,
+                safe_batch_cap: safeBatchCap.value,
                 bubble_threshold: bubbleThreshold.value
               })
             });
@@ -4136,6 +4295,15 @@
           getItemPrice,
           getItemProfit,
           getItemRoi,
+          safeBatchCap,
+          bubbleThresholdPct,
+          getSafeBatchQty,
+          getBatchProfit,
+          getRoyalBatchProfit,
+          getRealisticDailyPotential,
+          getRoyalRealisticPotential,
+          getWeeklyAvgProfit,
+          isItemPriceFromHistory,
           countProfitableNoFocus,
           countProfitableFocus,
           maxProfitItem,
