@@ -1,0 +1,11 @@
+{
+  "inner_spec": 100,
+  "outer_spec": 100,
+  "food_type": "pork_salad",
+  "item_specs": {
+    "T4_BOW": 100
+  },
+  "mastery_specs": {
+    "弓箭": 100
+  }
+}

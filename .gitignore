@@ -1,0 +1,46 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+.venv/
+venv/
+ENV/
+
+# Large binaries & executable clients
+archive/
+cloudflared.exe
+*.exe
+Albion Data Client/
+graphify-out/
+
+# Logs & Temporary files
+*.log
+*.log.*
+*.reconstructed
+debug_data/
+scratch/
+.system_generated/
+temp_*
+check_*
+print_*
+inspect_*
+find_*
+test_*
