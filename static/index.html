@@ -650,9 +650,20 @@
                     <td class="py-2.5 px-2 text-right font-bold whitespace-nowrap min-w-[115px]"
                         :class="isItemPriceFromHistory(item) ? 'text-amber-300' : (getItemPrice(item) > 0 ? 'text-white' : 'text-gray-500')">
                       <div>{{ getItemPrice(item) > 0 ? formatNumber(getItemPrice(item)) : '-' }}</div>
-                      <div v-if="isItemPriceFromHistory(item)" class="text-[9px] text-amber-400 font-sans flex items-center justify-end space-x-0.5 mt-0.5">
-                        <span class="px-1 py-0.2 rounded bg-amber-500/20 text-amber-300 font-normal">週均保底</span>
-                        <span class="text-gray-400 font-normal">(無即時單)</span>
+                      <div v-if="isItemPriceFromHistory(item)" class="text-[9px] text-amber-400 font-sans flex items-center justify-end space-x-1 mt-0.5">
+                        <span class="px-1 py-0.2 rounded bg-amber-500/20 text-amber-300 font-normal">
+                          {{ qualityBenchmark === 'history_7d' ? '7天均價' : (qualityBenchmark === 'compat_safe' && item.bubble_risk === 'high_risk' ? '防暴漲' : '週均保底') }}
+                        </span>
+                        <span v-if="item.bubble_risk === 'trough'" class="px-1 py-0.2 rounded bg-sky-950 text-sky-300 border border-sky-800" :title="item.bubble_tip">
+                          低谷 {{ Math.round((item.bubble_ratio || 0) * 100) }}%
+                        </span>
+                        <span v-else-if="item.bubble_risk === 'high_risk'" class="px-1 py-0.2 rounded bg-rose-950 text-rose-300 border border-rose-800" :title="item.bubble_tip">
+                          暴漲 +{{ Math.round((item.bubble_ratio || 0) * 100) }}%
+                        </span>
+                        <span v-else-if="item.compat_max_price > 0" class="text-gray-400 font-normal" :title="`現買單 ${formatNumber(item.compat_max_price)} 銀`">
+                          (現單{{ formatNumber(item.compat_max_price) }})
+                        </span>
+                        <span v-else class="text-gray-400 font-normal">(無即時單)</span>
                       </div>
                       <!-- 暴漲泡泡或低谷徽章 -->
                       <div v-else-if="item.bubble_risk && item.bubble_risk !== 'stable' && item.bubble_risk !== 'normal'" class="mt-0.5">
@@ -885,51 +896,112 @@
                           </div>
                         </div>
 
+                        <!-- ⚖️ 收購品質雙軌診斷條 -->
+                        <div class="p-2.5 rounded bg-albion-panel border border-albion-border/80 flex flex-wrap items-center justify-between gap-2 text-xs">
+                          <div class="flex items-center space-x-2">
+                            <span class="text-base">⚖️</span>
+                            <span class="font-bold text-gray-200">各品質雙軌淨利診斷 (即時砸單 vs 週均出貨)</span>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold"
+                                  :class="isItemPriceFromHistory(item) ? 'bg-amber-500/20 text-amber-300 border border-amber-600/40' : 'bg-indigo-950 text-indigo-300 border border-indigo-700/60'">
+                              頂部總覽基準: {{ benchmarkLabel }} ({{ formatNumber(getItemPrice(item)) }} 銀 ➔ 單件 {{ getItemProfit(item) > 0 ? '+' : '' }}{{ formatNumber(getItemProfit(item)) }})
+                            </span>
+                          </div>
+                          <div class="text-[11px]">
+                            <span v-if="item.bubble_risk === 'trough'" class="text-sky-300 font-medium">
+                              ❄️ 現行買單處於低谷 (比週均價低 {{ Math.round(Math.abs(item.bubble_ratio || 0) * 100) }}%)：立即砸單會虧，建議以週均價掛單出貨或等待黑市自動拉升補單
+                            </span>
+                            <span v-else-if="item.bubble_risk === 'high_risk'" class="text-rose-300 font-medium">
+                              ⚠️ 現行買單短期暴漲 (+{{ Math.round((item.bubble_ratio || 0) * 100) }}%)：現單高利潤但深度有限，砸穿後將回歸週均價
+                            </span>
+                            <span v-else class="text-gray-400">
+                              💡 提示：⚡ 即時砸單為直接吃現有黑市買單；📈 週均出貨為等待黑市補單拉回均價或掛單出貨
+                            </span>
+                          </div>
+                        </div>
+
                         <!-- 5 品質網格 -->
                         <div class="grid grid-cols-1 sm:grid-cols-5 gap-2 text-xs">
                           <div v-for="q in item.qualities" :key="q.quality"
                                class="bg-albion-panel border rounded p-2.5 flex flex-col justify-between"
-                               :class="q.eff_price > 0 && getQualityProfit(item, q, costMode === 'focus') > 0 ? 'border-emerald-600/50 bg-emerald-950/20' : 'border-albion-border'">
+                               :class="getQualityProfit(item, q, costMode === 'focus', 'benchmark') > 0 ? 'border-emerald-600/50 bg-emerald-950/20' : (q.eff_price > 0 && getQualityProfit(item, q, costMode === 'focus', 'instant') > 0 ? 'border-indigo-600/50 bg-indigo-950/20' : 'border-albion-border')">
                             
-                            <div class="space-y-1">
-                              <div class="flex justify-between font-bold">
+                            <div class="space-y-2">
+                              <!-- 品質標題 -->
+                              <div class="flex justify-between items-center font-bold pb-1 border-b border-albion-border/40">
                                 <span class="text-gray-200">{{ q.quality_name }}</span>
                                 <span class="text-[10px] text-gray-400 font-mono">Q{{ q.quality }}</span>
                               </div>
 
-                              <!-- 向下相容實售保底價 -->
-                              <div class="text-gray-400">
-                                <span>有效售價: </span>
-                                <span class="font-bold font-mono text-white text-sm">{{ q.eff_price > 0 ? formatNumber(q.eff_price) : '-' }}</span>
-                              </div>
-
-                              <!-- 相容提示 -->
-                              <div v-if="q.compat_bonus > 0" class="text-[10px] px-1 py-0.5 rounded bg-emerald-950 text-emerald-300 font-bold border border-emerald-800/60">
-                                ⬇️ 向下相容保底 (+{{ formatNumber(q.compat_bonus) }})
-                              </div>
-                              <div v-else-if="q.bm_price > 0" class="text-[10px] text-gray-500 font-mono">
-                                原始買單: {{ formatNumber(q.bm_price) }}
-                              </div>
-
-                              <!-- 7天歷史均價與銷量 -->
-                              <div class="text-[11px] text-gray-400 pt-1 border-t border-albion-border/40">
-                                <span>一週均價: </span>
-                                <span class="font-mono text-gray-300">{{ q.hist_avg_price > 0 ? formatNumber(q.hist_avg_price) : '無交易' }}</span>
-                                <span v-if="q.hist_vol > 0" class="text-[10px] text-gray-500 block font-mono">週售 {{ formatNumber(q.hist_vol) }} 件</span>
-                              </div>
-
-                              <!-- 利潤 -->
-                              <div class="text-[11px] pt-1 border-t border-albion-border/40">
-                                <div>
-                                  <span class="text-gray-400">無專注淨利: </span>
-                                  <span class="font-mono font-bold" :class="getQualityProfit(item, q, false) > 0 ? 'text-emerald-400' : (q.eff_price > 0 ? 'text-rose-400' : 'text-gray-500')">
-                                    {{ q.eff_price > 0 ? (getQualityProfit(item, q, false) > 0 ? '+' : '') + formatNumber(getQualityProfit(item, q, false)) : '-' }}
+                              <!-- 軌道 1: ⚡ 即時砸單 (現有買單) -->
+                              <div class="p-2 rounded bg-albion-card/70 border border-albion-border/60">
+                                <div class="flex items-center justify-between text-[11px] mb-1">
+                                  <span class="text-gray-300 font-semibold flex items-center space-x-1">
+                                    <span>⚡ 即時砸單</span>
+                                    <span v-if="qualityBenchmark === 'compat_max'" class="text-[9px] px-1 rounded bg-indigo-900/60 text-indigo-300 border border-indigo-700/50 font-normal">總覽基準</span>
                                   </span>
+                                  <span class="font-mono text-white font-bold text-xs">{{ q.eff_price > 0 ? formatNumber(q.eff_price) : '-' }}</span>
                                 </div>
-                                <div>
-                                  <span class="text-gray-400">下專注淨利: </span>
-                                  <span class="font-mono font-bold" :class="getQualityProfit(item, q, true) > 0 ? 'text-sky-400' : (q.eff_price > 0 ? 'text-rose-400' : 'text-gray-500')">
-                                    {{ q.eff_price > 0 ? (getQualityProfit(item, q, true) > 0 ? '+' : '') + formatNumber(getQualityProfit(item, q, true)) : '-' }}
+
+                                <div v-if="q.compat_bonus > 0" class="text-[9px] text-emerald-300 font-mono mb-1">
+                                  ⬇️ 向下相容保底 (+{{ formatNumber(q.compat_bonus) }})
+                                </div>
+                                <div v-else-if="q.bm_price > 0 && q.bm_price !== q.eff_price" class="text-[9px] text-gray-500 font-mono mb-1">
+                                  原始買單: {{ formatNumber(q.bm_price) }}
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-1 text-[10px] pt-1 border-t border-albion-border/30">
+                                  <div>
+                                    <span class="text-gray-400 block text-[9px]">無專注:</span>
+                                    <span class="font-mono font-bold" :class="getQualityProfit(item, q, false, 'instant') > 0 ? 'text-emerald-400' : (q.eff_price > 0 ? 'text-rose-400' : 'text-gray-500')">
+                                      {{ q.eff_price > 0 ? (getQualityProfit(item, q, false, 'instant') > 0 ? '+' : '') + formatNumber(getQualityProfit(item, q, false, 'instant')) : '無單' }}
+                                    </span>
+                                  </div>
+                                  <div class="text-right">
+                                    <span class="text-gray-400 block text-[9px]">下專注:</span>
+                                    <span class="font-mono font-bold" :class="getQualityProfit(item, q, true, 'instant') > 0 ? 'text-sky-400' : (q.eff_price > 0 ? 'text-rose-400' : 'text-gray-500')">
+                                      {{ q.eff_price > 0 ? (getQualityProfit(item, q, true, 'instant') > 0 ? '+' : '') + formatNumber(getQualityProfit(item, q, true, 'instant')) : '無單' }}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <!-- 軌道 2: 📈 週均出貨 (歷史成交均價) -->
+                              <div class="p-2 rounded bg-amber-950/20 border border-amber-900/40">
+                                <div class="flex items-center justify-between text-[11px] mb-1">
+                                  <span class="text-amber-300 font-semibold flex items-center space-x-1">
+                                    <span>📈 週均出貨</span>
+                                    <span v-if="qualityBenchmark === 'history_7d'" class="text-[9px] px-1 rounded bg-amber-500/20 text-amber-300 border border-amber-600/50 font-normal">總覽基準</span>
+                                  </span>
+                                  <span class="font-mono text-amber-200 font-bold text-xs">{{ q.hist_avg_price > 0 ? formatNumber(q.hist_avg_price) : (item.common_7d_avg > 0 ? formatNumber(item.common_7d_avg) : '-') }}</span>
+                                </div>
+
+                                <div class="text-[9px] text-gray-400 font-mono mb-1 flex justify-between">
+                                  <span>7天成交量</span>
+                                  <span>{{ q.hist_vol > 0 ? formatNumber(q.hist_vol) + ' 件' : (item.total_7d_vol > 0 ? '總量 ' + formatNumber(item.total_7d_vol) : '無紀錄') }}</span>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-1 text-[10px] pt-1 border-t border-amber-900/30">
+                                  <div>
+                                    <span class="text-gray-400 block text-[9px]">無專注:</span>
+                                    <span class="font-mono font-bold" :class="getQualityProfit(item, q, false, 'history') > 0 ? 'text-emerald-400' : (q.hist_avg_price > 0 || item.common_7d_avg > 0 ? 'text-rose-400' : 'text-gray-500')">
+                                      {{ (q.hist_avg_price > 0 || item.common_7d_avg > 0) ? (getQualityProfit(item, q, false, 'history') > 0 ? '+' : '') + formatNumber(getQualityProfit(item, q, false, 'history')) : '-' }}
+                                    </span>
+                                  </div>
+                                  <div class="text-right">
+                                    <span class="text-gray-400 block text-[9px]">下專注:</span>
+                                    <span class="font-mono font-bold" :class="getQualityProfit(item, q, true, 'history') > 0 ? 'text-sky-400' : (q.hist_avg_price > 0 || item.common_7d_avg > 0 ? 'text-rose-400' : 'text-gray-500')">
+                                      {{ (q.hist_avg_price > 0 || item.common_7d_avg > 0) ? (getQualityProfit(item, q, true, 'history') > 0 ? '+' : '') + formatNumber(getQualityProfit(item, q, true, 'history')) : '-' }}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <!-- 額外基準淨利 (非 compat_max 與 history_7d 時) -->
+                              <div v-if="qualityBenchmark !== 'compat_max' && qualityBenchmark !== 'history_7d'" class="p-1.5 rounded bg-indigo-950/30 border border-indigo-800/40 text-[10px]">
+                                <div class="flex justify-between items-center">
+                                  <span class="text-indigo-300">🎯 {{ benchmarkLabel }}淨利:</span>
+                                  <span class="font-mono font-bold" :class="getQualityProfit(item, q, costMode === 'focus', 'benchmark') > 0 ? 'text-emerald-400' : 'text-rose-400'">
+                                    {{ getQualityProfit(item, q, costMode === 'focus', 'benchmark') > 0 ? '+' : '' }}{{ formatNumber(getQualityProfit(item, q, costMode === 'focus', 'benchmark')) }}
                                   </span>
                                 </div>
                               </div>
@@ -1265,9 +1337,20 @@
                       <div class="font-bold" :class="isItemPriceFromHistory(item) ? 'text-amber-300' : (getItemPrice(item) > 0 ? 'text-white' : 'text-gray-500')">
                         {{ getItemPrice(item) > 0 ? formatNumber(getItemPrice(item)) : '-' }}
                       </div>
-                      <div v-if="isItemPriceFromHistory(item)" class="text-[9px] text-amber-400 font-sans flex items-center justify-end space-x-0.5 mt-0.5">
-                        <span class="px-1 py-0.2 rounded bg-amber-500/20 text-amber-300 font-normal">週均保底</span>
-                        <span class="text-gray-400 font-normal">(無即時單)</span>
+                      <div v-if="isItemPriceFromHistory(item)" class="text-[9px] text-amber-400 font-sans flex items-center justify-end space-x-1 mt-0.5">
+                        <span class="px-1 py-0.2 rounded bg-amber-500/20 text-amber-300 font-normal">
+                          {{ qualityBenchmark === 'history_7d' ? '7天均價' : (qualityBenchmark === 'compat_safe' && item.bubble_risk === 'high_risk' ? '防暴漲' : '週均保底') }}
+                        </span>
+                        <span v-if="item.bubble_risk === 'trough'" class="px-1 py-0.2 rounded bg-sky-950 text-sky-300 border border-sky-800" :title="item.bubble_tip">
+                          低谷 {{ Math.round((item.bubble_ratio || 0) * 100) }}%
+                        </span>
+                        <span v-else-if="item.bubble_risk === 'high_risk'" class="px-1 py-0.2 rounded bg-rose-950 text-rose-300 border border-rose-800" :title="item.bubble_tip">
+                          暴漲 +{{ Math.round((item.bubble_ratio || 0) * 100) }}%
+                        </span>
+                        <span v-else-if="item.compat_max_price > 0" class="text-gray-400 font-normal" :title="`現買單 ${formatNumber(item.compat_max_price)} 銀`">
+                          (現單{{ formatNumber(item.compat_max_price) }})
+                        </span>
+                        <span v-else class="text-gray-400 font-normal">(無即時單)</span>
                       </div>
                       <div v-else-if="item.bubble_risk && item.bubble_risk === 'high_risk'" class="text-[9px] text-rose-400 font-sans mt-0.5">
                         <span>⚠️ 暴漲 +{{ Math.round((item.bubble_ratio || 0) * 100) }}%</span>
@@ -1361,21 +1444,43 @@
                         </div>
 
                         <!-- 官方向下相容買單保底 -->
-                        <div class="p-2.5 rounded bg-albion-card/80 border border-albion-border text-xs">
-                          <div class="font-bold text-white mb-1.5 flex items-center justify-between">
-                            <span>💎 黑市各品質即時買單 (向下相容保底有效定價):</span>
+                        <div class="p-2.5 rounded bg-albion-card/80 border border-albion-border text-xs space-y-2">
+                          <div class="font-bold text-white flex flex-wrap items-center justify-between gap-2">
+                            <span class="flex items-center space-x-1.5">
+                              <span>💎</span>
+                              <span>黑市各品質雙軌定價 (即時買單 vs 週均出貨):</span>
+                            </span>
                             <span class="text-[10px] text-gray-400">高品質裝備可向下相容直接砸進低品質買單</span>
                           </div>
-                          <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 text-center font-mono">
+                          <div class="grid grid-cols-1 sm:grid-cols-5 gap-2 text-xs font-mono">
                             <div v-for="q in item.qualities" :key="q.quality"
-                                 class="p-2 rounded border"
-                                 :class="q.eff_price > 0 ? 'bg-albion-panel border-albion-border' : 'bg-albion-panel/40 border-albion-border/30 opacity-60'">
-                              <div class="text-[11px] text-gray-400 font-sans">{{ q.quality_name }}</div>
-                              <div class="text-sm font-bold mt-0.5" :class="q.eff_price > 0 ? 'text-white' : 'text-gray-500'">
-                                {{ q.eff_price > 0 ? formatNumber(q.eff_price) : '-' }}
-                              </div>
-                              <div class="text-[10px] mt-0.5 font-bold" :class="q.profit_no_focus > 0 ? 'text-emerald-400' : 'text-rose-400'">
-                                {{ q.profit_no_focus > 0 ? '+' : '' }}{{ formatNumber(q.profit_no_focus) }} 銀
+                                 class="p-2 rounded border flex flex-col justify-between"
+                                 :class="getRoyalQualityProfit(item, q, costMode === 'focus', 'benchmark') > 0 ? 'bg-albion-panel border-emerald-600/50' : 'bg-albion-panel border-albion-border'">
+                              <div>
+                                <div class="flex justify-between items-center font-sans font-bold text-gray-300 pb-1 border-b border-albion-border/30">
+                                  <span>{{ q.quality_name }}</span>
+                                  <span class="text-[10px] text-gray-500">Q{{ q.quality }}</span>
+                                </div>
+                                <!-- 即時買單 -->
+                                <div class="mt-1.5 p-1 rounded bg-black/30 border border-albion-border/40 text-[11px]">
+                                  <div class="flex justify-between text-gray-400 font-sans text-[10px]">
+                                    <span>⚡ 即時買單</span>
+                                    <span class="font-bold text-white font-mono">{{ q.eff_price > 0 ? formatNumber(q.eff_price) : '-' }}</span>
+                                  </div>
+                                  <div class="text-[10px] mt-0.5 text-right font-bold" :class="getRoyalQualityProfit(item, q, costMode === 'focus', 'instant') > 0 ? 'text-emerald-400' : (q.eff_price > 0 ? 'text-rose-400' : 'text-gray-500')">
+                                    {{ q.eff_price > 0 ? (getRoyalQualityProfit(item, q, costMode === 'focus', 'instant') > 0 ? '+' : '') + formatNumber(getRoyalQualityProfit(item, q, costMode === 'focus', 'instant')) : '無單' }}
+                                  </div>
+                                </div>
+                                <!-- 週均出貨 -->
+                                <div class="mt-1 p-1 rounded bg-amber-950/20 border border-amber-900/30 text-[11px]">
+                                  <div class="flex justify-between text-amber-300/80 font-sans text-[10px]">
+                                    <span>📈 週均均價</span>
+                                    <span class="font-bold text-amber-200 font-mono">{{ q.hist_avg_price > 0 ? formatNumber(q.hist_avg_price) : (item.common_7d_avg > 0 ? formatNumber(item.common_7d_avg) : '-') }}</span>
+                                  </div>
+                                  <div class="text-[10px] mt-0.5 text-right font-bold" :class="getRoyalQualityProfit(item, q, costMode === 'focus', 'history') > 0 ? 'text-emerald-400' : ((q.hist_avg_price > 0 || item.common_7d_avg > 0) ? 'text-rose-400' : 'text-gray-500')">
+                                    {{ (q.hist_avg_price > 0 || item.common_7d_avg > 0) ? (getRoyalQualityProfit(item, q, costMode === 'focus', 'history') > 0 ? '+' : '') + formatNumber(getRoyalQualityProfit(item, q, costMode === 'focus', 'history')) : '-' }}
+                                  </div>
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -3562,9 +3667,27 @@
           return getRoyalBatchProfit(item) * 2;
         };
 
-        // 取得指定品質之單品淨利 (向下相容有效售價)
-        const getQualityProfit = (item, q, isFocus) => {
-          const price = q.eff_price || q.bm_price || 0;
+        // 取得指定品質之單品淨利 (支援即時砸單 instant、週均出貨 history、與當前基準 benchmark)
+        const getQualityProfit = (item, q, isFocus, mode = 'benchmark') => {
+          if (!item || !q) return 0;
+          let price = 0;
+          if (mode === 'instant') {
+            price = q.eff_price || q.bm_price || 0;
+          } else if (mode === 'history') {
+            price = q.hist_avg_price || 0;
+            if (price <= 0) {
+              price = item.common_7d_avg || item.avg_price_7d || 0;
+            }
+          } else {
+            // benchmark 模式
+            if (qualityBenchmark.value === 'history_7d') {
+              price = q.hist_avg_price || item.common_7d_avg || item.avg_price_7d || q.eff_price || 0;
+            } else if (qualityBenchmark.value === 'compat_safe' && item.bubble_risk === 'high_risk') {
+              price = q.hist_avg_price || item.common_7d_avg || item.avg_price_7d || 0;
+            } else {
+              price = q.eff_price || q.bm_price || (item.common_7d_avg || 0);
+            }
+          }
           if (price <= 0) return 0;
           const cost = getItemCost(item, isFocus);
           if (cost <= 0) return 0;
@@ -3572,6 +3695,34 @@
           const stationFee = getItemStationFee(item);
           const subsidy = getItemJournalSubsidy(item);
           return Math.round(price * feeFactor - cost - stationFee + subsidy);
+        };
+
+        // 取得指定品質在皇家製造的單品淨利
+        const getRoyalQualityProfit = (item, q, isFocus, mode = 'benchmark') => {
+          if (!item || !q) return 0;
+          let price = 0;
+          if (mode === 'instant') {
+            price = q.eff_price || q.bm_price || 0;
+          } else if (mode === 'history') {
+            price = q.hist_avg_price || 0;
+            if (price <= 0) {
+              price = item.common_7d_avg || item.avg_price_7d || 0;
+            }
+          } else {
+            if (qualityBenchmark.value === 'history_7d') {
+              price = q.hist_avg_price || item.common_7d_avg || item.avg_price_7d || q.eff_price || 0;
+            } else if (qualityBenchmark.value === 'compat_safe' && item.bubble_risk === 'high_risk') {
+              price = q.hist_avg_price || item.common_7d_avg || item.avg_price_7d || 0;
+            } else {
+              price = q.eff_price || q.bm_price || (item.common_7d_avg || 0);
+            }
+          }
+          if (price <= 0) return 0;
+          const cost = getRoyalItemCost(item, isFocus);
+          if (cost <= 0) return 0;
+          const feeFactor = 1.0 - (effectiveTaxPct.value / 100.0);
+          const subsidy = getItemJournalSubsidy(item);
+          return Math.round(price * feeFactor - cost + subsidy);
         };
 
         const countProfitableNoFocus = computed(() => {
@@ -4629,6 +4780,7 @@
           getItemStationFee,
           getItemCost,
           getQualityProfit,
+          getRoyalQualityProfit,
           getItemFocusCost,
           getItemSilverPerFocus,
           batchList,
