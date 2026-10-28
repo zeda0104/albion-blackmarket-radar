@@ -1583,34 +1583,109 @@
 
             <!-- 原料清單卡片 -->
             <div class="bg-albion-panel border border-albion-border rounded-lg overflow-hidden shadow-sm">
-              <div class="bg-albion-card px-4 py-2.5 border-b border-albion-border flex justify-between items-center text-xs font-bold text-white">
-                <span>📋 原物料需求清單</span>
-                <span class="text-gray-400 font-normal">依 RRR 扣除退還消耗</span>
+              <div class="bg-albion-card px-4 py-2.5 border-b border-albion-border flex flex-wrap justify-between items-center gap-2 text-xs">
+                <div class="flex items-center space-x-2">
+                  <span class="font-bold text-white">📋 原物料需求清單</span>
+                  <span class="text-gray-400 text-[11px]">依 RRR 扣除退還消耗</span>
+                </div>
+                
+                <div v-if="batchSourceMode === 'buy'" class="flex items-center space-x-2">
+                  <label class="inline-flex items-center space-x-1 cursor-pointer text-[11px] text-gray-300">
+                    <input type="checkbox" v-model="enableMarketDepth" class="rounded bg-albion-card text-indigo-500 focus:ring-0">
+                    <span :class="enableMarketDepth ? 'text-indigo-300 font-bold' : 'text-gray-400'">深度精算</span>
+                  </label>
+                  
+                  <button @click="fetchBatchMarketDepth(true)"
+                          :disabled="isFetchingDepth"
+                          class="px-2 py-0.5 rounded bg-albion-panel hover:bg-albion-card border border-albion-border text-gray-300 hover:text-white text-[11px] flex items-center space-x-1 transition disabled:opacity-50 shadow-sm"
+                          title="強制向 AODP 抓取最新市場供貨深度與訂單簿">
+                    <span>{{ isFetchingDepth ? '⏳ 查詢中...' : '🔄 刷新深度' }}</span>
+                  </button>
+                  <span v-if="lastDepthFetchTime" class="text-[10px] text-gray-500 font-mono">{{ lastDepthFetchTime }}</span>
+                </div>
+              </div>
+
+              <!-- ⚠️ 現貨不足全域警示橫幅 -->
+              <div v-if="batchSourceMode === 'buy' && batchDetails.materials.some(m => m.is_depth_loaded && !m.is_sufficient)"
+                   class="mx-3 mt-3 p-2.5 rounded bg-rose-950/60 border border-rose-800/80 text-rose-200 text-xs flex items-start space-x-2 shadow-sm">
+                <span class="text-base leading-none">⚠️</span>
+                <div>
+                  <div class="font-bold text-rose-300">紅城市場供貨不足警告！</div>
+                  <div class="text-[11px] text-rose-200/90 mt-0.5 leading-relaxed">
+                    清單中有原料在 Caerleon 市場掛單總量不足以買齊實購量。直接直購將無法一次購足，建議：
+                    <b>1. 提早建立買單 (Buy Order)</b> 或 <b>2. 前往對應產地加成城拉貨</b>，避免缺料或遭超高單價黑心單套牢。
+                  </div>
+                </div>
               </div>
 
               <div class="p-3 text-xs overflow-x-auto">
-                <table class="w-full text-left text-xs">
+                <table class="w-full text-left text-xs whitespace-nowrap">
                   <thead class="border-b border-albion-border/40 text-gray-400">
                     <tr>
-                      <th class="pb-1.5">材料</th>
-                      <th class="pb-1.5 text-right">需備(Gross)</th>
-                      <th class="pb-1.5 text-right text-gray-400">退還</th>
-                      <th v-if="batchDeductLaborer" class="pb-1.5 text-right text-sky-400">工人抵扣</th>
-                      <th class="pb-1.5 text-right text-amber-300">{{ batchSourceMode === 'buy' ? '實購(Net)' : '實耗(Net)' }}</th>
+                      <th class="pb-1.5 text-left">材料</th>
+                      <th class="pb-1.5 text-right" title="製作此批量所需具備之原始材料總量">需備(Gross)</th>
+                      <th class="pb-1.5 text-right text-gray-400" title="工坊返還之材料">退還</th>
+                      <th v-if="batchDeductLaborer" class="pb-1.5 text-right text-sky-400" title="紅城島工人返還抵扣">工人抵扣</th>
+                      <th class="pb-1.5 text-right text-amber-300" title="扣除返還後的實質採購量">{{ batchSourceMode === 'buy' ? '實購(Net)' : '實耗(Net)' }}</th>
+                      <th v-if="batchSourceMode === 'buy'" class="pb-1.5 text-center">供貨深度</th>
+                      <th v-if="batchSourceMode === 'buy'" class="pb-1.5 text-right">直購均價</th>
                       <th v-if="batchSourceMode === 'buy'" class="pb-1.5 text-right">直購預算</th>
                     </tr>
                   </thead>
                   <tbody class="divide-y divide-albion-border/30 font-mono">
-                    <tr v-for="m in batchDetails.materials" :key="m.mat_type + m.tier" class="hover:bg-albion-hover">
-                      <td class="py-1.5 text-left font-sans">
-                        <span class="px-1 py-0.2 rounded font-bold text-[10px]" :class="getTierBadgeClass(m.tier)">T{{ m.tier }}</span>
-                        <span class="text-white ml-1">{{ m.mat_name }}</span>
+                    <tr v-for="m in batchDetails.materials" :key="m.mat_type + m.tier" class="hover:bg-albion-hover transition">
+                      <td class="py-2 text-left font-sans">
+                        <span class="px-1.5 py-0.5 rounded font-bold text-[10px]" :class="getTierBadgeClass(m.tier)">T{{ m.tier }}</span>
+                        <span class="text-white ml-1 font-medium">{{ m.mat_name }}</span>
                       </td>
-                      <td class="py-1.5 text-right text-gray-300 font-bold">{{ m.required }}</td>
-                      <td class="py-1.5 text-right text-emerald-400">+{{ m.returned }}</td>
-                      <td v-if="batchDeductLaborer" class="py-1.5 text-right text-sky-400">-{{ m.laborer_deduct || 0 }}</td>
-                      <td class="py-1.5 text-right text-amber-400 font-bold">{{ m.net_required }}</td>
-                      <td v-if="batchSourceMode === 'buy'" class="py-1.5 text-right font-bold text-white">{{ formatNumber(m.total_cost) }}</td>
+                      <td class="py-2 text-right text-gray-200 font-bold">{{ m.gross_qty }}</td>
+                      <td class="py-2 text-right text-emerald-400 font-medium">+{{ m.return_qty }}</td>
+                      <td v-if="batchDeductLaborer" class="py-2 text-right text-sky-400 font-medium">-{{ m.laborer_qty || 0 }}</td>
+                      <td class="py-2 text-right text-amber-400 font-bold">{{ m.actual_buy_qty }}</td>
+                      
+                      <!-- 市場供貨深度 -->
+                      <td v-if="batchSourceMode === 'buy'" class="py-2 text-center font-sans">
+                        <div v-if="isFetchingDepth" class="text-[11px] text-gray-400 animate-pulse flex items-center justify-center space-x-1">
+                          <span>⏳ 查詢中...</span>
+                        </div>
+                        <div v-else-if="m.is_depth_loaded" class="inline-flex items-center space-x-1.5">
+                          <span v-if="m.available_qty === 0" class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-950/80 text-rose-300 border border-rose-800" title="紅城市場無此品項現貨掛售">
+                            ⚪ 無現貨
+                          </span>
+                          <span v-else-if="m.is_sufficient" class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-950/80 text-emerald-300 border border-emerald-800 flex items-center space-x-1" :title="`市場現貨充足！總掛單量: ${m.available_qty} 件 (實購: ${m.actual_buy_qty} / 需備: ${m.gross_qty})`">
+                            <span>🟢 充足</span>
+                            <span class="font-mono text-[9px] opacity-80">({{ m.available_qty }}件)</span>
+                          </span>
+                          <span v-else class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-950/80 text-rose-300 border border-rose-800 flex items-center space-x-1" :title="`市場供貨不足！現貨僅 ${m.available_qty} 件，尚缺 ${m.shortfall} 件！`">
+                            <span>⚠️ 不足</span>
+                            <span class="font-mono text-[9px]">({{ m.available_qty }}/{{ m.actual_buy_qty }})</span>
+                          </span>
+
+                          <!-- 盤口查看按鈕 -->
+                          <button @click="openDepthModal(m)"
+                                  title="點擊查看 Caerleon 市場掛售吃單梯隊與滑價詳情"
+                                  class="px-1.5 py-0.5 rounded bg-sky-950 hover:bg-sky-900 text-sky-300 border border-sky-800 text-[10px] font-bold transition flex items-center space-x-0.5 shadow-sm">
+                            <span>🔍 盤口</span>
+                          </button>
+                        </div>
+                        <div v-else class="inline-flex items-center space-x-1 text-[10px]">
+                          <span class="text-gray-500">未同步</span>
+                          <button @click="fetchBatchMarketDepth(true)" class="text-sky-400 hover:underline">查深度</button>
+                        </div>
+                      </td>
+
+                      <!-- 直購均價 (含滑價顯示) -->
+                      <td v-if="batchSourceMode === 'buy'" class="py-2 text-right">
+                        <div class="text-white font-bold">{{ formatNumber(m.unit_price) }}</div>
+                        <div v-if="m.slippage_pct > 0" class="text-[9px] text-amber-400 font-sans font-medium" title="因吃透低價單而產生的滑價比例">
+                          +{{ m.slippage_pct }}% 滑價
+                        </div>
+                      </td>
+
+                      <!-- 直購預算 -->
+                      <td v-if="batchSourceMode === 'buy'" class="py-2 text-right font-bold text-amber-300 font-mono">
+                        {{ formatNumber(m.total_budget) }}
+                      </td>
                     </tr>
                   </tbody>
                 </table>
@@ -2349,6 +2424,129 @@
     </main>
 
 
+    <!-- 🔍 市場吃單深度盤口 Modal -->
+    <div v-if="showDepthModal && selectedDepthMat" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+      <div class="bg-albion-panel border border-albion-border rounded-xl max-w-xl w-full p-5 space-y-4 text-xs shadow-2xl flex flex-col max-h-[85vh]">
+        <!-- 標題與關閉 -->
+        <div class="flex justify-between items-center pb-3 border-b border-albion-border">
+          <div class="flex items-center space-x-2">
+            <span class="px-2 py-0.5 rounded font-mono font-bold text-xs" :class="getTierBadgeClass(selectedDepthMat.tier)">
+              T{{ selectedDepthMat.tier }}
+            </span>
+            <span class="font-bold text-white text-sm">{{ selectedDepthMat.mat_name }}</span>
+            <span class="text-gray-400 font-mono text-[11px]">({{ selectedDepthMat.api_id }})</span>
+          </div>
+          <button @click="showDepthModal = false" class="text-gray-400 hover:text-white text-base leading-none p-1">✕</button>
+        </div>
+
+        <!-- 概覽數據卡片 -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
+          <div class="bg-albion-card p-2 rounded border border-albion-border">
+            <div class="text-[10px] text-gray-400">實購需求量</div>
+            <div class="text-sm font-bold font-mono text-amber-300">{{ selectedDepthMat.actual_buy_qty }} 件</div>
+            <div class="text-[9px] text-gray-500 font-mono">需備: {{ selectedDepthMat.gross_qty }}</div>
+          </div>
+          <div class="bg-albion-card p-2 rounded border border-albion-border">
+            <div class="text-[10px] text-gray-400">市場現貨總量</div>
+            <div class="text-sm font-bold font-mono" :class="selectedDepthMat.is_sufficient ? 'text-emerald-400' : 'text-rose-400'">
+              {{ selectedDepthMat.available_qty }} 件
+            </div>
+            <div class="text-[9px] font-bold" :class="selectedDepthMat.is_sufficient ? 'text-emerald-400' : 'text-rose-400'">
+              {{ selectedDepthMat.is_sufficient ? '🟢 供貨充足' : `⚠️ 缺 ${selectedDepthMat.shortfall} 件` }}
+            </div>
+          </div>
+          <div class="bg-albion-card p-2 rounded border border-albion-border">
+            <div class="text-[10px] text-gray-400">直購加權均價</div>
+            <div class="text-sm font-bold font-mono text-white">{{ formatNumber(selectedDepthMat.unit_price) }} 銀</div>
+            <div class="text-[9px]" :class="selectedDepthMat.slippage_pct > 0 ? 'text-amber-400 font-bold' : 'text-gray-500'">
+              {{ selectedDepthMat.slippage_pct > 0 ? `+${selectedDepthMat.slippage_pct}% 滑價` : '無滑價 (最低檔)' }}
+            </div>
+          </div>
+          <div class="bg-albion-card p-2 rounded border border-albion-border">
+            <div class="text-[10px] text-gray-400">買齊總花費</div>
+            <div class="text-sm font-bold font-mono text-emerald-400">{{ formatNumber(selectedDepthMat.total_budget) }} 銀</div>
+            <div class="text-[9px] text-gray-500">Caerleon 紅城市場</div>
+          </div>
+        </div>
+
+        <!-- 說明文字 -->
+        <div class="text-[11px] text-gray-300 bg-albion-card/60 p-2.5 rounded border border-albion-border/40 flex items-center justify-between">
+          <span>💡 模擬在紅城市場直購 <b>{{ selectedDepthMat.actual_buy_qty }} 件</b> 時，吃單深度與各檔梯隊消耗：</span>
+          <button @click="fetchBatchMarketDepth(true)" class="text-sky-400 hover:underline text-[10px] flex items-center space-x-1">
+            <span>🔄 重新查詢盤口</span>
+          </button>
+        </div>
+
+        <!-- 訂單簿深度列表 -->
+        <div class="overflow-y-auto flex-1 border border-albion-border/50 rounded-lg max-h-[320px]">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-albion-card sticky top-0 border-b border-albion-border text-gray-400 z-10">
+              <tr>
+                <th class="py-1.5 px-2.5">檔位</th>
+                <th class="py-1.5 px-2 text-right">掛售單價</th>
+                <th class="py-1.5 px-2 text-right">該檔現貨</th>
+                <th class="py-1.5 px-2 text-right text-amber-300">本單吃單</th>
+                <th class="py-1.5 px-2 text-right">小計</th>
+                <th class="py-1.5 px-2.5 text-center">狀態</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-albion-border/30 font-mono">
+              <tr v-for="ord in selectedDepthMat.consumed_orders" :key="ord.tier_index" class="bg-emerald-950/20 hover:bg-emerald-950/30">
+                <td class="py-1.5 px-2.5 font-bold text-gray-400">#{{ ord.tier_index }}</td>
+                <td class="py-1.5 px-2 text-right font-bold text-white">{{ formatNumber(ord.price) }}</td>
+                <td class="py-1.5 px-2 text-right text-gray-300">{{ ord.amount }}</td>
+                <td class="py-1.5 px-2 text-right font-bold text-amber-300">{{ ord.used_qty }}</td>
+                <td class="py-1.5 px-2 text-right text-gray-200">{{ formatNumber(ord.subtotal) }}</td>
+                <td class="py-1.5 px-2.5 text-center font-sans">
+                  <span class="px-1.5 py-0.2 rounded text-[10px] font-bold" :class="ord.is_full_take ? 'bg-emerald-900/80 text-emerald-300' : 'bg-indigo-900/80 text-indigo-300'">
+                    {{ ord.is_full_take ? '吃完' : '吃部分' }}
+                  </span>
+                </td>
+              </tr>
+
+              <!-- 短缺警示行 -->
+              <tr v-if="selectedDepthMat.shortfall > 0" class="bg-rose-950/40 text-rose-300">
+                <td class="py-2 px-2.5 font-bold text-rose-400">缺貨</td>
+                <td class="py-2 px-2 text-right font-bold">-</td>
+                <td class="py-2 px-2 text-right font-bold text-rose-400">0</td>
+                <td class="py-2 px-2 text-right font-bold text-rose-300">缺 {{ selectedDepthMat.shortfall }} 件</td>
+                <td class="py-2 px-2 text-right font-bold text-rose-400">無法買齊</td>
+                <td class="py-2 px-2.5 text-center font-sans">
+                  <span class="px-1.5 py-0.2 rounded text-[10px] font-bold bg-rose-900 text-rose-200">
+                    ⚠️ 現貨不足
+                  </span>
+                </td>
+              </tr>
+
+              <!-- 未吃到的後續高價訂單 (預覽市場深度) -->
+              <tr v-for="(ord, idx) in (selectedDepthMat.sell_orders || []).slice(selectedDepthMat.consumed_orders ? selectedDepthMat.consumed_orders.length : 0, 15)"
+                  :key="'rem_' + idx"
+                  class="opacity-40 hover:opacity-75 transition">
+                <td class="py-1 px-2.5 text-gray-500">#{{ (selectedDepthMat.consumed_orders ? selectedDepthMat.consumed_orders.length : 0) + idx + 1 }}</td>
+                <td class="py-1 px-2 text-right text-gray-400">{{ formatNumber(ord.price) }}</td>
+                <td class="py-1 px-2 text-right text-gray-500">{{ ord.amount }}</td>
+                <td class="py-1 px-2 text-right text-gray-500">0</td>
+                <td class="py-1 px-2 text-right text-gray-500">-</td>
+                <td class="py-1.5 px-2.5 text-center font-sans text-gray-500 text-[10px]">未動用</td>
+              </tr>
+
+              <tr v-if="(!selectedDepthMat.consumed_orders || selectedDepthMat.consumed_orders.length === 0) && selectedDepthMat.shortfall <= 0">
+                <td colspan="6" class="py-4 text-center text-gray-500 font-sans">
+                  暫無掛單數據，請點擊上方重新查詢盤口
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="flex justify-end pt-2 border-t border-albion-border">
+          <button @click="showDepthModal = false" class="px-4 py-1.5 rounded bg-albion-card hover:bg-albion-hover text-white font-bold transition">
+            關閉
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- 設定 Modal -->
     <div v-if="showSettingsModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
       <div class="bg-albion-panel border border-albion-border rounded-lg max-w-sm w-full p-4 space-y-3 text-xs">
@@ -2852,6 +3050,108 @@
         // 📋 批量製造與採購清單
         const batchList = ref(JSON.parse(localStorage.getItem('albion_batch_list') || '[]'));
         const batchSourceMode = ref('buy'); // 'buy' (市場直購) or 'gather' (自備採集)
+        const marketDepthMap = ref({});
+        const isFetchingDepth = ref(false);
+        const enableMarketDepth = ref(true);
+        const lastDepthFetchTime = ref(null);
+        const showDepthModal = ref(false);
+        const selectedDepthMat = ref(null);
+
+        const MAT_NAME_MAP = {
+          PLANKS: '木材',
+          LEATHER: '皮革',
+          METALBAR: '金屬條',
+          CLOTH: '布料',
+          STONEBLOCK: '石磚'
+        };
+
+        const getMaterialApiId = (matType, tier) => {
+          const parts = String(tier).split('.');
+          const baseTier = parts[0];
+          const enchant = parts[1] || '0';
+          const suffix = (enchant !== '0' && enchant !== '') ? `_LEVEL${enchant}@${enchant}` : '';
+          return `T${baseTier}_${matType}${suffix}`;
+        };
+
+        const openDepthModal = (mat) => {
+          selectedDepthMat.value = mat;
+          showDepthModal.value = true;
+        };
+
+        let depthFetchDebounceTimer = null;
+
+        const fetchBatchMarketDepth = async (force = false) => {
+          if (batchList.value.length === 0) {
+            marketDepthMap.value = {};
+            return;
+          }
+
+          const matNeeds = {};
+          batchList.value.forEach(bItem => {
+            const fullEq = equipments.value.find(e => e.api_id === bItem.api_id);
+            if (!fullEq || !fullEq.recipe) return;
+            const isFocus = bItem.costMode === 'focus';
+            const rrr = getItemRrr(fullEq, isFocus);
+            const qty = bItem.qty || 1;
+
+            for (const [matType, countPerPiece] of Object.entries(fullEq.recipe)) {
+              const matInfo = materials.value.find(m => m.mat_type === matType && m.tier === fullEq.tier);
+              const apiId = matInfo ? matInfo.api_id : getMaterialApiId(matType, fullEq.tier);
+              if (!matNeeds[apiId]) {
+                matNeeds[apiId] = {
+                  api_id: apiId,
+                  mat_type: matType,
+                  tier: fullEq.tier,
+                  gross_qty: 0,
+                  net_qty: 0,
+                  fallback_price: matInfo ? matInfo.price : 0
+                };
+              }
+              const gross = countPerPiece * qty;
+              const net = Math.round(gross * (1.0 - rrr));
+              matNeeds[apiId].gross_qty += gross;
+              matNeeds[apiId].net_qty += net;
+            }
+          });
+
+          const itemsPayload = Object.values(matNeeds).map(item => ({
+            api_id: item.api_id,
+            needed_qty: Math.max(1, item.net_qty),
+            gross_qty: item.gross_qty,
+            fallback_price: item.fallback_price
+          }));
+
+          if (itemsPayload.length === 0) return;
+
+          isFetchingDepth.value = true;
+          try {
+            const res = await fetch('/api/market-depth', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                items: itemsPayload,
+                location: 'Caerleon',
+                server: serverKey.value || 'east',
+                force_refresh: force
+              })
+            });
+            if (res.ok) {
+              const data = await res.json();
+              if (data && data.depth) {
+                marketDepthMap.value = data.depth;
+                lastDepthFetchTime.value = new Date().toLocaleTimeString();
+                if (showDepthModal.value && selectedDepthMat.value) {
+                  const updated = batchDetails.value.materials.find(m => m.api_id === selectedDepthMat.value.api_id);
+                  if (updated) selectedDepthMat.value = updated;
+                }
+              }
+            }
+          } catch (err) {
+            console.error('Failed to fetch market depth:', err);
+          } finally {
+            isFetchingDepth.value = false;
+          }
+        };
 
         // 計算實效扣稅比率 (即時砸單 4% vs 批量掛單 4% + 2.5% = 6.5%)
         const effectiveTaxPct = computed(() => {
@@ -3347,6 +3647,9 @@
         const clearBatch = () => {
           if (confirm('確定清空所有待製作裝備？')) {
             batchList.value = [];
+            marketDepthMap.value = {};
+            selectedDepthMat.value = null;
+            showDepthModal.value = false;
           }
         };
 
@@ -3417,11 +3720,16 @@
                 const key = `${matType}_${fullEq.tier}`;
                 if (!matMap[key]) {
                   const matInfo = materials.value.find(m => m.mat_type === matType && m.tier === fullEq.tier);
+                  const apiId = matInfo ? matInfo.api_id : getMaterialApiId(matType, fullEq.tier);
+                  const matFriendlyName = (matInfo && matInfo.mat_name) ? matInfo.mat_name : (MAT_NAME_MAP[matType] || matType);
                   matMap[key] = {
+                    key: key,
                     mat_type: matType,
-                    mat_name: matInfo ? matInfo.mat_name : matType,
+                    mat_name: matFriendlyName,
                     tier: fullEq.tier,
+                    api_id: apiId,
                     unit_price: matInfo ? matInfo.price : 0,
+                    base_sell_min: matInfo ? matInfo.sell_min : 0,
                     gross_qty: 0,
                     net_qty: 0,
                     return_qty: 0,
@@ -3441,11 +3749,50 @@
             }
           });
 
-          // 原料清單計算 (實質採購量依 RRR 返還扣減)
+          // 原料清單計算 (實質採購量依 RRR 返還扣減與市場深度精算)
           const matList = Object.values(matMap);
           matList.forEach(m => {
-            m.actual_buy_qty = m.net_qty;
-            m.total_budget = m.actual_buy_qty * m.unit_price;
+            m.actual_buy_qty = Math.max(0, m.net_qty - (batchDeductLaborer.value ? (m.laborer_qty || 0) : 0));
+            
+            // 檢查是否有抓取到此原料之市場供貨深度
+            const depth = (enableMarketDepth.value && m.api_id) ? marketDepthMap.value[m.api_id] : null;
+            if (depth) {
+              m.depth = depth;
+              m.is_depth_loaded = true;
+              m.available_qty = depth.available_qty || 0;
+              m.is_sufficient = depth.is_sufficient;
+              m.gross_sufficient = depth.gross_sufficient;
+              m.shortfall = depth.shortfall || 0;
+              m.slippage_pct = depth.slippage_pct || 0;
+              m.avg_unit_price = depth.avg_unit_price || m.unit_price;
+              m.depth_total_cost = depth.total_cost || (m.actual_buy_qty * m.unit_price);
+              m.lowest_price = depth.lowest_price || m.unit_price;
+              m.consumed_orders = depth.consumed_orders || [];
+              m.sell_orders = depth.sell_orders || [];
+              m.status = depth.status;
+              
+              // 採用深度真實穿價之單價與預算
+              m.unit_price = depth.avg_unit_price;
+              m.total_budget = depth.total_cost;
+            } else {
+              m.is_depth_loaded = false;
+              m.available_qty = 0;
+              m.is_sufficient = true;
+              m.gross_sufficient = true;
+              m.shortfall = 0;
+              m.slippage_pct = 0;
+              m.consumed_orders = [];
+              m.sell_orders = [];
+              m.total_budget = m.actual_buy_qty * m.unit_price;
+            }
+
+            // 雙向相容屬性別名，徹底消除欄位為空或 undefined 造成的異常
+            m.required = m.gross_qty;
+            m.returned = m.return_qty;
+            m.laborer_deduct = m.laborer_qty || 0;
+            m.net_required = m.actual_buy_qty;
+            m.total_cost = m.total_budget;
+
             totalNetCost += m.total_budget;
           });
 
@@ -3546,8 +3893,12 @@
 
           text += `\n📦 原料${batchSourceMode.value === 'buy' ? '採購' : '採集'}需求:\n`;
           bd.materials.forEach(m => {
-            const labNote = (batchDeductLaborer.value && m.laborer_qty > 0) ? ` (已扣工人 ${m.laborer_qty} 個)` : '';
-            text += `  • T${m.tier} ${m.mat_name}: 實購 ${m.actual_buy_qty} 個${labNote} (理論實耗 ${m.net_qty}，需備 ${m.gross_qty}，退還 ${m.return_qty}) | 市價 ${formatNumber(m.unit_price)} 銀\n`;
+            const labNote = (batchDeductLaborer.value && m.laborer_qty > 0) ? ` (已扣工人 ${m.laborer_qty} 件)` : '';
+            const depthNote = m.is_depth_loaded 
+              ? (m.is_sufficient ? ` [現貨充足: ${m.available_qty}件]` : ` [⚠️現貨不足: 僅${m.available_qty}件/缺${m.shortfall}件]`)
+              : '';
+            const slipNote = (m.slippage_pct > 0) ? ` (+${m.slippage_pct}%滑價)` : '';
+            text += `  • T${m.tier} ${m.mat_name}: 實購 ${m.actual_buy_qty} 件${labNote} (需備 ${m.gross_qty}，退還 ${m.return_qty})${depthNote} | 均價 ${formatNumber(m.unit_price)} 銀${slipNote} | 預算 ${formatNumber(m.total_budget)} 銀\n`;
           });
 
           text += `\n💰 預估財務總覽:\n`;
@@ -4223,11 +4574,37 @@
         };
 
 
+        watch(
+          () => batchList.value,
+          () => {
+            localStorage.setItem('albion_batch_list', JSON.stringify(batchList.value));
+            if (batchSourceMode.value === 'buy' && batchList.value.length > 0) {
+              clearTimeout(depthFetchDebounceTimer);
+              depthFetchDebounceTimer = setTimeout(() => {
+                fetchBatchMarketDepth();
+              }, 600);
+            }
+          },
+          { deep: true }
+        );
+
+        watch(
+          () => batchSourceMode.value,
+          (newMode) => {
+            if (newMode === 'buy' && batchList.value.length > 0 && Object.keys(marketDepthMap.value).length === 0) {
+              fetchBatchMarketDepth();
+            }
+          }
+        );
+
         onMounted(async () => {
           await loadSpecsData();
           await loadRadarData();
           await loadLedgerData();
           settingsForm.value.server = serverKey.value;
+          if (batchList.value.length > 0 && batchSourceMode.value === 'buy') {
+            fetchBatchMarketDepth();
+          }
         });
 
         return {
@@ -4256,6 +4633,14 @@
           getItemSilverPerFocus,
           batchList,
           batchSourceMode,
+          marketDepthMap,
+          isFetchingDepth,
+          enableMarketDepth,
+          lastDepthFetchTime,
+          showDepthModal,
+          selectedDepthMat,
+          openDepthModal,
+          fetchBatchMarketDepth,
           addToBatch,
           removeFromBatch,
           updateBatchQty,

@@ -51,6 +51,7 @@ class MarketScanner:
         self.last_scan_time: Optional[float] = None
         self.materials_cache: List[Dict[str, Any]] = []
         self.equipment_cache: List[Dict[str, Any]] = []
+        self.orderbook_cache: Dict[tuple, Dict[str, Any]] = {}
         self.is_scanning: bool = False
         self.scan_progress: str = "就緒"
 
@@ -800,3 +801,160 @@ class MarketScanner:
             return {"success": False, "error": str(e)}
         finally:
             self.is_scanning = False
+
+    def fetch_market_depth(self, items: List[Dict[str, Any]], location: str = "Caerleon", server_key: Optional[str] = None) -> Dict[str, Any]:
+        """
+        獵取市場供貨深度並精算買齊材料之正確價格與滑價
+        items 格式: [{"api_id": "...", "needed_qty": 170, "gross_qty": 200, "fallback_price": 7000}, ...]
+        """
+        server = server_key or self.server_key
+        base_url = SERVERS.get(server, self.base_url)
+        headers = {'User-Agent': 'AlbionRadar/2.0'}
+        now = time.time()
+        
+        # 1. 整理需要向 AODP 抓取訂單簿的 item_id (有快取且未過期 60 秒則重用)
+        ids_to_fetch = []
+        for item in items:
+            api_id = item.get("api_id")
+            if not api_id:
+                continue
+            cache_key = (server, location, api_id)
+            cached = self.orderbook_cache.get(cache_key)
+            if not cached or (now - cached.get("timestamp", 0) > 60):
+                ids_to_fetch.append(api_id)
+                
+        # 2. 批次調用 AODP API
+        if ids_to_fetch:
+            chunk_size = 50
+            chunks = [ids_to_fetch[i:i + chunk_size] for i in range(0, len(ids_to_fetch), chunk_size)]
+            for ch in chunks:
+                url = f"{base_url}/orderbook/{','.join(ch)}?locations={location}&qualities=1"
+                try:
+                    resp = requests.get(url, headers=headers, timeout=12)
+                    if resp.status_code == 200:
+                        for entry in resp.json():
+                            eid = entry.get("item_id")
+                            eloc = entry.get("city", location)
+                            cache_key = (server, eloc, eid)
+                            self.orderbook_cache[cache_key] = {
+                                "timestamp": now,
+                                "sell": entry.get("sell", []),
+                                "buy": entry.get("buy", [])
+                            }
+                except Exception as e:
+                    print(f"[警告] 抓取訂單簿深度失敗: {e}")
+                    
+        # 3. 逐品項精算深度與採購滑價
+        results = {}
+        for item in items:
+            api_id = item.get("api_id")
+            if not api_id:
+                continue
+            needed_qty = int(item.get("needed_qty", 0))
+            gross_qty = int(item.get("gross_qty", needed_qty))
+            fallback_price = int(item.get("fallback_price", 0))
+            
+            cache_key = (server, location, api_id)
+            order_data = self.orderbook_cache.get(cache_key, {})
+            sell_orders = order_data.get("sell", [])
+            
+            depth_info = self._calculate_depth_walk(sell_orders, needed_qty, gross_qty, fallback_price)
+            depth_info["api_id"] = api_id
+            depth_info["location"] = location
+            depth_info["cached_at"] = order_data.get("timestamp", now)
+            results[api_id] = depth_info
+            
+        return results
+
+    def _calculate_depth_walk(self, raw_sell_orders: List[Dict[str, Any]], needed_qty: int, gross_qty: int, fallback_price: int = 0) -> Dict[str, Any]:
+        valid_orders = [
+            {
+                "price": int(o.get("price", 0)),
+                "amount": int(o.get("amount", 0)),
+                "updated_at": o.get("updated_at", "")
+            }
+            for o in raw_sell_orders
+            if o.get("price", 0) > 0 and o.get("amount", 0) > 0
+        ]
+        valid_orders.sort(key=lambda x: x["price"])
+        
+        total_available = sum(o["amount"] for o in valid_orders)
+        lowest_price = valid_orders[0]["price"] if valid_orders else fallback_price
+        
+        if needed_qty <= 0:
+            return {
+                "needed_qty": 0,
+                "gross_qty": gross_qty,
+                "available_qty": total_available,
+                "is_sufficient": True,
+                "gross_sufficient": (total_available >= gross_qty),
+                "shortfall": 0,
+                "lowest_price": lowest_price,
+                "avg_unit_price": lowest_price,
+                "total_cost": 0,
+                "slippage_pct": 0.0,
+                "consumed_orders": [],
+                "sell_orders": valid_orders[:25],
+                "status": "供貨充足" if total_available > 0 else "無現貨掛售"
+            }
+            
+        remaining = needed_qty
+        total_cost = 0
+        fulfilled_qty = 0
+        consumed_orders = []
+        
+        for idx, o in enumerate(valid_orders):
+            if remaining <= 0:
+                break
+            take = min(o["amount"], remaining)
+            subtotal = take * o["price"]
+            total_cost += subtotal
+            fulfilled_qty += take
+            remaining -= take
+            consumed_orders.append({
+                "tier_index": idx + 1,
+                "price": o["price"],
+                "amount": o["amount"],
+                "used_qty": take,
+                "subtotal": subtotal,
+                "is_full_take": (take == o["amount"]),
+                "updated_at": o["updated_at"]
+            })
+            
+        is_sufficient = (fulfilled_qty >= needed_qty)
+        gross_sufficient = (total_available >= gross_qty)
+        shortfall = max(0, needed_qty - fulfilled_qty)
+        
+        # 若現貨不足，短缺部分以當前可得最高賣單價或保底價預估
+        if shortfall > 0:
+            fill_price = valid_orders[-1]["price"] if valid_orders else fallback_price
+            total_cost += shortfall * fill_price
+            
+        avg_unit_price = int(round(total_cost / needed_qty)) if needed_qty > 0 else lowest_price
+        
+        slippage_pct = 0.0
+        if lowest_price > 0 and avg_unit_price > lowest_price:
+            slippage_pct = round(((avg_unit_price - lowest_price) / lowest_price) * 100, 2)
+            
+        if total_available == 0:
+            status = "無現貨掛售"
+        elif is_sufficient:
+            status = "供貨充足"
+        else:
+            status = "供貨不足"
+            
+        return {
+            "needed_qty": needed_qty,
+            "gross_qty": gross_qty,
+            "available_qty": total_available,
+            "is_sufficient": is_sufficient,
+            "gross_sufficient": gross_sufficient,
+            "shortfall": shortfall,
+            "lowest_price": lowest_price,
+            "avg_unit_price": avg_unit_price,
+            "total_cost": total_cost,
+            "slippage_pct": slippage_pct,
+            "consumed_orders": consumed_orders,
+            "sell_orders": valid_orders[:25],
+            "status": status
+        }
