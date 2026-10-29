@@ -167,7 +167,7 @@
           <div class="bg-albion-panel border border-albion-border rounded-lg p-3">
             <div class="text-[11px] text-gray-400">總監控品項</div>
             <div class="text-xl font-bold text-white mt-0.5">{{ equipments.length }} <span class="text-xs text-gray-500 font-normal">件 (4.0~6.3)</span></div>
-            <div class="text-[10px] text-gray-400 mt-0.5">實效手續費: <span class="text-amber-400 font-bold font-mono">{{ effectiveTaxPct.toFixed(1) }}%</span> ({{ sellMode === 'order' ? '批量掛單' : '即時砸單' }})</div>
+            <div class="text-[10px] text-gray-400 mt-0.5">實效手續費: <span class="text-amber-400 font-bold font-mono">{{ effectiveTaxPct.toFixed(1) }}%</span> (掛單制)</div>
           </div>
 
           <div class="bg-albion-panel border border-emerald-900/40 rounded-lg p-3">
@@ -184,8 +184,8 @@
 
           <div class="bg-gradient-to-br from-amber-950/40 via-amber-900/20 to-albion-panel border border-amber-500/50 rounded-lg p-3">
             <div class="text-[11px] text-amber-300 font-bold flex items-center justify-between">
-              <span>🚀 每日暴利潛力榜首</span>
-              <span class="text-[9px] px-1 py-0.2 rounded bg-amber-500 text-black font-extrabold">日銷×淨利</span>
+              <span>🌟 每日利潤榜首</span>
+              <span class="text-[9px] px-1 py-0.2 rounded bg-amber-500 text-black font-extrabold">批量×淨利+日誌</span>
             </div>
             <div class="text-xl font-bold text-amber-400 mt-0.5 font-mono">+{{ formatNumber(maxPotentialItem.potential) }} <span class="text-xs text-amber-200/80 font-normal">銀/日</span></div>
             <div class="text-[10px] text-gray-300 truncate mt-0.5">{{ maxPotentialItem.name || '-' }} ({{ Math.round(maxPotentialItem.vol) }} 件/日)</div>
@@ -448,15 +448,9 @@
               <span class="text-gray-400 shrink-0">收單基準:</span>
               <select v-model="qualityBenchmark" 
                       class="w-full py-1.5 px-2 bg-albion-card border border-albion-border rounded text-gray-200 focus:outline-none focus:border-indigo-500 font-medium">
-                <option value="compat_max">⬇️ 向下相容最高價 (無單自動保底週均價)</option>
-                <option value="compat_safe">🛡️ 穩健防暴漲模式 (暴漲與無單採週均價)</option>
-                <option value="history_7d">📈 7天黑市成交均價 (一週深度均價，徹底防被壓回)</option>
-                <option value="expected">📊 批量加權期望價 (Q1~Q4綜合)</option>
-                <option value="common_max">一般/優良 最高價 (原始收單)</option>
-                <option value="common_avg">一般/優良 平均價</option>
-                <option value="normal">只看 一般 (Normal Q1)</option>
-                <option value="good">只看 優良 (Good Q2)</option>
-                <option value="top3_avg">一般/優良/出眾 均價</option>
+                <option value="history_7d">📈 7天黑市均價 (核心)</option>
+                <option value="compat_max">⬇️ 即時最高價 (向下相容)</option>
+                <option value="expected">📊 加權期望價</option>
               </select>
             </div>
 
@@ -475,40 +469,45 @@
               <span class="text-gray-400 shrink-0">排序:</span>
               <select v-model="sortBy" 
                       class="w-full py-1.5 px-2 bg-albion-card border border-albion-border rounded text-gray-200 focus:outline-none focus:border-indigo-500 font-medium">
-                <option value="batch_profit_desc">💰 單批安全利潤 (推薦實戰)</option>
-                <option value="potential_desc">🚀 理論暴利潛力 (日銷量×淨利)</option>
-                <option value="focus_efficiency_desc">🎯 專注銀/點邊際效益 (高 → 低)</option>
-                <option value="bubble_desc">⚠️ 暴漲泡泡溢價率 (高 → 低)</option>
-                <option value="safe_batch_desc">🛡️ 安全批量建議 (大 → 小)</option>
-                <option value="profit_desc">💰 單件淨利潤 (高 → 低)</option>
-                <option value="roi_desc">📈 ROI 報酬率 (高 → 低)</option>
-                <option value="daily_vol_desc">📦 黑市日均銷量 (深度最大)</option>
-                <option value="vol_7d_desc">📊 7天總成交量 (高 → 低)</option>
-                <option value="history_price_desc">💵 7天歷史均價 (高 → 低)</option>
-                <option value="price_desc">黑市收購價 (高 → 低)</option>
-                <option value="tier_desc">階級 (高 → 低)</option>
+                <option value="batch_profit_desc">💰 單批淨利潤</option>
+                <option value="potential_desc">🌟 每日利潤</option>
+                <option value="profit_desc">💵 單件淨利潤</option>
+                <option value="history_price_desc">📈 7天黑市均價</option>
+                <option value="daily_vol_desc">📦 黑市日均銷量</option>
+                <option value="roi_desc">📊 ROI 投報率</option>
+                <option value="tier_desc">🛡️ 裝備階級</option>
               </select>
             </div>
 
           </div>
 
-          <!-- 利潤狀態篩選標籤 -->
-          <div class="flex items-center space-x-2 pt-1 text-xs">
-            <span class="text-gray-400">狀態過濾:</span>
-            <button @click="profitFilter = 'all'"
-                    :class="profitFilter === 'all' ? 'bg-gray-700 text-white' : 'text-gray-400 hover:text-white'"
-                    class="px-2 py-0.5 rounded">
-              全部
-            </button>
-            <button @click="profitFilter = 'profitable'"
-                    :class="profitFilter === 'profitable' ? 'bg-emerald-800 text-emerald-200 font-bold' : 'text-gray-400 hover:text-emerald-400'"
-                    class="px-2 py-0.5 rounded">
-              只看賺錢
-            </button>
-            <button @click="profitFilter = 'has_orders'"
-                    :class="profitFilter === 'has_orders' ? 'bg-indigo-800 text-indigo-200' : 'text-gray-400 hover:text-indigo-400'"
-                    class="px-2 py-0.5 rounded">
-              有收購單
+          <!-- 利潤狀態篩選標籤 & T4/T5 走量流 -->
+          <div class="flex flex-wrap items-center justify-between gap-2 pt-1 text-xs border-t border-albion-border/40 mt-1">
+            <div class="flex items-center space-x-2">
+              <span class="text-gray-400">狀態過濾:</span>
+              <button @click="profitFilter = 'all'"
+                      :class="profitFilter === 'all' && !isVolumeOnly ? 'bg-gray-700 text-white' : 'text-gray-400 hover:text-white'"
+                      class="px-2 py-0.5 rounded">
+                全部
+              </button>
+              <button @click="profitFilter = 'profitable'"
+                      :class="profitFilter === 'profitable' && !isVolumeOnly ? 'bg-emerald-800 text-emerald-200 font-bold' : 'text-gray-400 hover:text-emerald-400'"
+                      class="px-2 py-0.5 rounded">
+                只看賺錢
+              </button>
+              <button @click="profitFilter = 'has_orders'"
+                      :class="profitFilter === 'has_orders' && !isVolumeOnly ? 'bg-indigo-800 text-indigo-200' : 'text-gray-400 hover:text-indigo-400'"
+                      class="px-2 py-0.5 rounded">
+                有收購單
+              </button>
+            </div>
+
+            <!-- ⚡ T4/T5 走量爆款快捷鍵 -->
+            <button @click="toggleVolumeOnly"
+                    :class="isVolumeOnly ? 'bg-amber-600 text-white font-extrabold shadow ring-1 ring-amber-400' : 'bg-albion-card hover:bg-albion-hover text-amber-300 border border-amber-600/50'"
+                    class="px-2.5 py-1 rounded text-xs transition flex items-center space-x-1"
+                    title="一鍵過濾 T4/T5、高銷量、無專注獲利的走量製造爆款">
+              <span>⚡ T4/T5 走量爆款</span>
             </button>
           </div>
 
@@ -540,8 +539,8 @@
                   <th class="py-2.5 px-2 text-right font-bold text-purple-300 whitespace-nowrap min-w-[110px]">
                     🎯 專注效率
                   </th>
-                  <th class="py-2.5 px-2 text-right font-bold text-amber-300 whitespace-nowrap min-w-[120px]">
-                    每日暴利潛力
+                  <th class="py-2.5 px-2 text-right font-bold text-amber-300 whitespace-nowrap min-w-[120px]" title="每日利潤 = 安全批量 × 單件淨利 + 日誌收益">
+                    🌟 每日利潤
                   </th>
                   <th class="py-2.5 px-2 text-center font-bold text-sky-300 whitespace-nowrap min-w-[90px]">
                     🛡️ 安全批量
@@ -1103,8 +1102,8 @@
 
           <div class="bg-gradient-to-br from-amber-950/40 via-amber-900/20 to-albion-panel border border-amber-500/50 rounded-lg p-3">
             <div class="text-[11px] text-amber-300 font-bold flex items-center justify-between">
-              <span>🚀 皇家每日暴利潛力榜首</span>
-              <span class="text-[9px] px-1 py-0.2 rounded bg-amber-500 text-black font-extrabold">日銷×皇家淨利</span>
+              <span>🌟 皇家每日利潤榜首</span>
+              <span class="text-[9px] px-1 py-0.2 rounded bg-amber-500 text-black font-extrabold">批量×淨利+日誌</span>
             </div>
             <div class="text-xl font-bold text-amber-400 mt-0.5 font-mono">+{{ formatNumber(maxRoyalPotentialItem.potential) }} <span class="text-xs text-amber-200/80 font-normal">銀/日</span></div>
             <div class="text-[10px] text-gray-300 truncate mt-0.5">{{ maxRoyalPotentialItem.name || '-' }} ({{ Math.round(maxRoyalPotentialItem.vol) }} 件/日)</div>
@@ -1168,10 +1167,9 @@
             <div>
               <label class="block text-gray-400 mb-1 text-[11px]">收單基準</label>
               <select v-model="qualityBenchmark" class="w-full py-1.5 px-2 bg-albion-card border border-albion-border rounded text-white focus:outline-none">
-                <option value="compat_max">⬇️ 即時(無單轉週均)</option>
-                <option value="compat_safe">🛡️ 穩健防暴漲</option>
-                <option value="history_7d">📈 7天黑市均價</option>
-                <option value="expected">📊 批量期望價</option>
+                <option value="history_7d">📈 7天黑市均價 (核心)</option>
+                <option value="compat_max">⬇️ 即時最高價 (向下相容)</option>
+                <option value="expected">📊 加權期望價</option>
               </select>
             </div>
 
@@ -1191,13 +1189,12 @@
             <div>
               <label class="block text-gray-400 mb-1 text-[11px]">排序方式</label>
               <select v-model="royalSortBy" class="w-full py-1.5 px-2 bg-albion-card border border-albion-border rounded text-amber-300 font-bold focus:outline-none">
-                <option value="royal_batch_profit_desc">💰 皇家單批安全利潤最高 (推薦)</option>
-                <option value="royal_profit_desc">💵 單件淨利潤最高</option>
-                <option value="royal_potential_desc">🌟 理論每日暴利最高</option>
-                <option value="royal_roi_desc">📈 皇家投報率 (ROI) 最高</option>
-                <option value="daily_vol_desc">🌊 黑市日銷量最高</option>
-                <option value="journal_desc">📘 隨身日誌產出最高</option>
-                <option value="cost_asc">📉 實質成本最低</option>
+                <option value="royal_batch_profit_desc">💰 皇家單批淨利潤</option>
+                <option value="royal_potential_desc">🌟 皇家每日利潤</option>
+                <option value="royal_profit_desc">💵 單件淨利潤</option>
+                <option value="royal_roi_desc">📊 皇家投報率 (ROI)</option>
+                <option value="daily_vol_desc">📦 黑市日均銷量</option>
+                <option value="tier_desc">🛡️ 裝備階級</option>
               </select>
             </div>
 
@@ -1207,15 +1204,13 @@
           <div class="flex flex-wrap items-center justify-between border-t border-albion-border/40 pt-2 text-xs gap-2">
             <div class="flex items-center space-x-2">
               <span class="text-gray-400 text-[11px]">出貨模式:</span>
-              <button @click="setSellMode('instant')"
-                      :class="sellMode === 'instant' ? 'bg-emerald-600 text-white font-bold' : 'text-gray-400 hover:text-white'"
-                      class="px-2 py-0.5 rounded transition">
-                ⚡ 即時 (4%)
-              </button>
-              <button @click="setSellMode('order')"
-                      :class="sellMode === 'order' ? 'bg-amber-600 text-white font-bold' : 'text-gray-400 hover:text-white'"
-                      class="px-2 py-0.5 rounded transition">
-                📋 掛單 (6.5%)
+              <span class="px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-800 font-bold">📋 掛單制 (6.5% 稅費)</span>
+
+              <button @click="toggleVolumeOnly"
+                      :class="isVolumeOnly ? 'bg-amber-600 text-white font-extrabold shadow ring-1 ring-amber-400' : 'bg-albion-card hover:bg-albion-hover text-amber-300 border border-amber-600/50'"
+                      class="ml-2 px-2.5 py-0.5 rounded text-xs transition flex items-center space-x-1"
+                      title="一鍵過濾 T4/T5、高銷量、無專注獲利的走量製造爆款">
+                <span>⚡ T4/T5 走量爆款</span>
               </button>
 
               <span class="text-gray-400 text-[11px] ml-2">成本模式:</span>
@@ -1250,7 +1245,7 @@
                   <th class="py-2.5 px-2 text-right min-w-[110px]">皇家實質成本</th>
                   <th class="py-2.5 px-2 text-right min-w-[110px]">黑市收購價</th>
                   <th class="py-2.5 px-2 text-right min-w-[120px]">皇家單件淨利 & ROI</th>
-                  <th class="py-2.5 px-2 text-center min-w-[110px]">黑市日銷量與潛力</th>
+                  <th class="py-2.5 px-2 text-center min-w-[110px]" title="每日利潤 = 安全批量 × 單件淨利 + 日誌收益">🌟 每日利潤</th>
                   <th class="py-2.5 px-3 text-center min-w-[110px]">快捷操作</th>
                 </tr>
               </thead>
@@ -1607,13 +1602,26 @@
                 <div v-for="(b, idx) in batchList" :key="b.api_id"
                      class="p-3 hover:bg-albion-hover flex flex-wrap items-center justify-between gap-3">
                   
-                  <div class="flex items-center space-x-2.5 min-w-[180px]">
+                  <div class="flex items-center space-x-2.5 min-w-[200px]">
                     <span class="px-1.5 py-0.5 rounded font-mono font-bold text-[10px]" :class="getTierBadgeClass(b.tier)">
                       T{{ b.tier }}
                     </span>
                     <div>
-                      <div class="font-bold text-white text-sm">{{ b.name }}</div>
-                      <div class="text-[11px] text-gray-400">{{ b.recipe_str }}</div>
+                      <div class="flex items-center space-x-1.5">
+                        <span class="font-bold text-white text-sm">{{ b.name }}</span>
+                        <!-- 製造城市標籤 (區分紅城 vs 皇家加成產地城) -->
+                        <span class="px-1.5 py-0.2 rounded text-[10px] font-bold"
+                              :class="b.is_royal ? 'bg-amber-950 text-amber-300 border border-amber-800' : 'bg-rose-950 text-rose-300 border border-rose-800'">
+                          {{ b.craft_city_icon || (b.is_royal ? '🏰' : '🦹') }} {{ b.craft_city_zh || '紅城' }}
+                        </span>
+                      </div>
+                      <div class="flex items-center space-x-2 text-[11px] text-gray-400 mt-0.5">
+                        <span>{{ b.recipe_str }}</span>
+                        <!-- 消化天數預估 -->
+                        <span class="font-mono text-[10px]" :class="getDigestionClass(b)">
+                          ⏳ 預估消化: ~{{ getDigestionDays(b) }}天
+                        </span>
+                      </div>
                     </div>
                   </div>
 
@@ -1723,77 +1731,72 @@
                 </div>
               </div>
 
-              <div class="p-3 text-xs overflow-x-auto">
-                <table class="w-full text-left text-xs whitespace-nowrap">
-                  <thead class="border-b border-albion-border/40 text-gray-400">
-                    <tr>
-                      <th class="pb-1.5 text-left">材料</th>
-                      <th class="pb-1.5 text-right" title="製作此批量所需具備之原始材料總量">需備(Gross)</th>
-                      <th class="pb-1.5 text-right text-gray-400" title="工坊返還之材料">退還</th>
-                      <th v-if="batchDeductLaborer" class="pb-1.5 text-right text-sky-400" title="紅城島工人返還抵扣">工人抵扣</th>
-                      <th class="pb-1.5 text-right text-amber-300" title="扣除返還後的實質採購量">{{ batchSourceMode === 'buy' ? '實購(Net)' : '實耗(Net)' }}</th>
-                      <th v-if="batchSourceMode === 'buy'" class="pb-1.5 text-center">供貨深度</th>
-                      <th v-if="batchSourceMode === 'buy'" class="pb-1.5 text-right">直購均價</th>
-                      <th v-if="batchSourceMode === 'buy'" class="pb-1.5 text-right">直購預算</th>
-                    </tr>
-                  </thead>
-                  <tbody class="divide-y divide-albion-border/30 font-mono">
-                    <tr v-for="m in batchDetails.materials" :key="m.mat_type + m.tier" class="hover:bg-albion-hover transition">
-                      <td class="py-2 text-left font-sans">
-                        <span class="px-1.5 py-0.5 rounded font-bold text-[10px]" :class="getTierBadgeClass(m.tier)">T{{ m.tier }}</span>
-                        <span class="text-white ml-1 font-medium">{{ m.mat_name }}</span>
-                      </td>
-                      <td class="py-2 text-right text-gray-200 font-bold">{{ m.gross_qty }}</td>
-                      <td class="py-2 text-right text-emerald-400 font-medium">+{{ m.return_qty }}</td>
-                      <td v-if="batchDeductLaborer" class="py-2 text-right text-sky-400 font-medium">-{{ m.laborer_qty || 0 }}</td>
-                      <td class="py-2 text-right text-amber-400 font-bold">{{ m.actual_buy_qty }}</td>
-                      
-                      <!-- 市場供貨深度 -->
-                      <td v-if="batchSourceMode === 'buy'" class="py-2 text-center font-sans">
-                        <div v-if="isFetchingDepth" class="text-[11px] text-gray-400 animate-pulse flex items-center justify-center space-x-1">
-                          <span>⏳ 查詢中...</span>
-                        </div>
-                        <div v-else-if="m.is_depth_loaded" class="inline-flex items-center space-x-1.5">
-                          <span v-if="m.available_qty === 0" class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-950/80 text-rose-300 border border-rose-800" title="紅城市場無此品項現貨掛售">
-                            ⚪ 無現貨
-                          </span>
-                          <span v-else-if="m.is_sufficient" class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-950/80 text-emerald-300 border border-emerald-800 flex items-center space-x-1" :title="`市場現貨充足！總掛單量: ${m.available_qty} 件 (實購: ${m.actual_buy_qty} / 需備: ${m.gross_qty})`">
-                            <span>🟢 充足</span>
-                            <span class="font-mono text-[9px] opacity-80">({{ m.available_qty }}件)</span>
-                          </span>
-                          <span v-else class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-950/80 text-rose-300 border border-rose-800 flex items-center space-x-1" :title="`市場供貨不足！現貨僅 ${m.available_qty} 件，尚缺 ${m.shortfall} 件！`">
-                            <span>⚠️ 不足</span>
-                            <span class="font-mono text-[9px]">({{ m.available_qty }}/{{ m.actual_buy_qty }})</span>
-                          </span>
+              <div class="p-3 text-xs overflow-x-auto space-y-4">
+                <div v-for="(cityMats, cityName) in batchDetails.materialsByCity" :key="cityName"
+                     class="border border-albion-border/50 rounded-lg overflow-hidden bg-albion-card/30">
+                  <div class="px-3 py-1.5 bg-albion-card/80 border-b border-albion-border/40 flex items-center justify-between font-bold">
+                    <span class="text-amber-300 flex items-center space-x-1.5">
+                      <span>📍 {{ cityName }} 採購</span>
+                      <span class="text-[10px] text-gray-400 font-normal">({{ cityMats.length }} 款原料)</span>
+                    </span>
+                    <span class="text-amber-300 font-mono text-[11px]">
+                      預算小計: {{ formatNumber(cityMats.reduce((sum, m) => sum + (m.total_budget || 0), 0)) }} 銀
+                    </span>
+                  </div>
+                  <div class="p-2 overflow-x-auto">
+                    <table class="w-full text-left text-xs whitespace-nowrap">
+                      <thead class="border-b border-albion-border/40 text-gray-400">
+                        <tr>
+                          <th class="pb-1 text-left">材料</th>
+                          <th class="pb-1 text-right" title="原始材料總量">需備</th>
+                          <th class="pb-1 text-right text-gray-400" title="工坊返還">退還</th>
+                          <th v-if="batchDeductLaborer" class="pb-1 text-right text-sky-400">工人抵扣</th>
+                          <th class="pb-1 text-right text-amber-300">{{ batchSourceMode === 'buy' ? '實購(Net)' : '實耗' }}</th>
+                          <th v-if="batchSourceMode === 'buy'" class="pb-1 text-center">深度</th>
+                          <th v-if="batchSourceMode === 'buy'" class="pb-1 text-right">單價</th>
+                          <th v-if="batchSourceMode === 'buy'" class="pb-1 text-right">預算</th>
+                        </tr>
+                      </thead>
+                      <tbody class="divide-y divide-albion-border/30 font-mono">
+                        <tr v-for="m in cityMats" :key="m.key" class="hover:bg-albion-hover transition">
+                          <td class="py-1.5 text-left font-sans">
+                            <span class="px-1.5 py-0.5 rounded font-bold text-[10px]" :class="getTierBadgeClass(m.tier)">T{{ m.tier }}</span>
+                            <span class="text-white ml-1 font-medium">{{ m.mat_name }}</span>
+                          </td>
+                          <td class="py-1.5 text-right text-gray-200 font-bold">{{ m.gross_qty }}</td>
+                          <td class="py-1.5 text-right text-emerald-400 font-medium">+{{ m.return_qty }}</td>
+                          <td v-if="batchDeductLaborer" class="py-1.5 text-right text-sky-400 font-medium">-{{ m.laborer_qty || 0 }}</td>
+                          <td class="py-1.5 text-right text-amber-400 font-bold">{{ m.actual_buy_qty }}</td>
+                          
+                          <!-- 市場供貨深度 -->
+                          <td v-if="batchSourceMode === 'buy'" class="py-1.5 text-center font-sans">
+                            <div v-if="isFetchingDepth" class="text-[10px] text-gray-400 animate-pulse">⏳ 查詢...</div>
+                            <div v-else-if="m.is_depth_loaded" class="inline-flex items-center space-x-1">
+                              <span v-if="m.available_qty === 0" class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-rose-950/80 text-rose-300 border border-rose-800">⚪ 無貨</span>
+                              <span v-else-if="m.is_sufficient" class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-emerald-950/80 text-emerald-300 border border-emerald-800">🟢 充足 ({{ m.available_qty }})</span>
+                              <span v-else class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-rose-950/80 text-rose-300 border border-rose-800">⚠️ 缺{{ m.shortfall }}</span>
+                              <button @click="openDepthModal(m)" title="查看盤口明細" class="px-1 py-0.2 rounded bg-sky-950 hover:bg-sky-900 text-sky-300 border border-sky-800 text-[9px] font-bold">🔍</button>
+                            </div>
+                            <div v-else class="inline-flex items-center space-x-1 text-[10px]">
+                              <button @click="fetchBatchMarketDepth(true)" class="text-sky-400 hover:underline">查深度</button>
+                            </div>
+                          </td>
 
-                          <!-- 盤口查看按鈕 -->
-                          <button @click="openDepthModal(m)"
-                                  title="點擊查看 Caerleon 市場掛售吃單梯隊與滑價詳情"
-                                  class="px-1.5 py-0.5 rounded bg-sky-950 hover:bg-sky-900 text-sky-300 border border-sky-800 text-[10px] font-bold transition flex items-center space-x-0.5 shadow-sm">
-                            <span>🔍 盤口</span>
-                          </button>
-                        </div>
-                        <div v-else class="inline-flex items-center space-x-1 text-[10px]">
-                          <span class="text-gray-500">未同步</span>
-                          <button @click="fetchBatchMarketDepth(true)" class="text-sky-400 hover:underline">查深度</button>
-                        </div>
-                      </td>
+                          <!-- 單價 -->
+                          <td v-if="batchSourceMode === 'buy'" class="py-1.5 text-right">
+                            <div class="text-white font-bold">{{ formatNumber(m.unit_price) }}</div>
+                            <div v-if="m.slippage_pct > 0" class="text-[9px] text-amber-400 font-sans">+{{ m.slippage_pct }}%滑價</div>
+                          </td>
 
-                      <!-- 直購均價 (含滑價顯示) -->
-                      <td v-if="batchSourceMode === 'buy'" class="py-2 text-right">
-                        <div class="text-white font-bold">{{ formatNumber(m.unit_price) }}</div>
-                        <div v-if="m.slippage_pct > 0" class="text-[9px] text-amber-400 font-sans font-medium" title="因吃透低價單而產生的滑價比例">
-                          +{{ m.slippage_pct }}% 滑價
-                        </div>
-                      </td>
-
-                      <!-- 直購預算 -->
-                      <td v-if="batchSourceMode === 'buy'" class="py-2 text-right font-bold text-amber-300 font-mono">
-                        {{ formatNumber(m.total_budget) }}
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+                          <!-- 預算 -->
+                          <td v-if="batchSourceMode === 'buy'" class="py-1.5 text-right font-bold text-amber-300 font-mono">
+                            {{ formatNumber(m.total_budget) }}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -2759,10 +2762,20 @@
         const selectedTier = ref('all');
         const searchQuery = ref('');
         const profitFilter = ref('profitable'); // 預設只看賺錢
-        const sortBy = ref(localStorage.getItem('albion_sort_by') || 'potential_desc'); // 預設按每日暴利潛力排序
-        
-        // 核心策略控制：出貨模式、費率與日誌
-        const sellMode = ref(localStorage.getItem('albion_sell_mode') || 'instant'); // 'instant' (4%) vs 'order' (6.5%)
+        const sortBy = ref(localStorage.getItem('albion_sort_by') || 'batch_profit_desc'); // 預設按單批淨利潤排序
+        const isVolumeOnly = ref(false); // ⚡ T4/T5 走量專區篩選開關
+        const toggleVolumeOnly = () => {
+          isVolumeOnly.value = !isVolumeOnly.value;
+          if (isVolumeOnly.value) {
+            profitFilter.value = 'profitable';
+            royalProfitFilter.value = 'profitable';
+            sortBy.value = 'batch_profit_desc';
+            royalSortBy.value = 'royal_batch_profit_desc';
+          }
+        };
+
+        // 核心策略控制：出貨模式 (全面固定為掛單制 6.5%)、費率與日誌
+        const sellMode = ref('order'); // 全部採掛單制 (4% 稅 + 2.5% 掛單費 = 6.5%)
         const instantTaxPct = ref(parseFloat(localStorage.getItem('albion_instant_tax_pct') || '4.0'));
         const orderFeePct = ref(parseFloat(localStorage.getItem('albion_order_fee_pct') || '2.5'));
         const journalSubsidyMode = ref(localStorage.getItem('albion_journal_subsidy_mode') || 'laborer'); // 'laborer', 'sell', 'off'
@@ -2915,7 +2928,7 @@
         };
 
         // 基準品質與成本模式
-        const qualityBenchmark = ref(localStorage.getItem('albion_quality_benchmark') || 'compat_max'); // 預設向下相容最高
+        const qualityBenchmark = ref(localStorage.getItem('albion_quality_benchmark') || 'history_7d'); // 預設向下相容最高
         const costMode = ref(localStorage.getItem('albion_cost_mode') || 'no_focus');           // 'no_focus' (15.2%), 'focus' (47.9%)
 
         // 🎲 製作專精與食物設定 (多重擲骰品質系統)
@@ -3191,65 +3204,76 @@
             return;
           }
 
-          const matNeeds = {};
+          // 方案 A: 依採購產地城市將原料分組向 API 查詢深度，徹底消除「紅城缺料」假報警
+          const cityMatNeeds = {};
           batchList.value.forEach(bItem => {
             const fullEq = equipments.value.find(e => e.api_id === bItem.api_id);
             if (!fullEq || !fullEq.recipe) return;
+            const isRoyal = bItem.is_royal || (bItem.craft_city && bItem.craft_city !== 'Caerleon');
             const isFocus = bItem.costMode === 'focus';
-            const rrr = getItemRrr(fullEq, isFocus);
+            const rrr = isRoyal
+              ? (isFocus ? (fullEq.royal_rrr_focus || 0.479) : (fullEq.royal_rrr_no_focus || 0.248))
+              : getItemRrr(fullEq, isFocus);
             const qty = bItem.qty || 1;
 
             for (const [matType, countPerPiece] of Object.entries(fullEq.recipe)) {
               const matInfo = materials.value.find(m => m.mat_type === matType && m.tier === fullEq.tier);
               const apiId = matInfo ? matInfo.api_id : getMaterialApiId(matType, fullEq.tier);
-              if (!matNeeds[apiId]) {
-                matNeeds[apiId] = {
+              const pCity = isRoyal ? (matInfo?.refining_city || 'Caerleon') : 'Caerleon';
+
+              if (!cityMatNeeds[pCity]) cityMatNeeds[pCity] = {};
+              if (!cityMatNeeds[pCity][apiId]) {
+                cityMatNeeds[pCity][apiId] = {
                   api_id: apiId,
                   mat_type: matType,
                   tier: fullEq.tier,
                   gross_qty: 0,
                   net_qty: 0,
-                  fallback_price: matInfo ? matInfo.price : 0
+                  fallback_price: isRoyal ? (matInfo?.refining_price || matInfo?.price || 0) : (matInfo?.caerleon_price || matInfo?.price || 0)
                 };
               }
               const gross = countPerPiece * qty;
               const net = Math.round(gross * (1.0 - rrr));
-              matNeeds[apiId].gross_qty += gross;
-              matNeeds[apiId].net_qty += net;
+              cityMatNeeds[pCity][apiId].gross_qty += gross;
+              cityMatNeeds[pCity][apiId].net_qty += net;
             }
           });
 
-          const itemsPayload = Object.values(matNeeds).map(item => ({
-            api_id: item.api_id,
-            needed_qty: Math.max(1, item.net_qty),
-            gross_qty: item.gross_qty,
-            fallback_price: item.fallback_price
-          }));
-
-          if (itemsPayload.length === 0) return;
-
           isFetchingDepth.value = true;
           try {
-            const res = await fetch('/api/market-depth', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                items: itemsPayload,
-                location: 'Caerleon',
-                server: serverKey.value || 'east',
-                force_refresh: force
-              })
-            });
-            if (res.ok) {
-              const data = await res.json();
-              if (data && data.depth) {
-                marketDepthMap.value = data.depth;
-                lastDepthFetchTime.value = new Date().toLocaleTimeString();
-                if (showDepthModal.value && selectedDepthMat.value) {
-                  const updated = batchDetails.value.materials.find(m => m.api_id === selectedDepthMat.value.api_id);
-                  if (updated) selectedDepthMat.value = updated;
+            for (const [pCity, matNeeds] of Object.entries(cityMatNeeds)) {
+              const itemsPayload = Object.values(matNeeds).map(item => ({
+                api_id: item.api_id,
+                needed_qty: Math.max(1, item.net_qty),
+                gross_qty: item.gross_qty,
+                fallback_price: item.fallback_price
+              }));
+              if (itemsPayload.length === 0) continue;
+
+              const res = await fetch('/api/market-depth', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  items: itemsPayload,
+                  location: pCity,
+                  server: serverKey.value || 'east',
+                  force_refresh: force
+                })
+              });
+              if (res.ok) {
+                const data = await res.json();
+                if (data && data.depth) {
+                  for (const [apiId, depthData] of Object.entries(data.depth)) {
+                    marketDepthMap.value[`${apiId}_${pCity}`] = depthData;
+                    marketDepthMap.value[apiId] = depthData;
+                  }
                 }
               }
+            }
+            lastDepthFetchTime.value = new Date().toLocaleTimeString();
+            if (showDepthModal.value && selectedDepthMat.value) {
+              const updated = batchDetails.value.materials.find(m => m.api_id === selectedDepthMat.value.api_id);
+              if (updated) selectedDepthMat.value = updated;
             }
           } catch (err) {
             console.error('Failed to fetch market depth:', err);
@@ -3558,6 +3582,21 @@
           return qty;
         };
 
+        // 方案 B2: 預估黑市庫存消化天數 (依據過去 7 天日銷量與 40% 保守黑市吸收份額)
+        const getDigestionDays = (bItem) => {
+          const fullEq = equipments.value.find(e => e.api_id === bItem.api_id);
+          if (!fullEq || !fullEq.daily_avg_vol) return 1;
+          const conservativeDaily = Math.max(1, fullEq.daily_avg_vol * 0.4);
+          return Math.max(1, Math.ceil((bItem.qty || 1) / conservativeDaily));
+        };
+
+        const getDigestionClass = (bItem) => {
+          const days = getDigestionDays(bItem);
+          if (days <= 2) return 'text-emerald-400 font-bold';
+          if (days <= 5) return 'text-amber-400';
+          return 'text-rose-400';
+        };
+
         // 單批安全利潤 (安全批量 × 單件淨利)
         const getBatchProfit = (item) => {
           const profit = getItemProfit(item);
@@ -3766,7 +3805,9 @@
         // 批量清單操作
         const addToBatch = (item, qty = null) => {
           const addQty = (qty !== null && qty !== undefined) ? qty : (item.safe_batch_qty || 5);
-          const existing = batchList.value.find(b => b.api_id === item.api_id);
+          const craftCity = 'Caerleon';
+          // 方案 A: 區分製造城市，避免紅城與皇家採購單混雜硬合併
+          const existing = batchList.value.find(b => b.api_id === item.api_id && (b.craft_city === craftCity || !b.craft_city));
           if (existing) {
             existing.qty += addQty;
           } else {
@@ -3779,10 +3820,14 @@
               recipe: item.recipe,
               recipe_str: item.recipe_str,
               qty: addQty,
-              costMode: costMode.value
+              costMode: costMode.value,
+              craft_city: craftCity,
+              craft_city_zh: '紅城 (Caerleon)',
+              craft_city_icon: '🦹',
+              is_royal: false
             });
           }
-          copyTextWithFeedback(`已加入批量清單 (+${addQty}件)`, item.name);
+          copyTextWithFeedback(`已加入紅城批量清單 (+${addQty}件)`, item.name);
         };
 
         const removeFromBatch = (index) => {
@@ -3825,38 +3870,28 @@
             if (!fullEq) return;
 
             const isFocus = bItem.costMode === 'focus';
-            const rrr = getItemRrr(fullEq, isFocus);
-            const unitStationFee = getItemStationFee(fullEq);
+            const isRoyal = bItem.is_royal || (bItem.craft_city && bItem.craft_city !== 'Caerleon');
+            
+            // 方案 A: 正確套用返還率 (皇家製造使用加成 24.8%/47.9%，紅城製造使用 15.2%/47.9%)
+            let rrr = 0.152;
+            if (isRoyal) {
+              rrr = isFocus ? (fullEq.royal_rrr_focus || 0.479) : (fullEq.royal_rrr_no_focus || 0.248);
+            } else {
+              rrr = getItemRrr(fullEq, isFocus);
+            }
 
+            const unitStationFee = isRoyal ? 0 : getItemStationFee(fullEq);
             const qty = bItem.qty || 1;
             totalPieces += qty;
             const itemStationFee = unitStationFee * qty;
             totalStationFee += itemStationFee;
 
-            // 雙軌出貨拆單估算
-            // 若為暴漲高風險，即時砸單至多吃 2 件頂部單，其餘以穩健價掛單；否則依使用者出貨模式全量拆單
-            let recInst = 0;
-            if (fullEq.bubble_risk === 'high_risk') {
-              recInst = Math.min(qty, 2);
-            } else if (sellMode.value === 'order') {
-              recInst = 0;
-            } else {
-              recInst = qty;
-            }
-            const recOrd = Math.max(0, qty - recInst);
-
-            instantSellCount += recInst;
-            orderSellCount += recOrd;
-
-            const instP = fullEq.instant_sell_price || fullEq.compat_max_price || 0;
-            const ordP = fullEq.order_sell_price || Math.max(instP, fullEq.common_7d_avg || 0);
-
-            const itemInstRev = Math.round(instP * instantFeeFactor) * recInst;
-            const itemOrdRev = Math.round(ordP * orderFeeFactor) * recOrd;
-
-            estInstantRev += itemInstRev;
+            // 全部採用掛單制出貨 (6.5% 稅費，不再使用立即售出)
+            orderSellCount += qty;
+            const ordP = fullEq.order_sell_price || Math.max(fullEq.instant_sell_price || 0, fullEq.common_7d_avg || 0);
+            const itemOrdRev = Math.round(ordP * orderFeeFactor) * qty;
             estOrderRev += itemOrdRev;
-            totalRevenue += (itemInstRev + itemOrdRev);
+            totalRevenue += itemOrdRev;
 
             // 統計滿日誌本數
             if (fullEq.journal) {
@@ -3865,21 +3900,34 @@
               journalSummary[jName] = (journalSummary[jName] || 0) + jFilled;
             }
 
-            // 原料匯總
+            // 方案 A: 原料依採購城市與產地精煉價分流匯總
             if (fullEq.recipe && Object.keys(fullEq.recipe).length > 0) {
               for (const [matType, countPerPiece] of Object.entries(fullEq.recipe)) {
-                const key = `${matType}_${fullEq.tier}`;
+                const matInfo = materials.value.find(m => m.mat_type === matType && m.tier === fullEq.tier);
+                const apiId = matInfo ? matInfo.api_id : getMaterialApiId(matType, fullEq.tier);
+                const matFriendlyName = (matInfo && matInfo.mat_name) ? matInfo.mat_name : (MAT_NAME_MAP[matType] || matType);
+
+                let purchaseCity = 'Caerleon';
+                let purchaseCityZh = '紅城 (Caerleon)';
+                let unitPrice = matInfo ? (matInfo.caerleon_price || matInfo.price || 0) : 0;
+
+                if (isRoyal) {
+                  purchaseCity = matInfo?.refining_city || 'Caerleon';
+                  purchaseCityZh = matInfo?.refining_city_zh || '產地城';
+                  unitPrice = (matInfo && matInfo.refining_price > 0) ? matInfo.refining_price : (matInfo ? matInfo.price : 0);
+                }
+
+                const key = `${matType}_${fullEq.tier}_${purchaseCity}`;
                 if (!matMap[key]) {
-                  const matInfo = materials.value.find(m => m.mat_type === matType && m.tier === fullEq.tier);
-                  const apiId = matInfo ? matInfo.api_id : getMaterialApiId(matType, fullEq.tier);
-                  const matFriendlyName = (matInfo && matInfo.mat_name) ? matInfo.mat_name : (MAT_NAME_MAP[matType] || matType);
                   matMap[key] = {
                     key: key,
                     mat_type: matType,
                     mat_name: matFriendlyName,
                     tier: fullEq.tier,
                     api_id: apiId,
-                    unit_price: matInfo ? matInfo.price : 0,
+                    purchase_city: purchaseCity,
+                    purchase_city_zh: purchaseCityZh,
+                    unit_price: unitPrice,
                     base_sell_min: matInfo ? matInfo.sell_min : 0,
                     gross_qty: 0,
                     net_qty: 0,
@@ -3905,8 +3953,9 @@
           matList.forEach(m => {
             m.actual_buy_qty = Math.max(0, m.net_qty - (batchDeductLaborer.value ? (m.laborer_qty || 0) : 0));
             
-            // 檢查是否有抓取到此原料之市場供貨深度
-            const depth = (enableMarketDepth.value && m.api_id) ? marketDepthMap.value[m.api_id] : null;
+            // 方案 A: 依城市檢查是否有抓取到此原料之產地市場供貨深度
+            const depthKey = `${m.api_id}_${m.purchase_city}`;
+            const depth = (enableMarketDepth.value && m.api_id) ? (marketDepthMap.value[depthKey] || marketDepthMap.value[m.api_id]) : null;
             if (depth) {
               m.depth = depth;
               m.is_depth_loaded = true;
@@ -3947,7 +3996,15 @@
             totalNetCost += m.total_budget;
           });
 
-          matList.sort((a, b) => a.tier.localeCompare(b.tier) || a.mat_name.localeCompare(b.mat_name));
+          matList.sort((a, b) => (a.purchase_city_zh || '').localeCompare(b.purchase_city_zh || '') || a.tier.localeCompare(b.tier) || a.mat_name.localeCompare(b.mat_name));
+
+          // 方案 A: 依採購產地城市分組原料
+          const materialsByCity = {};
+          matList.forEach(m => {
+            const cName = m.purchase_city_zh || '採購城市';
+            if (!materialsByCity[cName]) materialsByCity[cName] = [];
+            materialsByCity[cName].push(m);
+          });
 
           // 日誌匯總清單
           const journalList = Object.entries(journalSummary).map(([name, count]) => ({
@@ -3991,6 +4048,7 @@
 
           return {
             materials: matList,
+            materialsByCity: materialsByCity,
             journals: journalList,
             laborerReturns: [],
             t6HunterJournalsCount: t6HunterJournalsCount.toFixed(1),
@@ -4014,16 +4072,12 @@
         const copyShoppingList = () => {
           if (batchList.value.length === 0) return;
           const bd = batchDetails.value;
-          let text = `【阿爾比恩卡利翁 批量採購與製造清單】\n`;
-          text += `銷售模式: ${sellMode.value === 'order' ? '批量掛單 (稅費 6.5%)' : '即時砸單 (稅費 4.0%)'}\n`;
-          text += `製造項目 (${batchList.value.length} 款，共 ${bd.totalPieces} 件):\n`;
+          let text = `【阿爾比恩 批量採購與製造清單 (掛單制)】\n`;
+          text += `出貨模式: 批量掛單制 (手續費 6.5%)\n`;
+          text += `製造裝備項目 (${batchList.value.length} 款，共 ${bd.totalPieces} 件):\n`;
           batchList.value.forEach(b => {
-            text += `  • ${b.name} x ${b.qty} 件 (${b.costMode === 'focus' ? '下專注' : '無專注'})\n`;
+            text += `  • ${b.name} x ${b.qty} 件 [${b.craft_city_zh || '紅城'}, ${b.costMode === 'focus' ? '下專注' : '無專注'}]\n`;
           });
-          
-          text += `\n⚖️ 雙軌出貨規劃建議:\n`;
-          text += `  • ⚡ 即時砸單出貨: 約 ${bd.instantSellCount} 件 (~${formatNumber(bd.estInstantRev)} 銀)\n`;
-          text += `  • 📋 穩健掛單出貨: 約 ${bd.orderSellCount} 件 (~${formatNumber(bd.estOrderRev)} 銀)\n`;
 
           if (bd.journals.length > 0) {
             text += `\n📜 隨身需備空白日誌:\n`;
@@ -4033,24 +4087,22 @@
           }
 
           if (bd.laborerReturns.length > 0) {
-            text += `\n🏝️ 紅城島獵人/工人工人預估產出 (150%幸福度估算):\n`;
+            text += `\n🏝️ 紅城島工人產出抵扣:\n`;
             bd.laborerReturns.forEach(lr => {
               text += `  • T${lr.tier} ${lr.mat_name}: 約 ${lr.count} 個 (估值 ~${formatNumber(lr.est_value)} 銀)\n`;
             });
-            if (batchDeductLaborer.value && journalSubsidyMode.value === 'laborer') {
-              text += `  * 已自動將工人產出精煉資源折抵於下方採購數量中！\n`;
-            }
           }
 
-          text += `\n📦 原料${batchSourceMode.value === 'buy' ? '採購' : '採集'}需求:\n`;
-          bd.materials.forEach(m => {
-            const labNote = (batchDeductLaborer.value && m.laborer_qty > 0) ? ` (已扣工人 ${m.laborer_qty} 件)` : '';
-            const depthNote = m.is_depth_loaded 
-              ? (m.is_sufficient ? ` [現貨充足: ${m.available_qty}件]` : ` [⚠️現貨不足: 僅${m.available_qty}件/缺${m.shortfall}件]`)
-              : '';
-            const slipNote = (m.slippage_pct > 0) ? ` (+${m.slippage_pct}%滑價)` : '';
-            text += `  • T${m.tier} ${m.mat_name}: 實購 ${m.actual_buy_qty} 件${labNote} (需備 ${m.gross_qty}，退還 ${m.return_qty})${depthNote} | 均價 ${formatNumber(m.unit_price)} 銀${slipNote} | 預算 ${formatNumber(m.total_budget)} 銀\n`;
-          });
+          text += `\n📦 原料採購清單 (依採購城市分組):\n`;
+          for (const [cityName, mats] of Object.entries(bd.materialsByCity || {})) {
+            const cityBudget = mats.reduce((s, m) => s + (m.total_budget || 0), 0);
+            text += `\n📍【${cityName} 採購】(預算小計: ${formatNumber(cityBudget)} 銀):\n`;
+            mats.forEach(m => {
+              const labNote = (batchDeductLaborer.value && m.laborer_qty > 0) ? ` (已抵工人 ${m.laborer_qty} 件)` : '';
+              const slipNote = (m.slippage_pct > 0) ? ` (+${m.slippage_pct}%滑價)` : '';
+              text += `  • T${m.tier} ${m.mat_name}: 實購 ${m.actual_buy_qty} 件${labNote} (需備 ${m.gross_qty}, 退還 ${m.return_qty}) | 單價 ${formatNumber(m.unit_price)} 銀${slipNote} | 預算 ${formatNumber(m.total_budget)} 銀\n`;
+            });
+          }
 
           text += `\n💰 預估財務總覽:\n`;
           if (batchSourceMode.value === 'buy') {
@@ -4312,6 +4364,12 @@
         const filteredRoyalEquipments = computed(() => {
           let list = equipments.value;
 
+          // ⚡ T4/T5 走量爆款過濾
+          if (isVolumeOnly.value) {
+            const vTiers = ['4.0', '4.1', '5.0', '5.1'];
+            list = list.filter(e => vTiers.includes(e.tier) && (e.daily_avg_vol || 0) >= 20 && getRoyalItemProfit(e) > 0);
+          }
+
           if (selectedRoyalCity.value !== 'all') {
             list = list.filter(e => e.royal_city === selectedRoyalCity.value);
           }
@@ -4384,7 +4442,11 @@
 
         const addToBatchFromRoyal = (item, qty = null) => {
           const addQty = (qty !== null && qty !== undefined) ? qty : (item.safe_batch_qty || 5);
-          const existing = batchList.value.find(b => b.api_id === item.api_id);
+          const craftCity = item.royal_city || 'Thetford';
+          const craftCityZh = item.royal_city_zh || '皇家產地城';
+          const craftCityIcon = item.royal_city_icon || '🏰';
+          // 方案 A: 區分皇家製造城市，避免與紅城採購單混雜硬合併
+          const existing = batchList.value.find(b => b.api_id === item.api_id && b.craft_city === craftCity);
           if (existing) {
             existing.qty += addQty;
           } else {
@@ -4398,16 +4460,23 @@
               recipe_str: item.recipe_str,
               qty: addQty,
               costMode: costMode.value,
-              isRoyal: true,
-              royal_city: item.royal_city,
-              royal_city_zh: item.royal_city_zh
+              craft_city: craftCity,
+              craft_city_zh: craftCityZh,
+              craft_city_icon: craftCityIcon,
+              is_royal: true
             });
           }
-          copyTextWithFeedback(`已加入批量清單 (🏰 ${item.royal_city_short || ''}製造 +${addQty}件)`, item.name);
+          copyTextWithFeedback(`已加入 [${craftCityZh}] 批量清單 (+${addQty}件)`, item.name);
         };
 
         const filteredEquipments = computed(() => {
           let list = equipments.value;
+
+          // ⚡ T4/T5 走量爆款過濾
+          if (isVolumeOnly.value) {
+            const vTiers = ['4.0', '4.1', '5.0', '5.1'];
+            list = list.filter(e => vTiers.includes(e.tier) && (e.daily_avg_vol || 0) >= 20 && getItemProfit(e) > 0);
+          }
 
           // 🦣 猛獁任務階段過濾
           if (activeStageFilter.value === 1) {
@@ -4880,6 +4949,10 @@
           filteredRoyalEquipments,
           pagedRoyalEquipments,
           royalTotalPages,
+          isVolumeOnly,
+          toggleVolumeOnly,
+          getDigestionDays,
+          getDigestionClass,
           addToBatchFromRoyal,
           pagedEquipments,
           materialGroups,
