@@ -285,8 +285,9 @@ def update_config(cfg: ConfigRequest):
             safe_profit = int(round(net_u_prof * safe_qty)) if net_u_prof > 0 else 0
             eq["safe_batch_profit"] = safe_profit
             eq["realistic_daily_potential"] = safe_profit * 2
-            # 每日利潤 = 安全批量 × 單件利潤 + 日誌收益 (即 safe_batch_profit)
-            eq["daily_profit_potential"] = safe_profit
+            # 每日理論極限利潤 = 單件實質淨利 × 日均銷量
+            daily_pot = int(round(net_u_prof * daily_vol)) if net_u_prof > 0 and daily_vol > 0 else 0
+            eq["daily_profit_potential"] = daily_pot
             eq["price_is_history"] = price_is_history
             eq["weekly_unit_profit_nf"] = int(round(c_7d * fee_factor - c_nf + unit_sub)) if c_7d > 0 and c_nf > 0 else 0
 
@@ -357,11 +358,13 @@ def update_config(cfg: ConfigRequest):
             eq["profit_boost_pct"] = round((extra_nf / abs(p_nf)) * 100, 1) if p_nf != 0 else (100.0 if r_p_nf > 0 else 0.0)
 
             unit_subsidy = eq.get("journal", {}).get("market_subsidy", 0) if scanner.journal_mode != "off" else 0
-            # 皇家每日利潤 = 安全批量 × 皇家單件利潤 + 日誌收益 (即 r_safe_profit)
-            eq["royal_daily_potential"] = r_safe_profit
+            # 皇家安全批量利潤與穩健日收
             r_safe_profit = int(round((r_p_nf + unit_subsidy) * safe_qty)) if (r_p_nf + unit_subsidy) > 0 else 0
             eq["royal_safe_batch_profit"] = r_safe_profit
             eq["royal_realistic_potential"] = r_safe_profit * 2
+            # 皇家每日理論極限總利潤 = 皇家單件淨利 × 黑市日均銷量
+            r_daily_pot = int(round((r_p_nf + unit_subsidy) * daily_vol)) if (r_p_nf + unit_subsidy) > 0 and daily_vol > 0 else 0
+            eq["royal_daily_potential"] = r_daily_pot
             eq["royal_weekly_unit_profit_nf"] = int(round(c_7d * fee_factor - r_c_nf + unit_subsidy)) if c_7d > 0 and r_c_nf > 0 else 0
 
             if bm == 0:

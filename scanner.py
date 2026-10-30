@@ -569,8 +569,8 @@ class MarketScanner:
                 # 穩健單日潛力：估計個人單日平穩消化 2 批安全批量 (約佔黑市日銷 5%~10%)
                 realistic_daily_potential = safe_batch_profit * 2
 
-                # 每日利潤 = 安全批量 × 單件淨利 + 日誌收益 (即 safe_batch_profit)
-                daily_profit_potential = safe_batch_profit
+                # 每日理論極限總利潤 = 單件實質淨利 × 日均銷量
+                daily_profit_potential = int(round(net_unit_profit * daily_avg_vol)) if net_unit_profit > 0 and daily_avg_vol > 0 else 0
 
                 # 均價後淨利 (當即時價格暴漲時，一旦被壓回均價後的單件實質淨利)
                 weekly_unit_profit_nf = int(round(common_7d_avg * fee_factor - cost_no_focus + unit_subsidy)) if common_7d_avg > 0 and cost_no_focus > 0 else 0
@@ -591,8 +591,8 @@ class MarketScanner:
                 # 皇家單批利潤與實質日潛力
                 royal_safe_batch_profit = int(round((royal_profit_no_focus + unit_subsidy) * safe_batch_qty)) if (royal_profit_no_focus + unit_subsidy) > 0 else 0
                 royal_realistic_potential = royal_safe_batch_profit * 2
-                # 皇家每日利潤 = 安全批量 × 皇家單件淨利 + 日誌收益
-                royal_daily_potential = royal_safe_batch_profit
+                # 皇家每日理論極限總利潤 = 皇家單件淨利 × 黑市日均銷量
+                royal_daily_potential = int(round((royal_profit_no_focus + unit_subsidy) * daily_avg_vol)) if (royal_profit_no_focus + unit_subsidy) > 0 and daily_avg_vol > 0 else 0
                 royal_weekly_unit_profit_nf = int(round(common_7d_avg * fee_factor - royal_cost_no_focus + unit_subsidy)) if common_7d_avg > 0 and royal_cost_no_focus > 0 else 0
 
                 if benchmark_price == 0:

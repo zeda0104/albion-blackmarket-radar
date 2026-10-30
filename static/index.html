@@ -184,11 +184,14 @@
 
           <div class="bg-gradient-to-br from-amber-950/40 via-amber-900/20 to-albion-panel border border-amber-500/50 rounded-lg p-3">
             <div class="text-[11px] text-amber-300 font-bold flex items-center justify-between">
-              <span>🌟 每日利潤榜首</span>
-              <span class="text-[9px] px-1 py-0.2 rounded bg-amber-500 text-black font-extrabold">批量×淨利+日誌</span>
+              <span>🌟 每日利潤榜首 (理論極限)</span>
+              <span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-500 text-black font-extrabold" title="計算方式：黑市全日銷量 × 單件實質淨利 (全伺服器極限天花板)">日銷量×淨利</span>
             </div>
             <div class="text-xl font-bold text-amber-400 mt-0.5 font-mono">+{{ formatNumber(maxPotentialItem.potential) }} <span class="text-xs text-amber-200/80 font-normal">銀/日</span></div>
-            <div class="text-[10px] text-gray-300 truncate mt-0.5">{{ maxPotentialItem.name || '-' }} ({{ Math.round(maxPotentialItem.vol) }} 件/日)</div>
+            <div class="text-[10px] text-gray-300 truncate mt-0.5 flex items-center justify-between">
+              <span class="truncate">{{ maxPotentialItem.name || '-' }}</span>
+              <span class="text-amber-300/90 font-mono shrink-0 ml-1">({{ Math.round(maxPotentialItem.vol) }} 件/日)</span>
+            </div>
           </div>
         </div>
 
@@ -470,7 +473,7 @@
               <select v-model="sortBy" 
                       class="w-full py-1.5 px-2 bg-albion-card border border-albion-border rounded text-gray-200 focus:outline-none focus:border-indigo-500 font-medium">
                 <option value="batch_profit_desc">💰 單批淨利潤</option>
-                <option value="potential_desc">🌟 每日利潤</option>
+                <option value="potential_desc">🌟 每日利潤 (理論極限)</option>
                 <option value="profit_desc">💵 單件淨利潤</option>
                 <option value="history_price_desc">📈 7天黑市均價</option>
                 <option value="daily_vol_desc">📦 黑市日均銷量</option>
@@ -713,20 +716,21 @@
                       <span v-else class="text-gray-600">-</span>
                     </td>
 
-                    <!-- 單批安全利潤與穩健日收 (取代不切實際的理論暴利) -->
-                    <td class="py-2.5 px-2 text-right font-mono whitespace-nowrap min-w-[125px]"
-                        :title="`🎯 實戰建議: 單批安全量 ${getSafeBatchQty(item)} 件，預期單批獲利 +${formatNumber(getBatchProfit(item))} 銀\n📈 穩健單日估計 (平穩消化 2 批): +${formatNumber(getRealisticDailyPotential(item))} 銀/日\n💡 全伺服器理論上限 (日均量 100% 全部賣出): +${formatNumber(getItemDailyPotential(item))} 銀/日`">
-                      <div v-if="getBatchProfit(item) > 0">
-                        <span class="font-extrabold text-amber-400 text-sm">
-                          +{{ formatNumber(getBatchProfit(item)) }}
-                        </span>
-                        <span class="text-[10px] text-gray-400 block font-sans">
-                          單批 ({{ getSafeBatchQty(item) }}件)
-                        </span>
-                        <span v-if="getRealisticDailyPotential(item) > 0" 
-                              class="text-[10px] text-emerald-400/90 block font-mono">
+                    <!-- 每日理論極限與穩健日收 -->
+                    <td class="py-2.5 px-2 text-right font-mono whitespace-nowrap min-w-[130px]"
+                        :title="`💡 全伺服器理論上限 (日銷量 100% 全部賣出): +${formatNumber(getItemDailyPotential(item))} 銀/日\n📈 穩健單日估計 (平穩消化 2 批安全量): +${formatNumber(getRealisticDailyPotential(item))} 銀/日\n🎯 單批推薦獲利 (${getSafeBatchQty(item)}件 × 單件淨利): +${formatNumber(getBatchProfit(item))} 銀`">
+                      <div v-if="getItemDailyPotential(item) > 0">
+                        <!-- 理論每日極限總利潤 (與上方榜首看板完全對齊) -->
+                        <div class="font-extrabold text-amber-400 text-sm leading-tight">
+                          +{{ formatNumber(getItemDailyPotential(item)) }}<span class="text-[10px] text-amber-300/80 font-normal ml-0.5">/日</span>
+                        </div>
+                        <div v-if="getRealisticDailyPotential(item) > 0" 
+                             class="text-[10px] text-emerald-400/90 block font-mono mt-0.5">
                           穩健 +{{ formatNumber(getRealisticDailyPotential(item)) }}/日
-                        </span>
+                        </div>
+                        <div class="text-[9px] text-gray-400 font-sans mt-0.5">
+                          單批 +{{ formatNumber(getBatchProfit(item)) }} ({{ getSafeBatchQty(item) }}件)
+                        </div>
                       </div>
                       <span v-else class="text-gray-600">-</span>
                     </td>
@@ -1102,11 +1106,14 @@
 
           <div class="bg-gradient-to-br from-amber-950/40 via-amber-900/20 to-albion-panel border border-amber-500/50 rounded-lg p-3">
             <div class="text-[11px] text-amber-300 font-bold flex items-center justify-between">
-              <span>🌟 皇家每日利潤榜首</span>
-              <span class="text-[9px] px-1 py-0.2 rounded bg-amber-500 text-black font-extrabold">批量×淨利+日誌</span>
+              <span>🌟 皇家每日利潤榜首 (理論極限)</span>
+              <span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-500 text-black font-extrabold" title="計算方式：黑市全日銷量 × 皇家單件淨利 (全伺服器極限天花板)">日銷量×淨利</span>
             </div>
             <div class="text-xl font-bold text-amber-400 mt-0.5 font-mono">+{{ formatNumber(maxRoyalPotentialItem.potential) }} <span class="text-xs text-amber-200/80 font-normal">銀/日</span></div>
-            <div class="text-[10px] text-gray-300 truncate mt-0.5">{{ maxRoyalPotentialItem.name || '-' }} ({{ Math.round(maxRoyalPotentialItem.vol) }} 件/日)</div>
+            <div class="text-[10px] text-gray-300 truncate mt-0.5 flex items-center justify-between">
+              <span class="truncate">{{ maxRoyalPotentialItem.name || '-' }}</span>
+              <span class="text-amber-300/90 font-mono shrink-0 ml-1">({{ Math.round(maxRoyalPotentialItem.vol) }} 件/日)</span>
+            </div>
           </div>
         </div>
 
@@ -1190,7 +1197,7 @@
               <label class="block text-gray-400 mb-1 text-[11px]">排序方式</label>
               <select v-model="royalSortBy" class="w-full py-1.5 px-2 bg-albion-card border border-albion-border rounded text-amber-300 font-bold focus:outline-none">
                 <option value="royal_batch_profit_desc">💰 皇家單批淨利潤</option>
-                <option value="royal_potential_desc">🌟 皇家每日利潤</option>
+                <option value="royal_potential_desc">🌟 皇家每日利潤 (理論極限)</option>
                 <option value="royal_profit_desc">💵 單件淨利潤</option>
                 <option value="royal_roi_desc">📊 皇家投報率 (ROI)</option>
                 <option value="daily_vol_desc">📦 黑市日均銷量</option>
@@ -1245,7 +1252,7 @@
                   <th class="py-2.5 px-2 text-right min-w-[110px]">皇家實質成本</th>
                   <th class="py-2.5 px-2 text-right min-w-[110px]">黑市收購價</th>
                   <th class="py-2.5 px-2 text-right min-w-[120px]">皇家單件淨利 & ROI</th>
-                  <th class="py-2.5 px-2 text-center min-w-[110px]" title="每日利潤 = 安全批量 × 單件淨利 + 日誌收益">🌟 每日利潤</th>
+                  <th class="py-2.5 px-2 text-right min-w-[130px]" title="🌟 每日利潤指標解析：&#10;1. 理論極限：黑市全日銷量 × 單件淨利 (對應頂部榜首)&#10;2. 穩健日收：平穩消化 2 批安全批量日收益 (實戰不易砸盤)&#10;3. 單批獲利：安全批量 × 單件淨利">🌟 每日利潤</th>
                   <th class="py-2.5 px-3 text-center min-w-[110px]">快捷操作</th>
                 </tr>
               </thead>
@@ -1376,20 +1383,29 @@
                       <div v-else class="text-gray-500 text-[11px]">-</div>
                     </td>
 
-                    <!-- 黑市銷量與利潤 (實戰單批利潤 + 穩健日收) -->
-                    <td class="py-2.5 px-2 text-center font-sans whitespace-nowrap">
-                      <div class="text-white font-mono font-bold text-xs" v-if="item.daily_avg_vol > 0">
-                        {{ Math.round(item.daily_avg_vol) }} 件/日
-                      </div>
-                      <div v-if="getRoyalBatchProfit(item) > 0" 
-                           class="text-[11px] text-amber-300 font-mono font-bold mt-0.5"
-                           :title="`🎯 單批安全獲利 (${getSafeBatchQty(item)}件 × 單件淨利 ${formatNumber(getRoyalItemProfit(item))})\n📈 穩健單日估計 (平穩消化 2 批): +${formatNumber(getRoyalRealisticPotential(item))} 銀/日\n💡 全伺服器理論極限 (100%全銷): +${formatNumber(getRoyalDailyPotential(item))} 銀/日`">
-                        單批 +{{ formatNumber(getRoyalBatchProfit(item)) }}
-                      </div>
-                      <div v-if="getRoyalRealisticPotential(item) > 0" class="text-[10px] text-emerald-400 font-mono">
-                        穩健 +{{ formatNumber(getRoyalRealisticPotential(item)) }}/日
+                    <!-- 黑市銷量與利潤 (理論極限日收 + 穩健日收 + 單批獲利) -->
+                    <td class="py-2.5 px-2 text-right font-mono whitespace-nowrap min-w-[130px]"
+                        :title="`💡 全伺服器理論極限 (日銷量 100% 全部賣出): +${formatNumber(getRoyalDailyPotential(item))} 銀/日\n📈 穩健單日估計 (平穩消化 2 批安全量): +${formatNumber(getRoyalRealisticPotential(item))} 銀/日\n🎯 單批安全獲利 (${getSafeBatchQty(item)}件 × 單件淨利 ${formatNumber(getRoyalItemProfit(item))}): +${formatNumber(getRoyalBatchProfit(item))} 銀\n📊 黑市深度: ${Math.round(item.daily_avg_vol || 0)} 件/日`">
+                      <div v-if="getRoyalDailyPotential(item) > 0">
+                        <!-- 理論每日極限總利潤 (與上方榜首看板完全對齊) -->
+                        <div class="font-extrabold text-amber-400 text-sm leading-tight">
+                          +{{ formatNumber(getRoyalDailyPotential(item)) }}<span class="text-[10px] text-amber-300/80 font-normal ml-0.5">/日</span>
+                        </div>
+                        <!-- 穩健每日估算 (平穩消化 2 批) -->
+                        <div v-if="getRoyalRealisticPotential(item) > 0" 
+                             class="text-[10px] text-emerald-400/90 block font-mono mt-0.5">
+                          穩健 +{{ formatNumber(getRoyalRealisticPotential(item)) }}/日
+                        </div>
+                        <!-- 單批獲利與市場深度 -->
+                        <div class="text-[9px] text-gray-400 font-sans mt-0.5 flex items-center justify-end space-x-1">
+                          <span class="text-sky-300 font-mono">單批 +{{ formatNumber(getRoyalBatchProfit(item)) }}</span>
+                          <span class="text-gray-500">({{ getSafeBatchQty(item) }}件)</span>
+                          <span class="text-gray-500">·</span>
+                          <span>{{ Math.round(item.daily_avg_vol) }}件/日</span>
+                        </div>
                       </div>
                       <span v-else-if="!item.daily_avg_vol" class="text-gray-500 text-[10px]">無近期交易</span>
+                      <span v-else class="text-gray-600">-</span>
                     </td>
 
                     <!-- 快捷操作 -->
@@ -4688,6 +4704,10 @@
           scanProgressMsg.value = '正在更新...';
           try {
             const res = await fetch('/api/scan', { method: 'POST' });
+            if (!res.ok) {
+              const errBody = await res.text();
+              throw new Error(`伺服器回應異常 (${res.status}): ${errBody.slice(0, 100)}`);
+            }
             const data = await res.json();
             if (data.success) {
               await loadRadarData();
