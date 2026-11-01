@@ -1054,7 +1054,6 @@
       <div v-show="currentTab === 'royal'" class="space-y-4">
 
         
-        </div>
 
         <!-- 數據摘要看板 (聚焦自身利潤、專注與日誌產出) -->
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -1681,38 +1680,6 @@
                   </div>
 
                 </div>
-                      <div class="flex items-center space-x-2 text-[11px] text-gray-400 mt-0.5">
-                        <span>{{ b.recipe_str }}</span>
-                        <!-- 消化天數預估 -->
-                        <span class="font-mono text-[10px]" :class="getDigestionClass(b)">
-                          ⏳ 預估消化: ~{{ getDigestionDays(b) }}天
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- 數量與專注模式調整 -->
-                  <div class="flex items-center space-x-2.5">
-                    <div class="flex items-center space-x-1">
-                      <button @click="updateBatchQty(idx, -5)" class="w-6 h-6 rounded bg-albion-card hover:bg-albion-panel border border-albion-border text-gray-300 text-xs font-bold">-5</button>
-                      <button @click="updateBatchQty(idx, -1)" class="w-6 h-6 rounded bg-albion-card hover:bg-albion-panel border border-albion-border text-gray-300 text-xs font-bold">-1</button>
-                      <input type="number" min="1" v-model.number="b.qty" class="w-14 py-0.5 px-1 bg-albion-panel border border-albion-border rounded text-white text-center font-bold font-mono text-xs">
-                      <button @click="updateBatchQty(idx, 1)" class="w-6 h-6 rounded bg-albion-card hover:bg-albion-panel border border-albion-border text-gray-300 text-xs font-bold">+1</button>
-                      <button @click="updateBatchQty(idx, 5)" class="w-6 h-6 rounded bg-albion-card hover:bg-albion-panel border border-albion-border text-gray-300 text-xs font-bold">+5</button>
-                    </div>
-
-                    <select v-model="b.costMode" class="py-1 px-2 bg-albion-card border border-albion-border rounded text-xs font-medium"
-                            :class="b.costMode === 'focus' ? 'text-sky-300' : 'text-gray-300'">
-                      <option value="no_focus">無專注</option>
-                      <option value="focus">下專注</option>
-                    </select>
-
-                    <button @click="removeFromBatch(idx)" class="p-1 text-gray-400 hover:text-rose-400 transition" title="移除此品項">
-                      ✕
-                    </button>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
 
@@ -1939,6 +1906,8 @@
           </div>
 
         </div>
+
+      </div>
 
       </div>
 
