@@ -28,6 +28,28 @@ RRR_FOCUS = 0.479      # 專注 47.9%
 MARKET_TAX = 0.04      # 即時砸單特權稅 4.0%
 ORDER_SETUP_FEE = 0.025 # 批量掛單設定費 2.5%
 
+def parse_price_age(target_date: str) -> tuple:
+    """計算市場價格更新時效性，回傳 (badge, level, hours)"""
+    price_age_hours = 999.0
+    if target_date and not str(target_date).startswith("0001"):
+        try:
+            dt_clean = str(target_date).replace("Z", "").split(".")[0]
+            dt_obj = datetime.fromisoformat(dt_clean).replace(tzinfo=timezone.utc)
+            now_utc = datetime.now(timezone.utc)
+            price_age_hours = max(0.0, (now_utc - dt_obj).total_seconds() / 3600.0)
+        except Exception:
+            price_age_hours = 999.0
+
+    if price_age_hours <= 1.0:
+        return "⚡ 1小時內", "fresh", price_age_hours
+    elif price_age_hours <= 24.0:
+        return f"🕒 {int(round(price_age_hours))}小時前", "recent", price_age_hours
+    elif price_age_hours < 999.0:
+        d = int(round(price_age_hours / 24.0))
+        return f"⚠️ {d}天前", "stale", price_age_hours
+    else:
+        return "無記錄", "unknown", price_age_hours
+
 class MarketScanner:
     def __init__(self, server_key: str = "east"):
         self.server_key = server_key
@@ -46,6 +68,7 @@ class MarketScanner:
         self.safe_batch_pct = 0.15    # 安全批量基準比例
         self.safe_batch_cap = 25      # 安全批量單品上限封頂 (預設 25 件，防範爆倉賣不完)
         self.bubble_threshold = 0.35  # 暴漲 / 泡泡 / 壓單風險警示門檻 (+35%)
+        self.royal_batch_qty = 100    # 皇家製造自訂快捷批量數量 (預設 100 件)
         
         # 快取
         self.last_scan_time: Optional[float] = None
@@ -69,7 +92,8 @@ class MarketScanner:
                    food: Optional[str] = None,
                    safe_batch_pct: Optional[float] = None,
                    safe_batch_cap: Optional[int] = None,
-                   bubble_threshold: Optional[float] = None):
+                   bubble_threshold: Optional[float] = None,
+                   royal_batch_qty: Optional[int] = None):
         if server_key and server_key in SERVERS:
             self.server_key = server_key
             self.base_url = SERVERS[server_key]
@@ -101,6 +125,8 @@ class MarketScanner:
             self.safe_batch_cap = max(0, int(safe_batch_cap))
         if bubble_threshold is not None:
             self.bubble_threshold = max(0.10, min(2.0, float(bubble_threshold)))
+        if royal_batch_qty is not None:
+            self.royal_batch_qty = max(1, int(royal_batch_qty))
 
     def calculate_safe_batch(self, daily_vol: float) -> int:
         """依黑市真實消化量與日銷階梯計算安全批量，並加入上限封頂保護"""
@@ -174,11 +200,21 @@ class MarketScanner:
             price_diff = caer_p - ref_p if (caer_p > 0 and ref_p > 0) else 0
             price_diff_pct = round((price_diff / caer_p) * 100, 1) if caer_p > 0 and price_diff > 0 else 0.0
 
+            ref_badge, ref_level, ref_hours = parse_price_age(ref_info.get("updated_at", ""))
+            caer_badge, caer_level, caer_hours = parse_price_age(caer_info.get("updated_at", ""))
+
             # 彙整五大城行情快照
             all_city_prices = {}
             for c_name in ["Caerleon", "Fort Sterling", "Martlock", "Lymhurst", "Thetford", "Bridgewatch"]:
-                c_data = mat_prices.get((api_id, c_name), {"sell_min": 0, "buy_max": 0})
-                all_city_prices[c_name] = c_data
+                c_data = mat_prices.get((api_id, c_name), {"sell_min": 0, "buy_max": 0, "updated_at": ""})
+                c_badge, c_level, c_hours = parse_price_age(c_data.get("updated_at", ""))
+                all_city_prices[c_name] = {
+                    "sell_min": c_data.get("sell_min", 0),
+                    "buy_max": c_data.get("buy_max", 0),
+                    "updated_at": c_data.get("updated_at", ""),
+                    "age_badge": c_badge,
+                    "age_level": c_level
+                }
 
             structured_materials[(mat_type, tier)] = {
                 "mat_type": mat_type,
@@ -190,6 +226,10 @@ class MarketScanner:
                 "buy_max": caer_info["buy_max"],
                 "price": caer_p if caer_p > 0 else caer_info["sell_min"],
                 "caerleon_price": caer_p if caer_p > 0 else caer_info["sell_min"],
+                "caerleon_updated_at": caer_info.get("updated_at", ""),
+                "caerleon_age_badge": caer_badge,
+                "caerleon_age_level": caer_level,
+                "caerleon_age_hours": round(caer_hours, 1),
                 # 皇家精煉產地直供行情
                 "refining_city": refining_city,
                 "refining_city_zh": refining_city_zh,
@@ -197,6 +237,10 @@ class MarketScanner:
                 "refining_price": ref_p,
                 "refining_sell_min": ref_info["sell_min"],
                 "refining_buy_max": ref_info["buy_max"],
+                "refining_updated_at": ref_info.get("updated_at", ""),
+                "refining_age_badge": ref_badge,
+                "refining_age_level": ref_level,
+                "refining_age_hours": round(ref_hours, 1),
                 "price_diff": price_diff,
                 "price_diff_pct": price_diff_pct,
                 "city_prices": all_city_prices
@@ -439,29 +483,7 @@ class MarketScanner:
 
                 # 時效性解析
                 target_date = q_dates.get(2) or q_dates.get(1) or (list(q_dates.values())[0] if q_dates else "")
-                price_age_hours = 999.0
-                if target_date and not str(target_date).startswith("0001"):
-                    try:
-                        dt_clean = str(target_date).replace("Z", "").split(".")[0]
-                        dt_obj = datetime.fromisoformat(dt_clean).replace(tzinfo=timezone.utc)
-                        now_utc = datetime.now(timezone.utc)
-                        price_age_hours = max(0.0, (now_utc - dt_obj).total_seconds() / 3600.0)
-                    except Exception:
-                        price_age_hours = 999.0
-
-                if price_age_hours <= 1.0:
-                    price_age_badge = "⚡ 1小時內"
-                    price_age_level = "fresh"
-                elif price_age_hours <= 24.0:
-                    price_age_badge = f"🕒 {int(round(price_age_hours))}小時前"
-                    price_age_level = "recent"
-                elif price_age_hours < 999.0:
-                    d = int(round(price_age_hours / 24.0))
-                    price_age_badge = f"⚠️ {d}天前"
-                    price_age_level = "stale"
-                else:
-                    price_age_badge = "無記錄"
-                    price_age_level = "unknown"
+                price_age_badge, price_age_level, price_age_hours = parse_price_age(target_date)
 
                 p_normal = q_prices.get(1, 0)       # 一般 (Normal, Q1)
                 p_good = q_prices.get(2, 0)         # 優良 (Good, Q2)

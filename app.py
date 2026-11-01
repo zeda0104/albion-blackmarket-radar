@@ -93,6 +93,7 @@ class ConfigRequest(BaseModel):
     safe_batch_pct: Optional[float] = None
     safe_batch_cap: Optional[int] = None
     bubble_threshold: Optional[float] = None
+    royal_batch_qty: Optional[int] = None
 
 class LedgerRequest(BaseModel):
     date: Optional[str] = None
@@ -134,6 +135,7 @@ def get_status():
         "safe_batch_pct": scanner.safe_batch_pct,
         "safe_batch_cap": scanner.safe_batch_cap,
         "bubble_threshold": scanner.bubble_threshold,
+        "royal_batch_qty": getattr(scanner, "royal_batch_qty", 100),
         "is_scanning": scanner.is_scanning,
         "scan_progress": scanner.scan_progress,
         "last_scan_time": scanner.last_scan_time,
@@ -167,6 +169,7 @@ def get_radar_data():
         "safe_batch_pct": scanner.safe_batch_pct,
         "safe_batch_cap": scanner.safe_batch_cap,
         "bubble_threshold": scanner.bubble_threshold,
+        "royal_batch_qty": getattr(scanner, "royal_batch_qty", 100),
         "quality_stats": calculate_quality_chances(scanner.inner_spec, scanner.outer_spec, scanner.food, False),
         "materials": scanner.materials_cache,
         "equipments": scanner.equipment_cache,
@@ -190,7 +193,8 @@ def get_config():
         "price_basis": scanner.price_basis,
         "safe_batch_pct": scanner.safe_batch_pct,
         "safe_batch_cap": scanner.safe_batch_cap,
-        "bubble_threshold": scanner.bubble_threshold
+        "bubble_threshold": scanner.bubble_threshold,
+        "royal_batch_qty": getattr(scanner, "royal_batch_qty", 100)
     }
 
 @app.post("/api/config")
@@ -213,7 +217,8 @@ def update_config(cfg: ConfigRequest):
         food=cfg.food,
         safe_batch_pct=cfg.safe_batch_pct,
         safe_batch_cap=cfg.safe_batch_cap,
-        bubble_threshold=cfg.bubble_threshold
+        bubble_threshold=cfg.bubble_threshold,
+        royal_batch_qty=cfg.royal_batch_qty
     )
     
     if need_rescan:

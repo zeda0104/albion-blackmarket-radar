@@ -1169,7 +1169,7 @@
             <div>
               <label class="block text-gray-400 mb-1 text-[11px]">排序方式</label>
               <select v-model="royalSortBy" class="w-full py-1.5 px-2 bg-albion-card border border-albion-border rounded text-amber-300 font-bold focus:outline-none">
-                <option value="royal_batch_profit_desc">💰 皇家單批淨利潤</option>
+                <option value="royal_batch_profit_desc">📦 皇家批量利潤 ({{ royalBatchQty }}件)</option>
                 <option value="royal_potential_desc">🌟 皇家每日利潤 (理論極限)</option>
                 <option value="royal_profit_desc">💵 單件淨利潤</option>
                 <option value="royal_roi_desc">📊 皇家投報率 (ROI)</option>
@@ -1225,7 +1225,7 @@
                   <th class="py-2.5 px-2 text-right min-w-[110px]">皇家實質成本</th>
                   <th class="py-2.5 px-2 text-right min-w-[110px]">黑市收購價</th>
                   <th class="py-2.5 px-2 text-right min-w-[120px]">皇家單件淨利 & ROI</th>
-                  <th class="py-2.5 px-2 text-right min-w-[130px]" title="🌟 每日利潤指標解析：&#10;1. 理論極限：黑市全日銷量 × 單件淨利 (對應頂部榜首)&#10;2. 穩健日收：平穩消化 2 批安全批量日收益 (實戰不易砸盤)&#10;3. 單批獲利：安全批量 × 單件淨利">🌟 每日利潤</th>
+                  <th class="py-2.5 px-2 text-right min-w-[140px]" :title="'📦 批量利潤：以自訂批量 (' + royalBatchQty + ' 件) × 單件淨利計算，並預估黑市消化天數'">📦 批量利潤</th>
                   <th class="py-2.5 px-3 text-center min-w-[110px]">快捷操作</th>
                 </tr>
               </thead>
@@ -1361,25 +1361,18 @@
                       <div v-else class="text-gray-500 text-[11px]">-</div>
                     </td>
 
-                    <!-- 黑市銷量與利潤 (理論極限日收 + 穩健日收 + 單批獲利) -->
-                    <td class="py-2.5 px-2 text-right font-mono whitespace-nowrap min-w-[130px]"
-                        :title="`💡 全伺服器理論極限 (日銷量 100% 全部賣出): +${formatNumber(getRoyalDailyPotential(item))} 銀/日\n📈 穩健單日估計 (平穩消化 2 批安全量): +${formatNumber(getRoyalRealisticPotential(item))} 銀/日\n🎯 單批安全獲利 (${getSafeBatchQty(item)}件 × 單件淨利 ${formatNumber(getRoyalItemProfit(item))}): +${formatNumber(getRoyalBatchProfit(item))} 銀\n📊 黑市深度: ${Math.round(item.daily_avg_vol || 0)} 件/日`">
-                      <div v-if="getRoyalDailyPotential(item) > 0">
-                        <!-- 理論每日極限總利潤 (與上方榜首看板完全對齊) -->
-                        <div class="font-extrabold text-amber-400 text-sm leading-tight">
-                          +{{ formatNumber(getRoyalDailyPotential(item)) }}<span class="text-[10px] text-amber-300/80 font-normal ml-0.5">/日</span>
+                    <!-- 批量利潤 (僅顯示批量利潤，並在旁新增黑市消化天數) -->
+                    <td class="py-2.5 px-2 text-right font-mono whitespace-nowrap min-w-[140px]"
+                        :title="`🎯 批量獲利 (${royalBatchQty}件 × 單件淨利 ${formatNumber(getRoyalItemProfit(item))}): ${getRoyalCustomBatchProfit(item) > 0 ? '+' : ''}${formatNumber(getRoyalCustomBatchProfit(item))} 銀\n⏳ 預估消化天數: 約 ${getRoyalDigestionDays(item)} 天 (黑市平均日銷量: ${Math.round(item.daily_avg_vol || 0)} 件/日)`">
+                      <div v-if="getRoyalCustomBatchProfit(item) !== 0">
+                        <div class="font-extrabold text-sm leading-tight" :class="getRoyalCustomBatchProfit(item) > 0 ? 'text-amber-400' : 'text-rose-400'">
+                          {{ getRoyalCustomBatchProfit(item) > 0 ? '+' : '' }}{{ formatNumber(getRoyalCustomBatchProfit(item)) }}
+                          <span class="text-[10px] text-gray-400 font-normal">({{ royalBatchQty }}件)</span>
                         </div>
-                        <!-- 穩健每日估算 (平穩消化 2 批) -->
-                        <div v-if="getRoyalRealisticPotential(item) > 0" 
-                             class="text-[10px] text-emerald-400/90 block font-mono mt-0.5">
-                          穩健 +{{ formatNumber(getRoyalRealisticPotential(item)) }}/日
-                        </div>
-                        <!-- 單批獲利與市場深度 -->
-                        <div class="text-[9px] text-gray-400 font-sans mt-0.5 flex items-center justify-end space-x-1">
-                          <span class="text-sky-300 font-mono">單批 +{{ formatNumber(getRoyalBatchProfit(item)) }}</span>
-                          <span class="text-gray-500">({{ getSafeBatchQty(item) }}件)</span>
-                          <span class="text-gray-500">·</span>
-                          <span>{{ Math.round(item.daily_avg_vol) }}件/日</span>
+                        <div class="mt-0.5 flex items-center justify-end space-x-1">
+                          <span class="text-[9px] px-1.5 py-0.2 rounded border font-sans font-medium" :class="getRoyalDigestionClass(item)">
+                            ⏳ 消化 ~{{ getRoyalDigestionDays(item) }}天
+                          </span>
                         </div>
                       </div>
                       <span v-else-if="!item.daily_avg_vol" class="text-gray-500 text-[10px]">無近期交易</span>
@@ -1389,11 +1382,11 @@
                     <!-- 快捷操作 -->
                     <td class="py-2.5 px-3 text-center whitespace-nowrap" @click.stop>
                       <div class="flex items-center justify-center space-x-1">
-                        <button @click="addToBatchFromRoyal(item, getSafeBatchQty(item))"
+                        <button @click="addToBatchFromRoyal(item, royalBatchQty)"
                                 class="px-2 py-1 rounded bg-amber-600 hover:bg-amber-500 text-black font-extrabold text-[11px] transition shadow flex items-center space-x-0.5"
-                                :title="`將推薦安全批量 (${getSafeBatchQty(item)} 件) 加入批量清單`">
+                                :title="`將自訂批量 (${royalBatchQty} 件) 加入批量清單`">
                           <span>📋</span>
-                          <span>+批量({{ getSafeBatchQty(item) }})</span>
+                          <span>+批量({{ royalBatchQty }})</span>
                         </button>
                         <button @click="openFastLedger(item, item.qualities ? item.qualities[1] : { quality_name: '優良', eff_price: getItemPrice(item) })"
                                 class="px-2 py-1 rounded bg-albion-card hover:bg-albion-hover text-gray-300 hover:text-white border border-albion-border text-[11px] transition"
@@ -1584,8 +1577,8 @@
         <!-- 批量內容雙欄佈局 -->
         <div v-else class="grid grid-cols-1 lg:grid-cols-12 gap-4">
           
-          <!-- 左側: 已選裝備列表 (7 欄寬) -->
-          <div class="lg:col-span-7 space-y-3">
+          <!-- 左側: 待製作裝備與隨身日誌 (6 欄寬) -->
+          <div class="lg:col-span-6 space-y-3">
             <div class="bg-albion-panel border border-albion-border rounded-lg overflow-hidden">
               <div class="bg-albion-card px-4 py-2.5 border-b border-albion-border flex flex-wrap justify-between items-center gap-2 text-xs font-bold text-white">
                 <div class="flex items-center space-x-2">
@@ -1683,10 +1676,6 @@
             </div>
           </div>
 
-          <!-- 右側: 原物料採購/採集清單與財務試算 (5 欄寬) -->
-          <div class="lg:col-span-5 space-y-3">
-            
-            <!-- 📜 隨身日誌需求與 🏝️ 紅城島獵人工人返還卡片 -->
             <div class="bg-albion-panel border border-sky-700/50 rounded-lg overflow-hidden space-y-2 p-3 text-xs shadow-sm">
               <div class="flex items-center justify-between border-b border-sky-600/30 pb-2">
                 <div class="flex items-center space-x-1.5 font-bold text-sky-300">
@@ -1726,8 +1715,79 @@
                 </div>
               </div>
             </div>
+          </div>
 
-            <!-- 原料清單卡片 -->
+          <!-- 右側: 財務總結（置頂）與原物料需求清單 (6 欄寬) -->
+          <div class="lg:col-span-6 space-y-3">
+            <div class="bg-albion-panel border border-albion-border rounded-lg p-4 space-y-2.5 text-xs">
+              <div class="font-bold text-white text-sm border-b border-albion-border pb-2 flex justify-between items-center">
+                <span>💰 財務與利潤試算總結</span>
+                <span class="text-[10px] px-1.5 py-0.2 rounded" :class="batchSourceMode === 'buy' ? 'bg-indigo-950 text-indigo-300 border border-indigo-800' : 'bg-emerald-950 text-emerald-300 border border-emerald-800'">
+                  {{ batchSourceMode === 'buy' ? '市場直購模式' : '自備材料模式' }}
+                </span>
+              </div>
+
+              <div class="space-y-1.5">
+                <div class="flex justify-between text-gray-300">
+                  <span>原物料實質成本:</span>
+                  <span class="font-mono font-bold" :class="batchSourceMode === 'buy' ? 'text-white' : 'text-gray-500'">
+                    {{ batchSourceMode === 'buy' ? formatNumber(batchDetails.totalNetCost) : '0 (自備)' }}
+                  </span>
+                </div>
+
+                <div class="flex justify-between text-gray-300">
+                  <span>城市工坊店稅 (營養費):</span>
+                  <span class="font-mono" :class="enableStationFee ? 'text-amber-300 font-bold' : 'text-gray-500'">
+                    {{ enableStationFee ? formatNumber(batchDetails.totalStationFee) : '0 (未啟用)' }}
+                  </span>
+                </div>
+
+                <div class="flex justify-between text-gray-300 border-t border-albion-border/40 pt-1.5">
+                  <span class="font-bold">總本金預算:</span>
+                  <span class="font-mono font-bold text-rose-300">
+                    {{ formatNumber(batchDetails.totalCost) }} 銀幣
+                  </span>
+                </div>
+
+                <div>
+                  <div class="flex justify-between text-gray-300">
+                    <span>黑市總營收 (已扣出貨稅費):</span>
+                    <span class="font-mono font-bold text-sky-300">
+                      {{ formatNumber(batchDetails.totalRevenue) }} 銀幣
+                    </span>
+                  </div>
+                </div>
+
+                <div v-if="journalSubsidyMode !== 'off' && batchDetails.totalJournalBenefit > 0" class="flex justify-between text-gray-300">
+                  <span>隨身日誌折現與工人收益:</span>
+                  <span class="font-mono font-bold text-sky-300">
+                    +{{ formatNumber(batchDetails.totalJournalBenefit) }} 銀幣
+                  </span>
+                </div>
+              </div>
+
+              <div class="border-t border-albion-border pt-2.5 flex justify-between items-center">
+                <div>
+                  <div class="text-[11px] text-gray-400">預估總淨利 (ROI)</div>
+                  <div class="text-xs font-mono font-bold text-gray-300">
+                    ROI {{ batchDetails.roi }}%
+                  </div>
+                </div>
+                <div class="text-right">
+                  <div class="text-xl font-bold font-mono" :class="batchDetails.netProfit >= 0 ? 'text-emerald-400' : 'text-rose-400'">
+                    {{ batchDetails.netProfit >= 0 ? '+' : '' }}{{ formatNumber(batchDetails.netProfit) }} 銀幣
+                  </div>
+                </div>
+              </div>
+
+              <!-- 快捷按鈕 -->
+              <div class="pt-2 flex space-x-2">
+                <button @click="copyShoppingList" class="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded text-xs transition flex items-center justify-center space-x-1 shadow">
+                  <span>📋 複製採購文字清單</span>
+                </button>
+              </div>
+            </div>
+
             <div class="bg-albion-panel border border-albion-border rounded-lg overflow-hidden shadow-sm">
               <div class="bg-albion-card px-4 py-2.5 border-b border-albion-border flex flex-wrap justify-between items-center gap-2 text-xs">
                 <div class="flex items-center space-x-2">
@@ -1832,86 +1892,13 @@
                 </div>
               </div>
             </div>
-
-            <!-- 財務預算儀表板 -->
-            <div class="bg-albion-panel border border-albion-border rounded-lg p-4 space-y-2.5 text-xs">
-              <div class="font-bold text-white text-sm border-b border-albion-border pb-2 flex justify-between items-center">
-                <span>💰 財務與利潤試算總結</span>
-                <span class="text-[10px] px-1.5 py-0.2 rounded" :class="batchSourceMode === 'buy' ? 'bg-indigo-950 text-indigo-300 border border-indigo-800' : 'bg-emerald-950 text-emerald-300 border border-emerald-800'">
-                  {{ batchSourceMode === 'buy' ? '市場直購模式' : '自備材料模式' }}
-                </span>
-              </div>
-
-              <div class="space-y-1.5">
-                <div class="flex justify-between text-gray-300">
-                  <span>原物料實質成本:</span>
-                  <span class="font-mono font-bold" :class="batchSourceMode === 'buy' ? 'text-white' : 'text-gray-500'">
-                    {{ batchSourceMode === 'buy' ? formatNumber(batchDetails.totalNetCost) : '0 (自備)' }}
-                  </span>
-                </div>
-
-                <div class="flex justify-between text-gray-300">
-                  <span>城市工坊店稅 (營養費):</span>
-                  <span class="font-mono" :class="enableStationFee ? 'text-amber-300 font-bold' : 'text-gray-500'">
-                    {{ enableStationFee ? formatNumber(batchDetails.totalStationFee) : '0 (未啟用)' }}
-                  </span>
-                </div>
-
-                <div class="flex justify-between text-gray-300 border-t border-albion-border/40 pt-1.5">
-                  <span class="font-bold">總本金預算:</span>
-                  <span class="font-mono font-bold text-rose-300">
-                    {{ formatNumber(batchDetails.totalCost) }} 銀幣
-                  </span>
-                </div>
-
-                <div>
-                  <div class="flex justify-between text-gray-300">
-                    <span>黑市總營收 (已扣出貨稅費):</span>
-                    <span class="font-mono font-bold text-sky-300">
-                      {{ formatNumber(batchDetails.totalRevenue) }} 銀幣
-                    </span>
-                  </div>
-                </div>
-
-                <div v-if="journalSubsidyMode !== 'off' && batchDetails.totalJournalBenefit > 0" class="flex justify-between text-gray-300">
-                  <span>隨身日誌折現與工人收益:</span>
-                  <span class="font-mono font-bold text-sky-300">
-                    +{{ formatNumber(batchDetails.totalJournalBenefit) }} 銀幣
-                  </span>
-                </div>
-              </div>
-
-              <div class="border-t border-albion-border pt-2.5 flex justify-between items-center">
-                <div>
-                  <div class="text-[11px] text-gray-400">預估總淨利 (ROI)</div>
-                  <div class="text-xs font-mono font-bold text-gray-300">
-                    ROI {{ batchDetails.roi }}%
-                  </div>
-                </div>
-                <div class="text-right">
-                  <div class="text-xl font-bold font-mono" :class="batchDetails.netProfit >= 0 ? 'text-emerald-400' : 'text-rose-400'">
-                    {{ batchDetails.netProfit >= 0 ? '+' : '' }}{{ formatNumber(batchDetails.netProfit) }} 銀幣
-                  </div>
-                </div>
-              </div>
-
-              <!-- 快捷按鈕 -->
-              <div class="pt-2 flex space-x-2">
-                <button @click="copyShoppingList" class="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded text-xs transition flex items-center justify-center space-x-1 shadow">
-                  <span>📋 複製採購文字清單</span>
-                </button>
-              </div>
-            </div>
-
           </div>
 
         </div>
 
       </div>
 
-      </div>
-
-<div v-show="currentTab === 'materials'" class="space-y-4">
+    <div v-show="currentTab === 'materials'" class="space-y-4">
         <div class="flex flex-wrap items-center justify-between gap-2 bg-albion-panel border border-albion-border rounded-lg p-3">
           <div>
             <h2 class="text-sm font-bold text-white flex items-center space-x-2">
@@ -1950,12 +1937,28 @@
                   </div>
                   <div v-else class="text-[10px] text-gray-500 mt-0.5">價差不大</div>
                 </div>
-                <div class="text-right font-mono">
-                  <div class="text-xs font-bold text-amber-300" :title="'產地城 (' + (m.refining_city_short || m.refining_city) + ') 售價'">
-                    {{ m.refining_city_short || '產地' }}: {{ m.refining_price > 0 ? formatNumber(m.refining_price) : '-' }}
+                <div class="text-right font-mono space-y-0.5">
+                  <div class="flex items-center justify-end space-x-1">
+                    <span v-if="m.refining_age_badge"
+                          class="text-[9px] px-1 py-0.2 rounded font-mono font-bold whitespace-nowrap shrink-0 inline-block leading-tight"
+                          :class="getPriceAgeBadgeClass(m.refining_age_level)"
+                          :title="'產地報價更新時間: ' + (m.refining_updated_at || '無')">
+                      {{ m.refining_age_badge }}
+                    </span>
+                    <span class="text-xs font-bold text-amber-300" :title="'產地城 (' + (m.refining_city_short || m.refining_city) + ') 售價'">
+                      {{ m.refining_city_short || '產地' }}: {{ m.refining_price > 0 ? formatNumber(m.refining_price) : '-' }}
+                    </span>
                   </div>
-                  <div class="text-[10px] text-gray-400 mt-0.5" title="紅城本地出售價">
-                    紅城: {{ m.sell_min > 0 ? formatNumber(m.sell_min) : '-' }}
+                  <div class="flex items-center justify-end space-x-1">
+                    <span v-if="m.caerleon_age_badge"
+                          class="text-[9px] px-1 py-0.2 rounded font-mono font-bold whitespace-nowrap shrink-0 inline-block leading-tight"
+                          :class="getPriceAgeBadgeClass(m.caerleon_age_level)"
+                          :title="'紅城報價更新時間: ' + (m.caerleon_updated_at || '無')">
+                      {{ m.caerleon_age_badge }}
+                    </span>
+                    <span class="text-[10px] text-gray-400" title="紅城本地出售價">
+                      紅城: {{ m.sell_min > 0 ? formatNumber(m.sell_min) : '-' }}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -2598,6 +2601,15 @@
         </div>
 
         <div>
+          <label class="block text-gray-400 mb-1">📦 皇家製造快捷批量數量 (預設 100 件)</label>
+          <div class="flex items-center space-x-2">
+            <input type="number" step="10" min="1" max="10000" v-model.number="royalBatchQty" class="w-2/3 p-1.5 bg-albion-card border border-albion-border rounded text-white font-mono">
+            <span class="text-gray-400 text-xs">件 / 次</span>
+          </div>
+          <span class="text-[10px] text-gray-500 mt-0.5 block">連動皇家城市製造分頁之「+批量」按鈕數量與「批量利潤」試算</span>
+        </div>
+
+        <div>
           <label class="block text-gray-400 mb-1">⚠️ 暴漲風險警示門檻 (高於週均價)</label>
           <div class="flex items-center space-x-2">
             <input type="number" step="5" min="10" max="100" v-model.number="bubbleThresholdPct" class="w-2/3 p-1.5 bg-albion-card border border-albion-border rounded text-white font-mono">
@@ -2658,6 +2670,8 @@
         // 🛡️ 黑市風控與安全批量參數
         const safeBatchPct = ref(parseFloat(localStorage.getItem('albion_safe_batch_pct') || '0.15'));
         const safeBatchCap = ref(parseInt(localStorage.getItem('albion_safe_batch_cap') || '25'));
+        const royalBatchQty = ref(parseInt(localStorage.getItem('albion_royal_batch_qty') || '100'));
+        watch(royalBatchQty, (val) => localStorage.setItem('albion_royal_batch_qty', (val || 100).toString()));
         const bubbleThreshold = ref(parseFloat(localStorage.getItem('albion_bubble_threshold') || '0.35'));
         const bubbleThresholdPct = ref(Math.round(bubbleThreshold.value * 100));
         const copiedTip = ref('');
@@ -3646,6 +3660,27 @@
           return Math.round(profit * qty);
         };
 
+        const getRoyalCustomBatchProfit = (item) => {
+          const profit = getRoyalItemProfit(item);
+          const qty = royalBatchQty.value || 100;
+          if (profit === 0 || qty <= 0) return 0;
+          return Math.round(profit * qty);
+        };
+
+        const getRoyalDigestionDays = (item) => {
+          if (!item || !item.daily_avg_vol) return 1;
+          const qty = royalBatchQty.value || 100;
+          const conservativeDaily = Math.max(1, item.daily_avg_vol * 0.4);
+          return Math.max(1, Math.ceil(qty / conservativeDaily));
+        };
+
+        const getRoyalDigestionClass = (item) => {
+          const days = getRoyalDigestionDays(item);
+          if (days <= 2) return 'bg-emerald-950/80 text-emerald-300 border-emerald-700/60';
+          if (days <= 5) return 'bg-amber-950/80 text-amber-300 border-amber-700/60';
+          return 'bg-rose-950/80 text-rose-300 border-rose-700/60';
+        };
+
         const getRoyalBatchProfit = (item) => {
           const profit = getRoyalItemProfit(item);
           const qty = getSafeBatchQty(item);
@@ -4454,8 +4489,8 @@
           }
 
           list = [...list].sort((a, b) => {
-            if (royalSortBy.value === 'royal_batch_profit_desc') {
-              return getRoyalBatchProfit(b) - getRoyalBatchProfit(a);
+            if (royalSortBy.value === 'royal_batch_profit_desc' || royalSortBy.value === 'royal_potential_desc') {
+              return getRoyalCustomBatchProfit(b) - getRoyalCustomBatchProfit(a);
             } else if (royalSortBy.value === 'royal_profit_desc') {
               return getRoyalItemProfit(b) - getRoyalItemProfit(a);
             } else if (royalSortBy.value === 'royal_potential_desc') {
@@ -4867,6 +4902,7 @@
                 journal_mode: journalSubsidyMode.value,
                 safe_batch_pct: safeBatchPct.value,
                 safe_batch_cap: safeBatchCap.value,
+                royal_batch_qty: royalBatchQty.value,
                 bubble_threshold: bubbleThreshold.value
               })
             });
@@ -4998,6 +5034,10 @@
           bubbleThresholdPct,
           getSafeBatchQty,
           getBatchProfit,
+          royalBatchQty,
+          getRoyalCustomBatchProfit,
+          getRoyalDigestionDays,
+          getRoyalDigestionClass,
           getRoyalBatchProfit,
           getRealisticDailyPotential,
           getRoyalRealisticPotential,
