@@ -42,7 +42,7 @@ class MarketScanner:
         self.journal_mode = "laborer" # 'laborer' (工人資源產出) 或 'sell' (日誌市價折現) 或 'off'
         self.inner_spec = 100         # 內圈母節點專精 (0~100)
         self.outer_spec = 100         # 外圈單品專精 (0~100)
-        self.food = "potato"          # 'none', 'potato' (+100), 'kraken' (+200)
+        self.food = "kraken"          # 'kraken' (+200 阿瓦隆海怪沙拉)
         self.safe_batch_pct = 0.15    # 安全批量基準比例
         self.safe_batch_cap = 25      # 安全批量單品上限封頂 (預設 25 件，防範爆倉賣不完)
         self.bubble_threshold = 0.35  # 暴漲 / 泡泡 / 壓單風險警示門檻 (+35%)

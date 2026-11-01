@@ -194,3 +194,57 @@ def delete_ledger_record(record_id: int) -> bool:
     except Exception as e:
         print(f"Error deleting record: {e}")
         return False
+
+def restore_ledger_records(records: List[Dict[str, Any]]) -> bool:
+    """以客戶端備份之紀錄全量覆寫/還原記帳本 (防止 Render 容器重啟丟失紀錄)"""
+    init_ledger_file()
+    try:
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = "記帳明細"
+        ws.append(COLUMNS)
+        for data in records:
+            date_str = data.get("date") or datetime.now().strftime("%Y-%m-%d")
+            rec_type = data.get("type", "支出")
+            tier = data.get("tier", "T4.0")
+            name = data.get("name", "").strip()
+            quality = data.get("quality", "一般")
+            try:
+                qty = int(data.get("qty", 1))
+            except:
+                qty = 1
+            try:
+                price = int(data.get("price", 0))
+            except:
+                price = 0
+            try:
+                fee = int(data.get("fee", 0))
+            except:
+                fee = 0
+            raw_mode = data.get("sell_mode") or data.get("mode") or ""
+            if "支出" in rec_type:
+                sell_mode = "-"
+            elif raw_mode in ["order", "掛單", "掛單賣出"]:
+                sell_mode = "掛單賣出"
+            elif raw_mode in ["instant", "直接", "直接賣出"]:
+                sell_mode = "直接賣出"
+            elif raw_mode in ["none", "custom", "免稅"]:
+                sell_mode = "免稅"
+            elif raw_mode:
+                sell_mode = raw_mode
+            else:
+                sell_mode = "免稅" if fee == 0 else "掛單賣出"
+
+            if "支出" in rec_type:
+                total = (qty * price) + fee
+            else:
+                total = (qty * price) - fee
+
+            row = [date_str, rec_type, tier, name, quality, qty, price, fee, total, sell_mode]
+            ws.append(row)
+        wb.save(LEDGER_FILE)
+        return True
+    except Exception as e:
+        print(f"Error restoring ledger records: {e}")
+        return False
+

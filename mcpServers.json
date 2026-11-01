@@ -1,0 +1,19 @@
+{
+  "mcpServers": {
+    "git": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-git", "--repository", "."]
+    },
+    "albion-sqlite": {
+      "command": "python",
+      "args": ["-m", "mcp.server.sqlite", "--db-path", "./data/market.db"],
+      "env": {
+        "DB_READONLY": "false"
+      }
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "."]
+    }
+  }
+}

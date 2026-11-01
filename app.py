@@ -39,7 +39,9 @@ def load_saved_specs() -> Dict[str, Any]:
     return {
         "inner_spec": 100,
         "outer_spec": 100,
-        "food_type": "potato",
+        "food_type": "kraken",
+        "user_base_capital": 20000000,
+        "mammoth_target": 360000000,
         "item_specs": {},
         "mastery_specs": {}
     }
@@ -60,7 +62,7 @@ scanner = MarketScanner(server_key="east")
 _init_specs = load_saved_specs()
 scanner.inner_spec = _init_specs.get("inner_spec", 100)
 scanner.outer_spec = _init_specs.get("outer_spec", 100)
-scanner.food = _init_specs.get("food_type", "potato")
+scanner.food = _init_specs.get("food_type", "kraken")
 os.makedirs("static", exist_ok=True)
 
 @asynccontextmanager
@@ -396,6 +398,14 @@ def delete_ledger(record_id: int):
         raise HTTPException(status_code=500, detail="刪除記錄失敗")
     return {"success": True, "data": ledger_manager.get_ledger_records()}
 
+@app.post("/api/ledger/restore")
+def restore_ledger(records: List[Dict[str, Any]]):
+    """從客戶端備份全量還原記帳本 (防止 Render 休眠重啟後紀錄丟失)"""
+    success = ledger_manager.restore_ledger_records(records)
+    if not success:
+        raise HTTPException(status_code=500, detail="還原記帳本失敗")
+    return {"success": True, "data": ledger_manager.get_ledger_records()}
+
 @app.get("/api/export-excel")
 def export_excel():
     if os.path.exists(ledger_manager.LEDGER_FILE):
@@ -410,9 +420,11 @@ def export_excel():
 class SpecsRequest(BaseModel):
     inner_spec: Optional[int] = 100
     outer_spec: Optional[int] = 100
-    food_type: Optional[str] = "potato"
+    food_type: Optional[str] = "kraken"
     item_specs: Optional[Dict[str, int]] = {}
     mastery_specs: Optional[Dict[str, int]] = {}
+    user_base_capital: Optional[int] = None
+    mammoth_target: Optional[int] = None
 
 @app.get("/api/specs")
 def get_specs():

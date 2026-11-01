@@ -1,0 +1,382 @@
+{
+  "directed": true,
+  "multigraph": false,
+  "graph": {
+    "name": "Albion Black Market Radar Architecture Graph",
+    "updated_at": "2026-10-28"
+  },
+  "nodes": [
+    {
+      "id": "ui_root",
+      "label": "Web 儀表板 (Vue 3 Single Page)",
+      "community": 0,
+      "community_name": "前端介面與交互層",
+      "type": "UI"
+    },
+    {
+      "id": "ui_radar_tab",
+      "label": "黑市雷達分頁 (Caerleon Arbitrage)",
+      "community": 0,
+      "community_name": "前端介面與交互層",
+      "type": "UI"
+    },
+    {
+      "id": "ui_royal_tab",
+      "label": "皇家城市製造分頁 (Royal City Crafting)",
+      "community": 0,
+      "community_name": "前端介面與交互層",
+      "type": "UI"
+    },
+    {
+      "id": "ui_mammoth_tab",
+      "label": "猛獁之路任務分頁 (Road to 360M Mammoth)",
+      "community": 0,
+      "community_name": "前端介面與交互層",
+      "type": "UI"
+    },
+    {
+      "id": "ui_batch_tab",
+      "label": "批量採購清單分頁 (Batch Shopping & Laborer)",
+      "community": 0,
+      "community_name": "前端介面與交互層",
+      "type": "UI"
+    },
+    {
+      "id": "ui_mats_tab",
+      "label": "跨城材料行情分頁 (Cross-city Materials)",
+      "community": 0,
+      "community_name": "前端介面與交互層",
+      "type": "UI"
+    },
+    {
+      "id": "ui_ledger_tab",
+      "label": "記帳本分頁 (Ledger & Summary)",
+      "community": 0,
+      "community_name": "前端介面與交互層",
+      "type": "UI"
+    },
+    {
+      "id": "ui_specs_tab",
+      "label": "專精配置分頁 (Specs & Mastery Setup)",
+      "community": 0,
+      "community_name": "前端介面與交互層",
+      "type": "UI"
+    },
+    {
+      "id": "app_fastapi",
+      "label": "FastAPI App (app.py)",
+      "community": 1,
+      "community_name": "API 與服務入口層",
+      "type": "Backend"
+    },
+    {
+      "id": "app_lifespan",
+      "label": "Lifespan 背景自動首次掃描",
+      "community": 1,
+      "community_name": "API 與服務入口層",
+      "type": "Backend"
+    },
+    {
+      "id": "api_radar",
+      "label": "GET /api/radar",
+      "community": 1,
+      "community_name": "API 與服務入口層",
+      "type": "API"
+    },
+    {
+      "id": "api_scan",
+      "label": "POST /api/scan",
+      "community": 1,
+      "community_name": "API 與服務入口層",
+      "type": "API"
+    },
+    {
+      "id": "api_config",
+      "label": "GET/POST /api/config",
+      "community": 1,
+      "community_name": "API 與服務入口層",
+      "type": "API"
+    },
+    {
+      "id": "api_specs",
+      "label": "GET/POST /api/specs (專精持久化)",
+      "community": 1,
+      "community_name": "API 與服務入口層",
+      "type": "API"
+    },
+    {
+      "id": "api_ledger",
+      "label": "CRUD /api/ledger",
+      "community": 1,
+      "community_name": "API 與服務入口層",
+      "type": "API"
+    },
+    {
+      "id": "engine_scanner",
+      "label": "MarketScanner (scanner.py)",
+      "community": 2,
+      "community_name": "市場掃描與量化計算引擎",
+      "type": "Engine"
+    },
+    {
+      "id": "engine_aodp",
+      "label": "AODP API 批次抓取 (ThreadPoolExecutor)",
+      "community": 2,
+      "community_name": "市場掃描與量化計算引擎",
+      "type": "Engine"
+    },
+    {
+      "id": "engine_depth",
+      "label": "黑市 7 天歷史銷量與深度分析",
+      "community": 2,
+      "community_name": "市場掃描與量化計算引擎",
+      "type": "Engine"
+    },
+    {
+      "id": "engine_multiroll",
+      "label": "多重擲骰品質期望價模型 (Downward Compat)",
+      "community": 2,
+      "community_name": "市場掃描與量化計算引擎",
+      "type": "Engine"
+    },
+    {
+      "id": "engine_royal_calc",
+      "label": "皇家城市加成與產地成本演算法",
+      "community": 2,
+      "community_name": "市場掃描與量化計算引擎",
+      "type": "Engine"
+    },
+    {
+      "id": "engine_laborer",
+      "label": "15 位 T6 獵人工人產能折抵模型",
+      "community": 2,
+      "community_name": "市場掃描與量化計算引擎",
+      "type": "Engine"
+    },
+    {
+      "id": "db_items",
+      "label": "Items Database (items_database.py)",
+      "community": 3,
+      "community_name": "裝備配方與常數資料庫",
+      "type": "Database"
+    },
+    {
+      "id": "db_960items",
+      "label": "960 件裝備配方庫 (T4.0~T6.3)",
+      "community": 3,
+      "community_name": "裝備配方與常數資料庫",
+      "type": "Database"
+    },
+    {
+      "id": "db_royal_rules",
+      "label": "皇家城市製造與精煉對照表",
+      "community": 3,
+      "community_name": "裝備配方與常數資料庫",
+      "type": "Database"
+    },
+    {
+      "id": "db_excel_mapping",
+      "label": "武器材料名稱對照表.xlsx",
+      "community": 3,
+      "community_name": "裝備配方與常數資料庫",
+      "type": "DataFile"
+    },
+    {
+      "id": "store_specs",
+      "label": "data/specs.json (專精持久化)",
+      "community": 4,
+      "community_name": "資料持久化與儲存層",
+      "type": "Storage"
+    },
+    {
+      "id": "store_ledger_mgr",
+      "label": "LedgerManager (ledger_manager.py)",
+      "community": 4,
+      "community_name": "資料持久化與儲存層",
+      "type": "Storage"
+    },
+    {
+      "id": "store_ledger_xlsx",
+      "label": "data/記帳.xlsx",
+      "community": 4,
+      "community_name": "資料持久化與儲存層",
+      "type": "Storage"
+    },
+    {
+      "id": "devops_render",
+      "label": "Render.com 雲端主機 (24hr Free Tier)",
+      "community": 5,
+      "community_name": "雲端部署與維運層",
+      "type": "DevOps"
+    },
+    {
+      "id": "devops_github",
+      "label": "GitHub 儲存庫 (CI/CD 觸發源)",
+      "community": 5,
+      "community_name": "雲端部署與維運層",
+      "type": "DevOps"
+    },
+    {
+      "id": "devops_docker",
+      "label": "Dockerfile / render.yaml / Procfile",
+      "community": 5,
+      "community_name": "雲端部署與維運層",
+      "type": "DevOps"
+    },
+    {
+      "id": "devops_git_tool",
+      "label": "[一鍵上傳GITHUB].bat",
+      "community": 5,
+      "community_name": "雲端部署與維運層",
+      "type": "DevOps"
+    }
+  ],
+  "links": [
+    {
+      "from": "ui_radar_tab",
+      "to": "api_radar"
+    },
+    {
+      "from": "ui_royal_tab",
+      "to": "api_radar"
+    },
+    {
+      "from": "ui_mammoth_tab",
+      "to": "api_radar"
+    },
+    {
+      "from": "ui_mammoth_tab",
+      "to": "api_ledger"
+    },
+    {
+      "from": "ui_batch_tab",
+      "to": "api_radar"
+    },
+    {
+      "from": "ui_mats_tab",
+      "to": "api_radar"
+    },
+    {
+      "from": "ui_ledger_tab",
+      "to": "api_ledger"
+    },
+    {
+      "from": "ui_specs_tab",
+      "to": "api_specs"
+    },
+    {
+      "from": "app_fastapi",
+      "to": "engine_scanner"
+    },
+    {
+      "from": "app_fastapi",
+      "to": "store_specs"
+    },
+    {
+      "from": "app_fastapi",
+      "to": "store_ledger_mgr"
+    },
+    {
+      "from": "app_lifespan",
+      "to": "engine_scanner"
+    },
+    {
+      "from": "api_radar",
+      "to": "engine_scanner"
+    },
+    {
+      "from": "api_scan",
+      "to": "engine_scanner"
+    },
+    {
+      "from": "api_specs",
+      "to": "store_specs"
+    },
+    {
+      "from": "api_ledger",
+      "to": "store_ledger_mgr"
+    },
+    {
+      "from": "engine_scanner",
+      "to": "engine_aodp"
+    },
+    {
+      "from": "engine_scanner",
+      "to": "engine_depth"
+    },
+    {
+      "from": "engine_scanner",
+      "to": "engine_multiroll"
+    },
+    {
+      "from": "engine_scanner",
+      "to": "engine_royal_calc"
+    },
+    {
+      "from": "engine_scanner",
+      "to": "engine_laborer"
+    },
+    {
+      "from": "engine_scanner",
+      "to": "db_items"
+    },
+    {
+      "from": "engine_royal_calc",
+      "to": "db_royal_rules"
+    },
+    {
+      "from": "db_items",
+      "to": "db_960items"
+    },
+    {
+      "from": "db_items",
+      "to": "db_excel_mapping"
+    },
+    {
+      "from": "store_ledger_mgr",
+      "to": "store_ledger_xlsx"
+    },
+    {
+      "from": "devops_git_tool",
+      "to": "devops_github"
+    },
+    {
+      "from": "devops_github",
+      "to": "devops_render"
+    },
+    {
+      "from": "devops_render",
+      "to": "devops_docker"
+    },
+    {
+      "from": "devops_docker",
+      "to": "app_fastapi"
+    }
+  ],
+  "communities": [
+    {
+      "id": 0,
+      "name": "前端介面與交互層"
+    },
+    {
+      "id": 1,
+      "name": "API 與服務入口層"
+    },
+    {
+      "id": 2,
+      "name": "市場掃描與量化計算引擎"
+    },
+    {
+      "id": 3,
+      "name": "裝備配方與常數資料庫"
+    },
+    {
+      "id": 4,
+      "name": "資料持久化與儲存層"
+    },
+    {
+      "id": 5,
+      "name": "雲端部署與維運層"
+    }
+  ]
+}

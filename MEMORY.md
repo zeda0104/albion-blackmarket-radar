@@ -1,0 +1,56 @@
+# 專案跨會話持久記憶 (MEMORY.md) - 阿爾比恩量化帝國
+
+> **說明**：本檔案為本專案的本機長效記憶（Cross-Session Memory），AI Agent 啟動或執行新任務時應優先以此為準，避免重複詢問已知事實或覆寫既定架構。
+
+---
+
+## 1. 系統架構與服務拓撲
+
+- **服務端 (Backend)**：
+  - `app.py`：採用 FastAPI 框架。
+  - **部署環境**：支援本機 `[以系統管理員]開網頁連線8000.bat`（Port 8000）與 Render.com (24hr Free Tier) 雲端容器部署。
+  - **背景任務**：FastAPI `lifespan` 事件自動啟動初始市場行情背景快取。
+- **量化與演算法 (Core Engine)**：
+  - `scanner.py`：
+    - 連接 AODP (Albion Online Data Project) API 批次查詢。
+    - 雙軌利潤診斷：提供「即時黑市倒賣 (Instant Sell)」與「7 天掛單消化模型 (7d Order)」雙向利潤計算。
+    - 黑市向下相容多重擲骰機率模型（向下判定低階品質消化）。
+    - 皇家 6 大城市專屬製造產出加成計算（基礎無專注 24.8% / 專注滿 47.9%）。
+    - 獵人/工人勞工返還折抵計算。
+- **裝備資料庫 (Constants Database)**：
+  - `items_database.py`：包含 960 件裝備配方全集、原料對照與城市加成矩陣。
+- **數據持久化 (Data Store)**：
+  - `data/specs.json`：使用者自定義專精等級與手續費配置（自動持久化保存）。
+  - `data/記帳.xlsx`、`ledger_manager.py`：歷史交易與記帳本紀錄。
+- **前端交互介面 (Frontend UI)**：
+  - `static/index.html`：單頁式儀表板，整合：
+    1. 黑市雷達 (Black Market Radar)
+    2. 皇家城市製造分頁 (Royal Crafting)
+    3. 猛獁之路任務樹 (Mammoth Road - 360M 進度試算)
+    4. 分城批量採購單 (Batch Purchasing Splitter)
+    5. 跨城原物料與裝備行情
+    6. 專精與成本試算器
+
+---
+
+## 2. 業務常數與公式約定 (不容竄改之核心邏輯)
+
+1. **城市製造加成矩陣**：
+   - 堡壘城 (Fort Sterling)：鐵礦相關裝備（重甲、錘子、長矛等）。
+   - 沼澤城 (Thetford)：木材/法系相關裝備（布甲、法杖、弓等）。
+   - 森林城 (Lymhurst)：獸皮/皮甲與獵人系裝備。
+   - 沙漠城 (Bridgewatch)：布匹、火法與副手裝備。
+   - 高原城 (Martlock)：石材、盾牌、斧頭等。
+   - 普城 (Caerleon)：特定非法裝備、食物與藥水加成。
+2. **稅率與手續費**：
+   - 高級會員（Premium）掛單費 2.5% + 售出稅 4% = 6.5%。
+   - 非會員掛單費 2.5% + 售出稅 8% = 10.5%。
+   - 系統依據使用者的專精配置即時計算製造淨利潤。
+
+---
+
+## 3. 開發與維護禁忌 (Ponytail 規範約束)
+
+- ❌ **嚴禁重構運作正常的公式**：任何針對 `scanner.py` 或 `items_database.py` 配方、加成、擲骰機率的調整，必須由使用者明確發起，禁止私自調校。
+- ❌ **嚴禁上傳巨大二進位檔**：`cloudflared.exe`、`archive/` 打包檔嚴禁推入 Git。
+- ❌ **保持極簡與零多餘依賴**：所有功能擴充以原生標準庫或現有 `fastapi`, `openpyxl`, `requests` 為限。

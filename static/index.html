@@ -1052,34 +1052,7 @@
 <!-- ================= 🏰 皇家城市製造 TAB ================= -->
       <div v-show="currentTab === 'royal'" class="space-y-4">
 
-        <!-- 👑 皇家產銷鏈條核心戰略橫幅 (獨立運作模型) -->
-        <div class="bg-gradient-to-r from-amber-950/90 via-amber-900/40 to-albion-panel border-2 border-amber-500/60 rounded-xl p-4 shadow-xl">
-          <div class="flex flex-wrap items-center justify-between gap-3">
-            <div class="flex items-start space-x-3">
-              <span class="text-3xl mt-0.5">🏰</span>
-              <div>
-                <div class="font-extrabold text-amber-300 flex items-center space-x-2 text-sm sm:text-base">
-                  <span>【皇家大陸跨城製造分業】</span>
-                  <span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/30 text-amber-200 border border-amber-500/50 font-bold">精煉加成料 ➔ 皇家城製造 ➔ 趁戰事走私黑市</span>
-                  <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-600/30 text-emerald-300 border border-emerald-500/50 font-mono font-bold">獨立產銷鏈條・零運費扣除</span>
-                </div>
-                <div class="text-gray-300 text-xs mt-1 leading-relaxed">
-                  • <b class="text-sky-300">精煉產地直供</b>：木拉白城、皮拉藍城、布拉綠城、鐵拉紫城，享深水池產地批發底價！<br>
-                  • <b class="text-amber-300">皇家加成製造</b>：在對應裝備加成城市製作，享 <b>24.8% 資源返還率 (RRR)</b>（下專注 47.9%），材料少耗 11.3%！<br>
-                  • <b class="text-indigo-300">隨身日誌工人循環</b>：隨身攜帶製作日誌填滿，送入島嶼工人產出原料或折現現金，大幅提升額外收益！<br>
-                  • <b class="text-emerald-300">黑市走私變現</b>：趁紅區匪徒活動（Bandit）或陣營戰大團混亂無損運入黑市，純享自身獨立套利利潤！
-                </div>
-              </div>
-            </div>
-            
-            <div class="flex items-center space-x-2 shrink-0">
-              <div class="bg-albion-card/80 border border-amber-500/40 rounded-lg p-2.5 text-right font-mono">
-                <div class="text-[10px] text-gray-400">皇家可獲利品項</div>
-                <div class="text-lg font-bold text-emerald-400">{{ profitableRoyalCount }} <span class="text-xs text-emerald-200 font-normal">件</span></div>
-                <div class="text-[10px] text-amber-400">無專注可賺: {{ countRoyalNoFocus }} 件</div>
-              </div>
-            </div>
-          </div>
+        
         </div>
 
         <!-- 數據摘要看板 (聚焦自身利潤、專注與日誌產出) -->
@@ -1334,10 +1307,15 @@
                       </div>
                     </td>
 
-                    <!-- 黑市收購價 -->
+                    <!-- 黑市收購價 (含時效性) -->
                     <td class="py-2.5 px-2 text-right whitespace-nowrap">
-                      <div class="font-bold" :class="isItemPriceFromHistory(item) ? 'text-amber-300' : (getItemPrice(item) > 0 ? 'text-white' : 'text-gray-500')">
-                        {{ getItemPrice(item) > 0 ? formatNumber(getItemPrice(item)) : '-' }}
+                      <div class="flex items-center justify-end space-x-1 font-mono">
+                        <span class="text-[9px] px-1 py-0.2 rounded font-mono font-bold whitespace-nowrap shrink-0 inline-block" :class="getPriceAgeBadgeClass(item.price_age_level)" :title="'買單時效: ' + (item.price_age_badge || '未知')">
+                          {{ item.price_age_badge || '未知' }}
+                        </span>
+                        <span class="font-bold" :class="isItemPriceFromHistory(item) ? 'text-amber-300' : (getItemPrice(item) > 0 ? 'text-white' : 'text-gray-500')">
+                          {{ getItemPrice(item) > 0 ? formatNumber(getItemPrice(item)) : '-' }}
+                        </span>
                       </div>
                       <div v-if="isItemPriceFromHistory(item)" class="text-[9px] text-amber-400 font-sans flex items-center justify-end space-x-1 mt-0.5">
                         <span class="px-1 py-0.2 rounded bg-amber-500/20 text-amber-300 font-normal">
@@ -1609,28 +1587,99 @@
           <!-- 左側: 已選裝備列表 (7 欄寬) -->
           <div class="lg:col-span-7 space-y-3">
             <div class="bg-albion-panel border border-albion-border rounded-lg overflow-hidden">
-              <div class="bg-albion-card px-4 py-2.5 border-b border-albion-border flex justify-between items-center text-xs font-bold text-white">
-                <span>待製作裝備清單 ({{ batchList.length }} 款)</span>
-                <span class="text-gray-400 font-normal">可隨意增減件數與調整專注</span>
+              <div class="bg-albion-card px-4 py-2.5 border-b border-albion-border flex flex-wrap justify-between items-center gap-2 text-xs font-bold text-white">
+                <div class="flex items-center space-x-2">
+                  <input type="checkbox"
+                         :checked="isAllBatchSelected"
+                         @change="toggleSelectAllBatch($event.target.checked)"
+                         class="rounded bg-albion-panel text-indigo-500 focus:ring-0 w-4 h-4 cursor-pointer"
+                         title="全選 / 全不選">
+                  <span>待製作裝備清單 ({{ batchList.length }} 款，已勾選 {{ selectedBatchCount }} 款)</span>
+                </div>
+                <div class="flex items-center space-x-1.5 font-normal">
+                  <button @click="toggleSelectAllBatch(true)" class="px-2 py-0.5 rounded bg-albion-panel hover:bg-albion-hover text-indigo-300 border border-indigo-700/50 text-[11px] transition">全選</button>
+                  <button @click="toggleSelectAllBatch(false)" class="px-2 py-0.5 rounded bg-albion-panel hover:bg-albion-hover text-gray-400 border border-gray-700 text-[11px] transition">全不選</button>
+                </div>
               </div>
 
               <div class="divide-y divide-albion-border/40 text-xs">
                 <div v-for="(b, idx) in batchList" :key="b.api_id"
-                     class="p-3 hover:bg-albion-hover flex flex-wrap items-center justify-between gap-3">
-                  
-                  <div class="flex items-center space-x-2.5 min-w-[200px]">
-                    <span class="px-1.5 py-0.5 rounded font-mono font-bold text-[10px]" :class="getTierBadgeClass(b.tier)">
-                      T{{ b.tier }}
-                    </span>
-                    <div>
-                      <div class="flex items-center space-x-1.5">
-                        <span class="font-bold text-white text-sm">{{ b.name }}</span>
-                        <!-- 製造城市標籤 (區分紅城 vs 皇家加成產地城) -->
-                        <span class="px-1.5 py-0.2 rounded text-[10px] font-bold"
-                              :class="b.is_royal ? 'bg-amber-950 text-amber-300 border border-amber-800' : 'bg-rose-950 text-rose-300 border border-rose-800'">
-                          {{ b.craft_city_icon || (b.is_royal ? '🏰' : '🦹') }} {{ b.craft_city_zh || '紅城' }}
-                        </span>
+                     class="p-3 hover:bg-albion-hover transition"
+                     :class="{'opacity-50 grayscale-[40%] bg-albion-dark/40': b.selected === false}">
+
+                  <div class="flex flex-wrap items-center justify-between gap-3">
+                    <div class="flex items-center space-x-2.5 min-w-[200px]">
+                      <input type="checkbox"
+                             v-model="b.selected"
+                             class="rounded bg-albion-panel text-indigo-500 focus:ring-0 w-4 h-4 cursor-pointer shrink-0"
+                             title="勾選以納入採購與財務計算">
+                      <span class="px-1.5 py-0.5 rounded font-mono font-bold text-[10px]" :class="getTierBadgeClass(b.tier)">
+                        T{{ b.tier }}
+                      </span>
+                      <div>
+                        <div class="flex items-center space-x-1.5">
+                          <span class="font-bold text-white text-sm">{{ b.name }}</span>
+                          <!-- 製造城市標籤 (區分紅城 vs 皇家加成產地城) -->
+                          <span class="px-1.5 py-0.2 rounded text-[10px] font-bold"
+                                :class="b.is_royal ? 'bg-amber-950 text-amber-300 border border-amber-800' : 'bg-rose-950 text-rose-300 border border-rose-800'">
+                            {{ b.craft_city_icon || (b.is_royal ? '🏰' : '🦹') }} {{ b.craft_city_zh || '紅城' }}
+                          </span>
+                        </div>
+                        <div class="flex items-center space-x-2 text-[11px] text-gray-400 mt-0.5">
+                          <span>{{ b.recipe_str }}</span>
+                          <!-- 消化天數預估 -->
+                          <span class="font-mono text-[10px]" :class="getDigestionClass(b)">
+                            ⏳ 預估消化: ~{{ getDigestionDays(b) }}天
+                          </span>
+                        </div>
                       </div>
+                    </div>
+
+                    <!-- 數量與專注模式調整 -->
+                    <div class="flex items-center space-x-2.5">
+                      <div class="flex items-center space-x-1">
+                        <button @click="updateBatchQty(idx, -5)" class="w-6 h-6 rounded bg-albion-card hover:bg-albion-panel border border-albion-border text-gray-300 text-xs font-bold">-5</button>
+                        <button @click="updateBatchQty(idx, -1)" class="w-6 h-6 rounded bg-albion-card hover:bg-albion-panel border border-albion-border text-gray-300 text-xs font-bold">-1</button>
+                        <input type="number" min="1" v-model.number="b.qty" class="w-14 py-0.5 px-1 bg-albion-panel border border-albion-border rounded text-white text-center font-bold font-mono text-xs">
+                        <button @click="updateBatchQty(idx, 1)" class="w-6 h-6 rounded bg-albion-card hover:bg-albion-panel border border-albion-border text-gray-300 text-xs font-bold">+1</button>
+                        <button @click="updateBatchQty(idx, 5)" class="w-6 h-6 rounded bg-albion-card hover:bg-albion-panel border border-albion-border text-gray-300 text-xs font-bold">+5</button>
+                      </div>
+
+                      <select v-model="b.costMode" class="py-1 px-2 bg-albion-card border border-albion-border rounded text-xs font-medium"
+                              :class="b.costMode === 'focus' ? 'text-sky-300' : 'text-gray-300'">
+                        <option value="no_focus">無專注</option>
+                        <option value="focus">下專注</option>
+                      </select>
+
+                      <button @click="removeFromBatch(idx)" class="p-1 text-gray-400 hover:text-rose-400 transition" title="移除此品項">
+                        ✕
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- 該品項專屬利潤儀表 (單件淨利 + ROI + 本款小計淨利) -->
+                  <div class="mt-2.5 pt-2 border-t border-albion-border/40 flex flex-wrap items-center justify-between text-xs gap-2 font-mono">
+                    <div class="flex items-center space-x-3 text-gray-300">
+                      <span class="text-[11px] text-gray-400">單件淨利:</span>
+                      <span class="font-bold" :class="getBatchItemProfit(b).unitProfit > 0 ? 'text-emerald-400' : 'text-rose-400'">
+                        {{ getBatchItemProfit(b).unitProfit > 0 ? '+' : '' }}{{ formatNumber(getBatchItemProfit(b).unitProfit) }} 銀
+                      </span>
+                      <span class="text-[10px] px-1.5 py-0.2 rounded font-bold"
+                            :class="getBatchItemProfit(b).unitProfit > 0 ? 'bg-emerald-950 text-emerald-300 border border-emerald-800/60' : 'bg-rose-950 text-rose-300 border border-rose-800/60'">
+                        ROI {{ getBatchItemProfit(b).roi }}%
+                      </span>
+                    </div>
+
+                    <div class="flex items-center space-x-3 text-right">
+                      <span class="text-[11px] text-gray-400">本款成本: {{ formatNumber(getBatchItemProfit(b).subtotalCost) }}</span>
+                      <span class="text-[11px] text-gray-400">營收: {{ formatNumber(getBatchItemProfit(b).subtotalRev) }}</span>
+                      <span class="font-extrabold text-sm" :class="getBatchItemProfit(b).subtotalProfit > 0 ? 'text-emerald-400' : 'text-rose-400'">
+                        小計: {{ getBatchItemProfit(b).subtotalProfit > 0 ? '+' : '' }}{{ formatNumber(getBatchItemProfit(b).subtotalProfit) }} 銀
+                      </span>
+                    </div>
+                  </div>
+
+                </div>
                       <div class="flex items-center space-x-2 text-[11px] text-gray-400 mt-0.5">
                         <span>{{ b.recipe_str }}</span>
                         <!-- 消化天數預估 -->
@@ -2080,6 +2129,16 @@
 
             <!-- 全域快捷按鈕 -->
             <div class="flex items-center space-x-2">
+              <button @click="exportAppSettings"
+                      class="px-3 py-1.5 rounded bg-amber-600 hover:bg-amber-500 text-black font-extrabold transition flex items-center space-x-1 shadow"
+                      title="匯出專精與記帳本為 JSON 備份檔">
+                <span>📤 備份設定</span>
+              </button>
+              <label class="px-3 py-1.5 rounded bg-albion-card hover:bg-albion-hover text-amber-300 border border-amber-500/50 font-bold transition cursor-pointer flex items-center space-x-1 shadow"
+                     title="匯入先前備份之 JSON 設定檔">
+                <span>📥 匯入設定</span>
+                <input type="file" accept=".json" class="hidden" @change="importAppSettings">
+              </label>
               <button @click="manualSaveSpecs"
                       class="px-3 py-1.5 rounded bg-emerald-600 hover:bg-emerald-500 text-white font-bold transition flex items-center space-x-1 shadow">
                 <span>💾 儲存專精至檔案</span>
@@ -2233,28 +2292,41 @@
                 </span>
               </div>
               <p class="text-xs text-gray-400">
-                專為 20M 銀幣本金打造的零風險、高周轉滾雪球計畫。透過黑市套利雷達、工人無本循環與向下相容期望利潤，直通 200M 提領運載猛獁象！
+                阿爾比恩商業帝國・全天候量化資產成長系統。透過黑市套利雷達、工人無本循環與向下相容期望利潤，直通提領運載猛獁象！
               </p>
             </div>
 
-            <!-- 本金設定與淨利試算小卡 -->
-            <div class="flex items-center space-x-4 bg-albion-card/80 border border-albion-border/80 rounded-lg p-2.5 text-xs">
-              <div>
-                <div class="text-[10px] text-gray-400">初始本金 (銀幣)</div>
-                <input v-model.number="userBaseCapital" type="number" step="1000000"
-                       class="w-28 bg-albion-dark border border-albion-border rounded px-2 py-1 text-white font-mono font-bold text-xs mt-0.5 focus:border-amber-500 focus:outline-none">
-              </div>
-              <div>
-                <div class="text-[10px] text-gray-400">記帳累積淨利</div>
-                <div class="font-mono font-bold text-emerald-400 mt-1.5">
-                  {{ ledgerSummary.net_profit >= 0 ? '+' : '' }}{{ formatNumber(ledgerSummary.net_profit) }} 銀
+            <!-- 本金設定與淨利試算小卡 + 雲端備份還原 -->
+            <div class="flex flex-wrap items-center gap-3">
+              <div class="flex items-center space-x-4 bg-albion-card/80 border border-albion-border/80 rounded-lg p-2.5 text-xs shadow-sm">
+                <div>
+                  <div class="text-[10px] text-gray-400">初始本金 (銀幣)</div>
+                  <input v-model.number="userBaseCapital" type="number" step="1000000"
+                         class="w-28 bg-albion-dark border border-albion-border rounded px-2 py-1 text-white font-mono font-bold text-xs mt-0.5 focus:border-amber-500 focus:outline-none">
+                </div>
+                <div>
+                  <div class="text-[10px] text-gray-400">記帳累積淨利</div>
+                  <div class="font-mono font-bold text-emerald-400 mt-1.5">
+                    {{ ledgerSummary.net_profit >= 0 ? '+' : '' }}{{ formatNumber(ledgerSummary.net_profit) }} 銀
+                  </div>
+                </div>
+                <div>
+                  <div class="text-[10px] text-gray-400">當前總資產估算</div>
+                  <div class="font-mono font-extrabold text-amber-400 text-sm mt-1">
+                    {{ formatNumber(currentTotalCapital) }} 銀
+                  </div>
                 </div>
               </div>
-              <div>
-                <div class="text-[10px] text-gray-400">當前總資產估算</div>
-                <div class="font-mono font-extrabold text-amber-400 text-sm mt-1">
-                  {{ formatNumber(currentTotalCapital) }} 銀
-                </div>
+
+              <!-- 雲端與本地備份還原 -->
+              <div class="flex flex-col sm:flex-row items-center gap-1.5 text-xs">
+                <button @click="exportAppSettings" class="px-3 py-2 rounded bg-amber-600 hover:bg-amber-500 text-black font-extrabold text-xs transition shadow flex items-center space-x-1" title="下載專精、本金與記帳數據備份 (JSON 檔)">
+                  <span>📤 備份設定</span>
+                </button>
+                <label class="px-3 py-2 rounded bg-albion-card hover:bg-albion-panel border border-amber-500/50 text-amber-300 font-bold text-xs transition cursor-pointer flex items-center space-x-1 shadow" title="匯入備份之 JSON 設定檔">
+                  <span>📥 匯入設定</span>
+                  <input type="file" accept=".json" class="hidden" @change="importAppSettings">
+                </label>
               </div>
             </div>
           </div>
@@ -2359,191 +2431,7 @@
           </div>
         </div>
 
-        <!-- 4 大階段作戰卡片 (Milestone Stages) -->
-        <div class="space-y-3">
-          <div class="flex items-center justify-between">
-            <h3 class="text-sm font-bold text-white flex items-center space-x-2">
-              <span>🗺️</span>
-              <span>猛獁象進階 4 階段戰略藍圖</span>
-            </h3>
-            <span class="text-xs text-gray-400">點擊各階段按鈕即可一鍵將雷達鎖定在該階段最佳獲利品項</span>
-          </div>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            
-            <!-- 階段 I 卡片 -->
-            <div :class="currentStage === 1 ? 'border-amber-500 bg-amber-950/20' : 'border-albion-border bg-albion-card'"
-                 class="border rounded-xl p-4.5 space-y-3 relative overflow-hidden transition shadow-sm">
-              <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-2">
-                  <span class="text-xl">🥉</span>
-                  <div class="font-extrabold text-sm text-white">階段 I：【20M ➔ 50M】起步極速翻倍</div>
-                </div>
-                <span v-if="currentStage === 1" class="text-[10px] px-2 py-0.5 rounded-full bg-amber-500 text-black font-extrabold animate-pulse">
-                  當前階段
-                </span>
-                <span v-else-if="currentStage > 1" class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 font-bold">
-                  ✓ 已達成
-                </span>
-              </div>
-
-              <div class="text-xs text-gray-300 space-y-1.5 leading-relaxed">
-                <div>• <strong class="text-amber-300">核心策略</strong>：極速週轉、拒絕壓貨、100% 砸單現折 (Instant Sell 4%)。</div>
-                <div>• <strong class="text-amber-300">推薦品項</strong>：T4.0, T4.1, T4.2, T5.0（單件成本 15k~70k，日銷 ≥ 20 件）。</div>
-                <div>• <strong class="text-amber-300">資金配置</strong>：單批投入 5M~8M，保留 12M+ 現金作為護城河，絕不 All-in。</div>
-                <div>• <strong class="text-amber-300">預期週期</strong>：每批淨利約 1M~1.8M，預計 12~15 批出貨即可翻倍至 40M！</div>
-              </div>
-
-              <button @click="applyStageFilter(1)"
-                      class="w-full py-2 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-black font-extrabold rounded-lg text-xs transition shadow flex items-center justify-center space-x-1.5">
-                <span>🎯 一鍵套用【階段 I】低風險拓荒選品</span>
-                <span class="text-[10px] opacity-75">(T4~T5 高流動即時砸單)</span>
-              </button>
-            </div>
-
-            <!-- 階段 II 卡片 -->
-            <div :class="currentStage === 2 ? 'border-amber-500 bg-amber-950/20' : 'border-albion-border bg-albion-card'"
-                 class="border rounded-xl p-4.5 space-y-3 relative overflow-hidden transition shadow-sm">
-              <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-2">
-                  <span class="text-xl">🥈</span>
-                  <div class="font-extrabold text-sm text-white">階段 II：【50M ➔ 120M】工人與專注引擎</div>
-                </div>
-                <span v-if="currentStage === 2" class="text-[10px] px-2 py-0.5 rounded-full bg-amber-500 text-black font-extrabold animate-pulse">
-                  當前階段
-                </span>
-                <span v-else-if="currentStage > 2" class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 font-bold">
-                  ✓ 已達成
-                </span>
-              </div>
-
-              <div class="text-xs text-gray-300 space-y-1.5 leading-relaxed">
-                <div>• <strong class="text-amber-300">核心策略</strong>：紅城島 15 位 T6 獵人工人循環 + 每日 10,000 專注點最大化。</div>
-                <div>• <strong class="text-amber-300">推薦品項</strong>：T5.0~T5.2, T6.0 獵人裝備（弓、雙匕首、長矛、皮甲等）。</div>
-                <div>• <strong class="text-amber-300">工人無本原料</strong>：做約 5 件 T6 獵人裝填滿 15 本日誌，22hr 獲 144 個精煉原料 (日收 30 萬)。</div>
-                <div>• <strong class="text-amber-300">出貨比例</strong>：80% 砸單現折 + 20% 高溢價穩健掛單。</div>
-              </div>
-
-              <button @click="applyStageFilter(2)"
-                      class="w-full py-2 bg-gradient-to-r from-sky-600 to-sky-500 hover:from-sky-500 hover:to-sky-400 text-white font-extrabold rounded-lg text-xs transition shadow flex items-center justify-center space-x-1.5">
-                <span>🏹 一鍵套用【階段 II】工人生態圈選品</span>
-                <span class="text-[10px] opacity-75">(獵人產線 + 專注高回報)</span>
-              </button>
-            </div>
-
-            <!-- 階段 III 卡片 -->
-            <div :class="currentStage === 3 ? 'border-amber-500 bg-amber-950/20' : 'border-albion-border bg-albion-card'"
-                 class="border rounded-xl p-4.5 space-y-3 relative overflow-hidden transition shadow-sm">
-              <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-2">
-                  <span class="text-xl">🥇</span>
-                  <div class="font-extrabold text-sm text-white">階段 III：【120M ➔ 240M】資本槓桿・黑市掛單</div>
-                </div>
-                <span v-if="currentStage === 3" class="text-[10px] px-2 py-0.5 rounded-full bg-amber-500 text-black font-extrabold animate-pulse">
-                  當前階段
-                </span>
-                <span v-else-if="currentStage > 3" class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 font-bold">
-                  ✓ 已達成
-                </span>
-              </div>
-
-              <div class="text-xs text-gray-300 space-y-1.5 leading-relaxed">
-                <div>• <strong class="text-amber-300">核心策略</strong>：批量掛單模式 (Order 6.5% 稅費)，利用向下相容保底有效價享受品質溢價。</div>
-                <div>• <strong class="text-amber-300">推薦品項</strong>：T6.0, T6.1, T6.2 多品項廣布（單次鋪貨 8~12 款商品）。</div>
-                <div>• <strong class="text-amber-300">風控避坑</strong>：雷達出現 ⚠️ 暴漲紅字 時，只即時砸 1~2 件，其餘依穩健掛單價掛單。</div>
-                <div>• <strong class="text-amber-300">單日收益</strong>：掛單池被動成交，每日被動入帳 5M ~ 8M 銀幣！</div>
-              </div>
-
-              <button @click="applyStageFilter(3)"
-                      class="w-full py-2 bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-500 hover:to-purple-400 text-white font-extrabold rounded-lg text-xs transition shadow flex items-center justify-center space-x-1.5">
-                <span>💰 一鍵套用【階段 III】批量掛單深度選品</span>
-                <span class="text-[10px] opacity-75">(T6+ 高向下相容期望價)</span>
-              </button>
-            </div>
-
-            <!-- 階段 IV 卡片 -->
-            <div :class="currentStage === 4 ? 'border-amber-500 bg-amber-950/20' : 'border-albion-border bg-albion-card'"
-                 class="border rounded-xl p-4.5 space-y-3 relative overflow-hidden transition shadow-sm">
-              <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-2">
-                  <span class="text-xl">🦣</span>
-                  <div class="font-extrabold text-sm text-white">階段 IV：【240M ➔ 360M+】終局衝刺・猛獁提車 💀</div>
-                </div>
-                <span v-if="currentStage === 4" class="text-[10px] px-2 py-0.5 rounded-full bg-amber-500 text-black font-extrabold animate-pulse">
-                  當前階段
-                </span>
-              </div>
-
-              <div class="text-xs text-gray-300 space-y-1.5 leading-relaxed">
-                <div>• <strong class="text-amber-300">核心策略</strong>：每日暴利潛力榜首全明星掃盤，大資本全量產線全開。</div>
-                <div>• <strong class="text-amber-300">推薦品項</strong>：雷達【每日暴利潛力 (日銷×淨利)】前 10 名無神器商品。</div>
-                <div>• <strong class="text-amber-300">衝刺速度</strong>：單日利潤破 10M~15M，約 7~10 天即可補齊剩餘 60M 缺口。</div>
-                <div>• <strong class="text-amber-300">終極提車</strong>：準備好 360M，在拍賣行一鍵購入【T8 運載猛獁象】，登頂阿爾比恩！💀</div>
-              </div>
-
-              <button @click="applyStageFilter(4)"
-                      class="w-full py-2 bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-black font-extrabold rounded-lg text-xs transition shadow flex items-center justify-center space-x-1.5">
-                <span>🚀 一鍵套用【階段 IV】全明星暴利選品</span>
-                <span class="text-[10px] opacity-75">(日利潤最大化神品)</span>
-              </button>
-            </div>
-
-          </div>
         </div>
-
-        <!-- 20M 破局防翻車 4 大鐵律 (Anti-Ruin Risk Rules) -->
-        <div class="bg-albion-panel border border-albion-border rounded-xl p-5 space-y-3">
-          <div class="flex items-center space-x-2">
-            <span class="text-lg">🛡️</span>
-            <h3 class="text-sm font-bold text-white tracking-wide">20M 破局防翻車 4 大鐵律 (新手必讀)</h3>
-          </div>
-
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
-            
-            <div class="bg-albion-card border border-albion-border/80 rounded-lg p-3 space-y-1.5">
-              <div class="font-bold text-amber-300 flex items-center space-x-1">
-                <span>1.</span>
-                <span>單品 30% 資金上限</span>
-              </div>
-              <div class="text-[11px] text-gray-400 leading-relaxed">
-                當前本金 20M，單批投入控制在 6M 左右，任何單一裝備採購金額切勿超過 2M。分散到 3~4 種裝備，防止單一黑市買單被同行搶先吃光而卡死本金。
-              </div>
-            </div>
-
-            <div class="bg-albion-card border border-albion-border/80 rounded-lg p-3 space-y-1.5">
-              <div class="font-bold text-amber-300 flex items-center space-x-1">
-                <span>2.</span>
-                <span>流動性守門原則</span>
-              </div>
-              <div class="text-[11px] text-gray-400 leading-relaxed">
-                切勿只看「單件淨利超高」就衝動製造！務必確認日均銷量 ≥ 20 件（綠色標籤）。日銷只有 1~2 件的商品，做 5 件可能要賣兩週，極度拖慢資金滾動速度。
-              </div>
-            </div>
-
-            <div class="bg-albion-card border border-albion-border/80 rounded-lg p-3 space-y-1.5">
-              <div class="font-bold text-amber-300 flex items-center space-x-1">
-                <span>3.</span>
-                <span>工坊必備馬鈴薯沙拉</span>
-              </div>
-              <div class="text-[11px] text-gray-400 leading-relaxed">
-                每次製作裝備前，花 3,000 銀吃一個【T6 馬鈴薯沙拉】（增加 100 製作品質骰）。黑市具有「向下相容機制」，擲出優良、出眾、傑出裝備可直接吃高價買單，成本幾乎零，收益翻倍！
-              </div>
-            </div>
-
-            <div class="bg-albion-card border border-albion-border/80 rounded-lg p-3 space-y-1.5">
-              <div class="font-bold text-amber-300 flex items-center space-x-1">
-                <span>4.</span>
-                <span>日誌隨身攜帶白嫖原料</span>
-              </div>
-              <div class="text-[11px] text-gray-400 leading-relaxed">
-                製造獵人武器（弓、槍、刺客裝）時，背包務必帶滿 15 本 T6 鐵匠/獵人日誌。做完後日誌立刻填滿，回島嶼交給 15 位 T6 獵人工人，22hr 後收穫大量 6 階皮與木板，等於無本印鈔！
-              </div>
-            </div>
-
-          </div>
-        </div>
-
-      </div>
 
     </main>
 
@@ -2822,8 +2710,8 @@
           localStorage.setItem('albion_mammoth_target', '360000000');
         }
         const mammothTarget = ref(savedMammothTarget);
-        watch(userBaseCapital, (val) => localStorage.setItem('albion_base_capital', (val || 0).toString()));
-        watch(mammothTarget, (val) => localStorage.setItem('albion_mammoth_target', (val || 200000000).toString()));
+        watch(userBaseCapital, (val) => { localStorage.setItem('albion_base_capital', (val || 0).toString()); saveSpecsToFile(false); });
+        watch(mammothTarget, (val) => { localStorage.setItem('albion_mammoth_target', (val || 360000000).toString()); saveSpecsToFile(false); });
 
         const currentTotalCapital = computed(() => {
           return (userBaseCapital.value || 0) + (ledgerSummary.value.net_profit || 0);
@@ -2844,15 +2732,30 @@
         });
 
         const defaultDailyQuests = [
-          { id: 'scan', icon: '🔄', title: '【晨間雷達掃描】更新 AODP 實時行情', desc: '確保資料新鮮度，點擊「更新黑市行情」抓取最新紅城原物料與黑市買單。', done: false, action: 'scan' },
-          { id: 'laborer', icon: '🏰', title: '【紅城島工人巡禮】收割 15 位 T6 獵人工人', desc: '收取工人返還的 144 個精煉皮革、木板與金屬條，存入紅城倉庫抵扣今日原料成本。', done: false },
-          { id: 'focus', icon: '🔥', title: '【每日專注點燃燒】清空 10,000 專注點', desc: '專注點每日恢復 10,000，按「專注效率 (銀/專注)」排序，下在回報 > 40 的單品上。', done: false, action: 'focus' },
-          { id: 'select', icon: '🎯', title: '【本金適配選品】點擊當前階段智慧選品', desc: '依照當前 20M 資金規模，挑選 3~5 款高周轉、零泡沫的裝備，加入批量採購清單。', done: false, action: 'stage' },
-          { id: 'craft', icon: '🥣', title: '【工坊極限製造】吃馬鈴薯沙拉 + 攜帶日誌', desc: '在紅城公會/公開工坊製造，享受 15.2%（專注 47.9%）材料返還，沙拉增加高品質擲骰。', done: false },
-          { id: 'sell', icon: '💰', title: '【黑市出貨與記帳】即時砸單或掛單並記帳', desc: '將裝備送至黑市出貨，點擊雷達「⚡ 記錄此售單」或批量結算，看著進度條跳動！', done: false, action: 'ledger' }
+          { id: 'scan', icon: '🔄', title: '【市場行情掃描】更新 AODP 實時行情', desc: '確保資料新鮮度，點擊「更新黑市行情」抓取最新六大城原物料與黑市買單。', done: false, action: 'scan' },
+          { id: 'laborer', icon: '🏰', title: '【工人產出收割】收割島嶼工人原料', desc: '收取工人返還的精煉皮革、木板與金屬條，存入倉庫抵扣今日原料成本。', done: false },
+          { id: 'focus', icon: '🔥', title: '【專注點滿額燃燒】下在專注效率最高品項', desc: '專注點每日恢復 10,000，按「專注效率」排序，集中投在回報率最高之單品。', done: false, action: 'focus' },
+          { id: 'select', icon: '🎯', title: '【高投報選品備料】挑選當前資金最適批量商品', desc: '根據當前資金規模與黑市深度，挑選高周轉、低風險裝備加入批量清單。', done: false, action: 'radar' },
+          { id: 'craft', icon: '🥣', title: '【工坊極限製造】吃海怪沙拉 + 攜帶日誌', desc: '在對應加成工坊製造，享受 24.8%~47.9% 材料返還，海怪沙拉增加高品質擲骰。', done: false },
+          { id: 'sell', icon: '💰', title: '【黑市出貨記帳】完成出貨並核算當日利潤', desc: '將裝備送至黑市出貨，點擊「⚡ 記錄此售單」或批量結算，累積淨利奔向猛獁！', done: false, action: 'ledger' }
         ];
 
-        const dailyQuests = ref(JSON.parse(localStorage.getItem('albion_daily_quests') || 'null') || defaultDailyQuests);
+        const savedDq = localStorage.getItem('albion_daily_quests');
+        let initialDq = defaultDailyQuests;
+        if (savedDq) {
+          try {
+            const parsed = JSON.parse(savedDq);
+            // 若舊版任務含有馬鈴薯沙拉或20M字樣，自動平滑升級為全階段通用任務
+            if (Array.isArray(parsed) && parsed.some(q => q.title && (q.title.includes('馬鈴薯') || q.desc.includes('20M')))) {
+              console.log('[系統] 升級日常作戰任務為全階段通用體系');
+              initialDq = defaultDailyQuests;
+              localStorage.setItem('albion_daily_quests', JSON.stringify(defaultDailyQuests));
+            } else {
+              initialDq = parsed;
+            }
+          } catch(e) {}
+        }
+        const dailyQuests = ref(initialDq);
 
         watch(dailyQuests, (newVal) => {
           localStorage.setItem('albion_daily_quests', JSON.stringify(newVal));
@@ -2950,13 +2853,13 @@
         // 🎲 製作專精與食物設定 (多重擲骰品質系統)
         const innerSpec = ref(parseInt(localStorage.getItem('albion_inner_spec') || '100'));
         const outerSpec = ref(parseInt(localStorage.getItem('albion_outer_spec') || '100'));
-        const foodType = ref(localStorage.getItem('albion_food_type') || 'potato'); // 'none', 'potato', 'kraken'
+        const foodType = ref(localStorage.getItem('albion_food_type') || 'kraken'); // 'none', 'potato', 'kraken'
 
         watch(innerSpec, (val) => { localStorage.setItem('albion_inner_spec', val); saveSpecsToFile(false); });
         watch(outerSpec, (val) => { localStorage.setItem('albion_outer_spec', val); saveSpecsToFile(false); });
         watch(foodType, (val) => { localStorage.setItem('albion_food_type', val); saveSpecsToFile(false); });
 
-        // ================== 💾 專精檔案同步機制 (data/specs.json) ==================
+        // ================== 💾 專精與雲端備份同步機制 (data/specs.json) ==================
         const loadSpecsData = async () => {
           try {
             const res = await fetch('/api/specs');
@@ -2964,10 +2867,30 @@
             if (data) {
               if (data.inner_spec !== undefined) innerSpec.value = data.inner_spec;
               if (data.outer_spec !== undefined) outerSpec.value = data.outer_spec;
-              if (data.food_type) foodType.value = data.food_type;
-              if (data.item_specs && Object.keys(data.item_specs).length > 0) itemSpecs.value = data.item_specs;
-              if (data.mastery_specs && Object.keys(data.mastery_specs).length > 0) masterySpecs.value = data.mastery_specs;
-              console.log('[系統] 成功從 data/specs.json 載入專精配置');
+              foodType.value = 'kraken';
+
+              // 🛡️ 雙向防覆蓋：優先保護本地已設專精，伺服器新數據進行補強，絕不以預設100覆蓋本地！
+              const localItemSpecs = JSON.parse(localStorage.getItem('albion_item_specs') || '{}');
+              const localMasterySpecs = JSON.parse(localStorage.getItem('albion_mastery_specs') || '{}');
+
+              if (data.item_specs && typeof data.item_specs === 'object') {
+                itemSpecs.value = { ...data.item_specs, ...localItemSpecs };
+                localStorage.setItem('albion_item_specs', JSON.stringify(itemSpecs.value));
+              }
+              if (data.mastery_specs && typeof data.mastery_specs === 'object') {
+                masterySpecs.value = { ...data.mastery_specs, ...localMasterySpecs };
+                localStorage.setItem('albion_mastery_specs', JSON.stringify(masterySpecs.value));
+              }
+
+              // 同步本金與目標
+              if (data.user_base_capital !== undefined && !localStorage.getItem('albion_base_capital')) {
+                userBaseCapital.value = data.user_base_capital;
+              }
+              if (data.mammoth_target !== undefined && !localStorage.getItem('albion_mammoth_target')) {
+                mammothTarget.value = data.mammoth_target;
+              }
+
+              console.log('[系統] 成功同步專精與資產配置');
             }
           } catch (e) {
             console.warn('[警告] 讀取專精檔案失敗，沿用瀏覽器快取:', e);
@@ -2982,9 +2905,11 @@
               const payload = {
                 inner_spec: innerSpec.value,
                 outer_spec: outerSpec.value,
-                food_type: foodType.value,
+                food_type: 'kraken',
                 item_specs: itemSpecs.value,
-                mastery_specs: masterySpecs.value
+                mastery_specs: masterySpecs.value,
+                user_base_capital: userBaseCapital.value,
+                mammoth_target: mammothTarget.value
               };
               const res = await fetch('/api/specs', {
                 method: 'POST',
@@ -2993,7 +2918,7 @@
               });
               const resData = await res.json();
               if (resData.success && notify) {
-                copyTextWithFeedback('✓ 專精配置已永久保存至 data/specs.json', '檔案已保存');
+                copyTextWithFeedback('✓ 專精與本金已儲存至 data/specs.json (已同步本地快取)', '檔案已保存');
               }
             } catch (e) {
               console.error('[錯誤] 保存專精至檔案失敗:', e);
@@ -3003,6 +2928,89 @@
 
         const manualSaveSpecs = () => {
           saveSpecsToFile(true);
+        };
+
+        // 📤 雲端與本地全系統配置備份 (JSON 下載與匯入)
+        const exportAppSettings = () => {
+          const backup = {
+            version: '2026.2',
+            timestamp: new Date().toISOString(),
+            user_base_capital: userBaseCapital.value,
+            mammoth_target: mammothTarget.value,
+            inner_spec: innerSpec.value,
+            outer_spec: outerSpec.value,
+            food_type: 'kraken',
+            item_specs: itemSpecs.value,
+            mastery_specs: masterySpecs.value,
+            daily_quests: dailyQuests.value,
+            ledger_records: ledgerRecords.value,
+            batch_list: batchList.value
+          };
+          const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          const dStr = new Date().toISOString().split('T')[0];
+          a.download = `albion_empire_backup_${dStr}.json`;
+          a.click();
+          URL.revokeObjectURL(url);
+          copyTextWithFeedback('✓ 已成功匯出全系統配置備份檔 (JSON)', '備份下載');
+        };
+
+        const importAppSettings = (event) => {
+          const file = event.target.files && event.target.files[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = async (e) => {
+            try {
+              const data = JSON.parse(e.target.result);
+              if (data.inner_spec !== undefined) innerSpec.value = data.inner_spec;
+              if (data.outer_spec !== undefined) outerSpec.value = data.outer_spec;
+              foodType.value = 'kraken';
+              if (data.item_specs && typeof data.item_specs === 'object') {
+                itemSpecs.value = data.item_specs;
+                localStorage.setItem('albion_item_specs', JSON.stringify(data.item_specs));
+              }
+              if (data.mastery_specs && typeof data.mastery_specs === 'object') {
+                masterySpecs.value = data.mastery_specs;
+                localStorage.setItem('albion_mastery_specs', JSON.stringify(data.mastery_specs));
+              }
+              if (data.user_base_capital !== undefined) {
+                userBaseCapital.value = data.user_base_capital;
+                localStorage.setItem('albion_base_capital', data.user_base_capital.toString());
+              }
+              if (data.mammoth_target !== undefined) {
+                mammothTarget.value = data.mammoth_target;
+                localStorage.setItem('albion_mammoth_target', data.mammoth_target.toString());
+              }
+              if (data.daily_quests) {
+                dailyQuests.value = data.daily_quests;
+                localStorage.setItem('albion_daily_quests', JSON.stringify(data.daily_quests));
+              }
+              if (data.ledger_records && Array.isArray(data.ledger_records)) {
+                ledgerRecords.value = data.ledger_records;
+                localStorage.setItem('albion_ledger_records', JSON.stringify(data.ledger_records));
+                // 自動同步至後端 Excel
+                fetch('/api/ledger/restore', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(data.ledger_records)
+                }).then(() => loadLedgerData()).catch(err => console.warn('同步後端 Excel 失敗:', err));
+              }
+              if (data.batch_list) {
+                batchList.value = data.batch_list;
+                localStorage.setItem('albion_batch_list', JSON.stringify(data.batch_list));
+              }
+
+              // 同步專精檔案到伺服器
+              saveSpecsToFile(false);
+              copyTextWithFeedback('✓ 成功匯入上次設定與記帳數據！', '匯入成功');
+            } catch (err) {
+              alert('解析備份檔案失敗: ' + err.message);
+            }
+          };
+          reader.readAsText(file);
+          event.target.value = '';
         };
 
 
@@ -3112,9 +3120,8 @@
           const inner = getMasterySpec(subcat);
           const outer = getItemSpec(baseId);
 
-          let foodBonus = 0;
-          if (foodType.value === 'potato') foodBonus = 100;
-          else if (foodType.value === 'kraken') foodBonus = 200;
+          // 一律吃阿瓦隆海怪沙拉 (+200 QB)
+          let foodBonus = 200;
           const focusBonus = costMode.value === 'focus' ? 50 : 0;
 
           const qb = (inner * 0.3) + (outer * 2.5) + foodBonus + focusBonus;
@@ -3127,6 +3134,12 @@
           const p1 = Math.max(0, 1.0 - (p2 + p3 + p4 + p5));
 
           return {
+          isAllBatchSelected,
+          selectedBatchCount,
+          toggleSelectAllBatch,
+          getBatchItemProfit,
+          exportAppSettings,
+          importAppSettings,
             qb: Math.round(qb),
             n: n.toFixed(1),
             q1: p1, q2: p2, q3: p3, q4: p4, q5: p5,
@@ -3142,9 +3155,8 @@
         const craftingOdds = computed(() => {
           const inner = Math.max(0, Math.min(100, parseInt(innerSpec.value) || 0));
           const outer = Math.max(0, Math.min(100, parseInt(outerSpec.value) || 0));
-          let foodBonus = 0;
-          if (foodType.value === 'potato') foodBonus = 100;
-          else if (foodType.value === 'kraken') foodBonus = 200;
+          // 一律吃阿瓦隆海怪沙拉 (+200 QB)
+          let foodBonus = 200;
           const focusBonus = costMode.value === 'focus' ? 50 : 0;
           
           const qb = (inner * 0.3) + (outer * 2.5) + foodBonus + focusBonus;
@@ -3183,6 +3195,54 @@
 
         // 📋 批量製造與採購清單
         const batchList = ref(JSON.parse(localStorage.getItem('albion_batch_list') || '[]'));
+        // 🛒 購物車模式全選/全不選與各款利潤精算
+        const isAllBatchSelected = computed(() => {
+          return batchList.value.length > 0 && batchList.value.every(b => b.selected !== false);
+        });
+
+        const selectedBatchCount = computed(() => {
+          return batchList.value.filter(b => b.selected !== false).length;
+        });
+
+        const toggleSelectAllBatch = (status) => {
+          batchList.value.forEach(b => {
+            b.selected = !!status;
+          });
+          localStorage.setItem('albion_batch_list', JSON.stringify(batchList.value));
+        };
+
+        const getBatchItemProfit = (b) => {
+          const fullEq = equipments.value.find(e => e.api_id === b.api_id);
+          if (!fullEq) return { unitProfit: 0, subtotalProfit: 0, roi: '0.0', unitCost: 0, subtotalCost: 0, subtotalRev: 0 };
+          const isFocus = b.costMode === 'focus';
+          const isRoyal = b.is_royal || (b.craft_city && b.craft_city !== 'Caerleon');
+          const qty = b.qty || 1;
+
+          let unitCost = isRoyal ? getRoyalItemCost(fullEq, isFocus) : getItemCost(fullEq, isFocus);
+          const stationFee = isRoyal ? 0 : getItemStationFee(fullEq);
+          const effectiveUnitCost = unitCost + (enableStationFee.value ? stationFee : 0);
+
+          const ordP = fullEq.order_sell_price || Math.max(fullEq.instant_sell_price || 0, fullEq.common_7d_avg || 0);
+          const orderFeeFactor = 1.0 - ((instantTaxPct.value + orderFeePct.value) / 100.0);
+          const unitRev = Math.round(ordP * orderFeeFactor);
+
+          const journalSubsidy = (journalSubsidyMode.value !== 'off') ? getItemJournalSubsidy(fullEq) : 0;
+          const unitProfit = unitRev - effectiveUnitCost + journalSubsidy;
+          const subtotalProfit = unitProfit * qty;
+          const subtotalCost = effectiveUnitCost * qty;
+          const subtotalRev = unitRev * qty;
+          const roi = effectiveUnitCost > 0 ? ((unitProfit / effectiveUnitCost) * 100).toFixed(1) : '0.0';
+
+          return {
+            unitProfit,
+            subtotalProfit,
+            roi,
+            unitCost: effectiveUnitCost,
+            subtotalCost,
+            subtotalRev
+          };
+        };
+
         const batchSourceMode = ref('buy'); // 'buy' (市場直購) or 'gather' (自備採集)
         const marketDepthMap = ref({});
         const isFetchingDepth = ref(false);
@@ -3222,7 +3282,8 @@
 
           // 方案 A: 依採購產地城市將原料分組向 API 查詢深度，徹底消除「紅城缺料」假報警
           const cityMatNeeds = {};
-          batchList.value.forEach(bItem => {
+          const activeBatchItems = batchList.value.filter(b => b.selected !== false);
+          activeBatchItems.forEach(bItem => {
             const fullEq = equipments.value.find(e => e.api_id === bItem.api_id);
             if (!fullEq || !fullEq.recipe) return;
             const isRoyal = bItem.is_royal || (bItem.craft_city && bItem.craft_city !== 'Caerleon');
@@ -3840,7 +3901,8 @@
               craft_city: craftCity,
               craft_city_zh: '紅城 (Caerleon)',
               craft_city_icon: '🦹',
-              is_royal: false
+              is_royal: false,
+              selected: true
             });
           }
           copyTextWithFeedback(`已加入紅城批量清單 (+${addQty}件)`, item.name);
@@ -3881,7 +3943,8 @@
           const instantFeeFactor = 1.0 - (instantTaxPct.value / 100.0);
           const orderFeeFactor = 1.0 - ((instantTaxPct.value + orderFeePct.value) / 100.0);
 
-          batchList.value.forEach(bItem => {
+          const activeBatchItems = batchList.value.filter(b => b.selected !== false);
+          activeBatchItems.forEach(bItem => {
             const fullEq = equipments.value.find(e => e.api_id === bItem.api_id);
             if (!fullEq) return;
 
@@ -4086,7 +4149,8 @@
         });
 
         const copyShoppingList = () => {
-          if (batchList.value.length === 0) return;
+          const activeBatch = batchList.value.filter(b => b.selected !== false);
+          if (activeBatch.length === 0) { alert('請至少勾選一款待製作裝備！'); return; }
           const bd = batchDetails.value;
           let text = `【阿爾比恩 批量採購與製造清單 (掛單制)】\n`;
           text += `出貨模式: 批量掛單制 (手續費 6.5%)\n`;
@@ -4141,7 +4205,8 @@
         };
 
         const exportBatchExpenseToLedger = async () => {
-          if (batchList.value.length === 0) return;
+          const activeBatch = batchList.value.filter(b => b.selected !== false);
+          if (activeBatch.length === 0) { alert('請至少勾選一款待製作裝備！'); return; }
           const bd = batchDetails.value;
           if (!confirm(`【階段一：材料支出記帳】\n確認將材料採購成本與工坊店稅共計 ${formatNumber(bd.totalCost)} 銀幣記入「記帳本 (支出)」？`)) return;
 
@@ -4168,7 +4233,8 @@
         };
 
         const exportBatchRevenueToLedger = async () => {
-          if (batchList.value.length === 0) return;
+          const activeBatch = batchList.value.filter(b => b.selected !== false);
+          if (activeBatch.length === 0) { alert('請至少勾選一款待製作裝備！'); return; }
           const bd = batchDetails.value;
           const userVal = prompt(`【階段二：黑市出貨收入確認】\n請確認實際售出之黑市總營收 (預估為 ${formatNumber(bd.totalRevenue)} 銀幣)：`, String(bd.totalRevenue));
           if (userVal === null) return;
@@ -4479,7 +4545,8 @@
               craft_city: craftCity,
               craft_city_zh: craftCityZh,
               craft_city_icon: craftCityIcon,
-              is_royal: true
+              is_royal: true,
+              selected: true
             });
           }
           copyTextWithFeedback(`已加入 [${craftCityZh}] 批量清單 (+${addQty}件)`, item.name);
@@ -4724,14 +4791,49 @@
           try {
             const res = await fetch('/api/ledger');
             const data = await res.json();
-            ledgerRecords.value = data.records || [];
-            ledgerSummary.value = {
-              total_income: data.total_income || 0,
-              total_expense: data.total_expense || 0,
-              net_profit: data.net_profit || 0
-            };
+            const serverRecords = data.records || [];
+            const localSaved = JSON.parse(localStorage.getItem('albion_ledger_records') || '[]');
+
+            // 🛡️ 伺服器重啟保護：如果伺服器因 Render 容器休眠重啟而清空，但本地快取有記錄，自動恢復並還原伺服器 Excel！
+            if (serverRecords.length === 0 && localSaved.length > 0) {
+              console.log('[系統] 檢測到伺服器記帳紀錄為空，自本地快取恢復 ' + localSaved.length + ' 筆紀錄並還原後端');
+              ledgerRecords.value = localSaved;
+              let inc = 0, exp = 0;
+              localSaved.forEach(r => {
+                if (r.type === '收入') inc += (r.total || 0);
+                else exp += (r.total || 0);
+              });
+              ledgerSummary.value = {
+                total_income: inc,
+                total_expense: exp,
+                net_profit: inc - exp
+              };
+              fetch('/api/ledger/restore', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(localSaved)
+              }).catch(err => console.warn('自動還原 Excel 失敗:', err));
+            } else {
+              ledgerRecords.value = serverRecords;
+              localStorage.setItem('albion_ledger_records', JSON.stringify(serverRecords));
+              ledgerSummary.value = {
+                total_income: data.total_income || 0,
+                total_expense: data.total_expense || 0,
+                net_profit: data.net_profit || 0
+              };
+            }
           } catch (e) {
             console.error(e);
+            const localSaved = JSON.parse(localStorage.getItem('albion_ledger_records') || '[]');
+            if (localSaved.length > 0) {
+              ledgerRecords.value = localSaved;
+              let inc = 0, exp = 0;
+              localSaved.forEach(r => {
+                if (r.type === '收入') inc += (r.total || 0);
+                else exp += (r.total || 0);
+              });
+              ledgerSummary.value = { total_income: inc, total_expense: exp, net_profit: inc - exp };
+            }
           }
         };
 

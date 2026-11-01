@@ -1,7 +1,9 @@
 {
   "inner_spec": 100,
   "outer_spec": 100,
-  "food_type": "pork_salad",
+  "food_type": "kraken",
+  "user_base_capital": 20000000,
+  "mammoth_target": 360000000,
   "item_specs": {
     "T4_BOW": 100
   },
