@@ -506,13 +506,27 @@
               </button>
             </div>
 
-            <!-- ⚡ T4/T5 走量爆款快捷鍵 -->
-            <button @click="toggleVolumeOnly"
-                    :class="isVolumeOnly ? 'bg-amber-600 text-white font-extrabold shadow ring-1 ring-amber-400' : 'bg-albion-card hover:bg-albion-hover text-amber-300 border border-amber-600/50'"
-                    class="px-2.5 py-1 rounded text-xs transition flex items-center space-x-1"
-                    title="一鍵過濾 T4/T5、高銷量、無專注獲利的走量製造爆款">
-              <span>⚡ T4/T5 走量爆款</span>
-            </button>
+            <!-- 快捷過濾群組 -->
+            <div class="flex items-center space-x-2">
+              <!-- 🛡️ 現貨深度可製造過濾 (預設啟用) -->
+              <button @click="onlyCraftable = !onlyCraftable"
+                      :class="onlyCraftable ? 'bg-emerald-600 text-white font-extrabold shadow ring-1 ring-emerald-400' : 'bg-albion-card hover:bg-albion-hover text-emerald-300 border border-emerald-600/50'"
+                      class="px-2.5 py-1 rounded text-xs transition flex items-center space-x-1"
+                      title="一鍵過濾紅城原料盤口不足的裝備，僅顯示能夠立即採購製造的品項">
+                <span>🛡️ 僅看現貨可造</span>
+                <span class="text-[10px] px-1.5 py-0.2 rounded font-mono" :class="onlyCraftable ? 'bg-black text-emerald-300' : 'bg-emerald-950 text-emerald-200'">
+                  {{ countCraftableItems }} 件
+                </span>
+              </button>
+
+              <!-- ⚡ T4/T5 走量爆款快捷鍵 -->
+              <button @click="toggleVolumeOnly"
+                      :class="isVolumeOnly ? 'bg-amber-600 text-white font-extrabold shadow ring-1 ring-amber-400' : 'bg-albion-card hover:bg-albion-hover text-amber-300 border border-amber-600/50'"
+                      class="px-2.5 py-1 rounded text-xs transition flex items-center space-x-1"
+                      title="一鍵過濾 T4/T5、高銷量、無專注獲利的走量製造爆款">
+                <span>⚡ T4/T5 走量爆款</span>
+              </button>
+            </div>
           </div>
 
         </div>
@@ -588,7 +602,19 @@
                               </span>
                             </template>
                           </div>
-                          <span class="text-[11px] text-gray-500 block">{{ item.subcat }} ({{ item.cat }})</span>
+                          <div class="flex items-center space-x-1.5 mt-0.5">
+                            <span class="text-[11px] text-gray-500">{{ item.subcat }} ({{ item.cat }})</span>
+                            <span v-if="(item.craftable_qty || 0) >= 1" 
+                                  class="text-[9px] px-1 py-0.2 rounded font-mono font-bold bg-emerald-950/80 text-emerald-300 border border-emerald-800"
+                                  :title="`紅城原料現貨充足，當前盤口深度最多可直造 ${item.craftable_qty} 件`">
+                              🟢 現貨可造 {{ item.craftable_qty }} 件
+                            </span>
+                            <span v-else 
+                                  class="text-[9px] px-1 py-0.2 rounded font-mono font-bold bg-rose-950/80 text-rose-300 border border-rose-800"
+                                  title="紅城市場原料盤口不足或缺貨，無法買齊製造！">
+                              ⚠️ 深度不足 (缺料)
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </td>
@@ -1251,7 +1277,19 @@
                               📋
                             </button>
                           </div>
-                          <span class="text-[11px] text-gray-500 block">{{ item.subcat }} ({{ item.cat }})</span>
+                          <div class="flex items-center space-x-1.5 mt-0.5">
+                            <span class="text-[11px] text-gray-500">{{ item.subcat }} ({{ item.cat }})</span>
+                            <span v-if="(item.craftable_qty || 0) >= 1" 
+                                  class="text-[9px] px-1 py-0.2 rounded font-mono font-bold bg-emerald-950/80 text-emerald-300 border border-emerald-800"
+                                  :title="`紅城原料現貨充足，當前盤口深度最多可直造 ${item.craftable_qty} 件`">
+                              🟢 現貨可造 {{ item.craftable_qty }} 件
+                            </span>
+                            <span v-else 
+                                  class="text-[9px] px-1 py-0.2 rounded font-mono font-bold bg-rose-950/80 text-rose-300 border border-rose-800"
+                                  title="紅城市場原料盤口不足或缺貨，無法買齊製造！">
+                              ⚠️ 深度不足 (缺料)
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </td>
@@ -1948,6 +1986,9 @@
                     <span class="text-xs font-bold text-amber-300" :title="'產地城 (' + (m.refining_city_short || m.refining_city) + ') 售價'">
                       {{ m.refining_city_short || '產地' }}: {{ m.refining_price > 0 ? formatNumber(m.refining_price) : '-' }}
                     </span>
+                    <button @click.stop="openMaterialDepthModal(m, m.refining_city, m.refining_city_zh)" 
+                            title="查看產地盤口深度明細" 
+                            class="px-1 py-0.2 rounded bg-sky-950 hover:bg-sky-900 text-sky-300 border border-sky-800 text-[9px] font-bold">🔍</button>
                   </div>
                   <div class="flex items-center justify-end space-x-1">
                     <span v-if="m.caerleon_age_badge"
@@ -1959,6 +2000,9 @@
                     <span class="text-[10px] text-gray-400" title="紅城本地出售價">
                       紅城: {{ m.sell_min > 0 ? formatNumber(m.sell_min) : '-' }}
                     </span>
+                    <button @click.stop="openMaterialDepthModal(m, 'Caerleon', '紅城 (Caerleon)')" 
+                            title="查看紅城本地盤口深度明細" 
+                            class="px-1 py-0.2 rounded bg-indigo-950 hover:bg-indigo-900 text-indigo-300 border border-indigo-800 text-[9px] font-bold">🔍</button>
                   </div>
                 </div>
               </div>
@@ -2420,6 +2464,9 @@
             </span>
             <span class="font-bold text-white text-sm">{{ selectedDepthMat.mat_name }}</span>
             <span class="text-gray-400 font-mono text-[11px]">({{ selectedDepthMat.api_id }})</span>
+            <span class="text-xs px-2 py-0.5 rounded font-bold bg-amber-950 text-amber-300 border border-amber-800">
+              📍 {{ selectedDepthMat.purchase_city_zh || selectedDepthMat.purchase_city || '紅城' }}
+            </span>
           </div>
           <button @click="showDepthModal = false" class="text-gray-400 hover:text-white text-base leading-none p-1">✕</button>
         </div>
@@ -2442,21 +2489,23 @@
           </div>
           <div class="bg-albion-card p-2 rounded border border-albion-border">
             <div class="text-[10px] text-gray-400">直購加權均價</div>
-            <div class="text-sm font-bold font-mono text-white">{{ formatNumber(selectedDepthMat.unit_price) }} 銀</div>
+            <div class="text-sm font-bold font-mono text-white">{{ formatNumber(selectedDepthMat.avg_unit_price || selectedDepthMat.unit_price) }} 銀</div>
             <div class="text-[9px]" :class="selectedDepthMat.slippage_pct > 0 ? 'text-amber-400 font-bold' : 'text-gray-500'">
               {{ selectedDepthMat.slippage_pct > 0 ? `+${selectedDepthMat.slippage_pct}% 滑價` : '無滑價 (最低檔)' }}
             </div>
           </div>
           <div class="bg-albion-card p-2 rounded border border-albion-border">
             <div class="text-[10px] text-gray-400">買齊總花費</div>
-            <div class="text-sm font-bold font-mono text-emerald-400">{{ formatNumber(selectedDepthMat.total_budget) }} 銀</div>
-            <div class="text-[9px] text-gray-500">Caerleon 紅城市場</div>
+            <div class="text-sm font-bold font-mono text-emerald-400">{{ formatNumber(selectedDepthMat.total_budget || selectedDepthMat.depth_total_cost) }} 銀</div>
+            <div class="text-[9px] text-amber-300 font-medium font-sans">
+              📍 {{ selectedDepthMat.purchase_city_zh || selectedDepthMat.purchase_city || '紅城' }} 市場
+            </div>
           </div>
         </div>
 
         <!-- 說明文字 -->
         <div class="text-[11px] text-gray-300 bg-albion-card/60 p-2.5 rounded border border-albion-border/40 flex items-center justify-between">
-          <span>💡 模擬在紅城市場直購 <b>{{ selectedDepthMat.actual_buy_qty }} 件</b> 時，吃單深度與各檔梯隊消耗：</span>
+          <span>💡 模擬在 <b>{{ selectedDepthMat.purchase_city_zh || selectedDepthMat.purchase_city || '紅城市場' }}</b> 直購 <b>{{ selectedDepthMat.actual_buy_qty }} 件</b> 時，吃單深度與各檔梯隊消耗：</span>
           <button @click="fetchBatchMarketDepth(true)" class="text-sky-400 hover:underline text-[10px] flex items-center space-x-1">
             <span>🔄 重新查詢盤口</span>
           </button>
@@ -3228,6 +3277,7 @@
         const lastDepthFetchTime = ref(null);
         const showDepthModal = ref(false);
         const selectedDepthMat = ref(null);
+        const onlyCraftable = ref(true); // 預設開啟：紅城製造利潤僅顯示現貨深度充足 (可製造) 之裝備
 
         const MAT_NAME_MAP = {
           PLANKS: '木材',
@@ -3248,6 +3298,74 @@
         const openDepthModal = (mat) => {
           selectedDepthMat.value = mat;
           showDepthModal.value = true;
+        };
+
+        // 直接從跨城行情開啟單項原料深度明細
+        const openMaterialDepthModal = async (mat, city = 'Caerleon', cityZh = '') => {
+          const apiId = mat.api_id;
+          const targetCity = city || 'Caerleon';
+          const targetCityZh = cityZh || (targetCity === 'Caerleon' ? '紅城 (Caerleon)' : targetCity);
+          const fallbackPrice = (targetCity === 'Caerleon') ? (mat.caerleon_price || mat.sell_min || 0) : (mat.refining_price || mat.price || 0);
+          
+          const matItem = {
+            key: `${mat.mat_type}_${mat.tier}_${targetCity}`,
+            mat_type: mat.mat_type,
+            mat_name: mat.mat_name,
+            tier: mat.tier,
+            api_id: apiId,
+            purchase_city: targetCity,
+            purchase_city_zh: targetCityZh,
+            unit_price: fallbackPrice,
+            avg_unit_price: fallbackPrice,
+            gross_qty: 100,
+            actual_buy_qty: 100,
+            available_qty: mat.available_qty || 0,
+            is_sufficient: true,
+            shortfall: 0,
+            slippage_pct: 0,
+            lowest_price: fallbackPrice,
+            total_budget: 100 * fallbackPrice,
+            consumed_orders: [],
+            sell_orders: [],
+            status: '查詢中...'
+          };
+          selectedDepthMat.value = matItem;
+          showDepthModal.value = true;
+          
+          try {
+            const res = await fetch('/api/market-depth', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                items: [{ api_id: apiId, needed_qty: 100, gross_qty: 100, fallback_price: fallbackPrice }],
+                location: targetCity,
+                server: serverKey.value || 'east',
+                force_refresh: false
+              })
+            });
+            if (res.ok) {
+              const data = await res.json();
+              if (data && data.depth && data.depth[apiId]) {
+                const depth = data.depth[apiId];
+                marketDepthMap.value[`${apiId}_${targetCity}`] = depth;
+                selectedDepthMat.value = {
+                  ...matItem,
+                  available_qty: depth.available_qty,
+                  is_sufficient: depth.is_sufficient,
+                  shortfall: depth.shortfall,
+                  slippage_pct: depth.slippage_pct,
+                  avg_unit_price: depth.avg_unit_price,
+                  lowest_price: depth.lowest_price,
+                  total_budget: depth.total_cost,
+                  consumed_orders: depth.consumed_orders,
+                  sell_orders: depth.sell_orders,
+                  status: depth.status
+                };
+              }
+            }
+          } catch (e) {
+            console.error('Failed to fetch single depth:', e);
+          }
         };
 
         let depthFetchDebounceTimer = null;
@@ -3320,14 +3438,13 @@
                 if (data && data.depth) {
                   for (const [apiId, depthData] of Object.entries(data.depth)) {
                     marketDepthMap.value[`${apiId}_${pCity}`] = depthData;
-                    marketDepthMap.value[apiId] = depthData;
                   }
                 }
               }
             }
             lastDepthFetchTime.value = new Date().toLocaleTimeString();
             if (showDepthModal.value && selectedDepthMat.value) {
-              const updated = batchDetails.value.materials.find(m => m.api_id === selectedDepthMat.value.api_id);
+              const updated = batchDetails.value.materials.find(m => m.key === selectedDepthMat.value.key || (m.api_id === selectedDepthMat.value.api_id && m.purchase_city === selectedDepthMat.value.purchase_city));
               if (updated) selectedDepthMat.value = updated;
             }
           } catch (err) {
@@ -4033,7 +4150,7 @@
             
             // 方案 A: 依城市檢查是否有抓取到此原料之產地市場供貨深度
             const depthKey = `${m.api_id}_${m.purchase_city}`;
-            const depth = (enableMarketDepth.value && m.api_id) ? (marketDepthMap.value[depthKey] || marketDepthMap.value[m.api_id]) : null;
+            const depth = (enableMarketDepth.value && m.api_id) ? (marketDepthMap.value[depthKey] || (m.purchase_city === 'Caerleon' ? marketDepthMap.value[`${m.api_id}_Caerleon`] : null)) : null;
             if (depth) {
               m.depth = depth;
               m.is_depth_loaded = true;
@@ -4555,6 +4672,16 @@
         const filteredEquipments = computed(() => {
           let list = equipments.value;
 
+          // 🛡️ 盤口深度過濾：排除紅城原料深度不足 (無法製造) 的項目
+          if (onlyCraftable.value) {
+            list = list.filter(e => {
+              if (e.craftable_qty !== undefined) {
+                return e.craftable_qty >= 1;
+              }
+              return e.is_depth_sufficient !== false;
+            });
+          }
+
           // ⚡ T4/T5 走量爆款過濾
           if (isVolumeOnly.value) {
             const vTiers = ['4.0', '4.1', '5.0', '5.1'];
@@ -4639,6 +4766,10 @@
           });
 
           return list;
+        });
+
+        const countCraftableItems = computed(() => {
+          return equipments.value.filter(e => (e.craftable_qty !== undefined ? e.craftable_qty >= 1 : e.is_depth_sufficient !== false)).length;
         });
 
         const totalPages = computed(() => {
@@ -4990,6 +5121,9 @@
           showDepthModal,
           selectedDepthMat,
           openDepthModal,
+          openMaterialDepthModal,
+          onlyCraftable,
+          countCraftableItems,
           fetchBatchMarketDepth,
           addToBatch,
           removeFromBatch,

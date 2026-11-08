@@ -13,6 +13,7 @@ from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from typing import Optional, Dict, Any, List
+from urllib.parse import unquote
 
 if sys.platform.startswith("win"):
     try:
@@ -470,10 +471,11 @@ class MarketDepthRequest(BaseModel):
 def post_market_depth(req: MarketDepthRequest):
     """查詢原物料市場供貨深度、是否充足與買齊之正確成本 (含訂單簿穿價滑價試算)"""
     server = req.server or scanner.server_key
-    loc = req.location or "Caerleon"
+    loc = unquote(req.location or "Caerleon").strip()
     if req.force_refresh:
         for item in req.items:
             scanner.orderbook_cache.pop((server, loc, item.api_id), None)
+            scanner.orderbook_cache.pop((server, req.location, item.api_id), None)
             
     items_data = [
         {
@@ -495,10 +497,11 @@ def post_market_depth(req: MarketDepthRequest):
 @app.get("/api/market-depth")
 def get_market_depth(items: str, location: str = "Caerleon", server: Optional[str] = None):
     """以 GET 簡易查詢多品項深度"""
+    loc = unquote(location).strip()
     item_ids = [x.strip() for x in items.split(",") if x.strip()]
     items_data = [{"api_id": iid, "needed_qty": 1, "gross_qty": 1} for iid in item_ids]
-    results = scanner.fetch_market_depth(items_data, location=location, server_key=server)
-    return {"success": True, "location": location, "depth": results}
+    results = scanner.fetch_market_depth(items_data, location=loc, server_key=server)
+    return {"success": True, "location": loc, "depth": results}
 
 
 app.mount("/static", StaticFiles(directory="static"), name="static")

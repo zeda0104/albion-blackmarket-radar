@@ -7,6 +7,7 @@ Albion Online 黑市製造利潤掃描引擎
 import time
 import requests
 import concurrent.futures
+from urllib.parse import unquote
 from datetime import datetime, timezone
 from typing import Dict, List, Any, Optional
 from items_database import (
@@ -177,11 +178,37 @@ class MarketScanner:
             except Exception as e:
                 print(f"Error fetching materials: {e}")
 
+        # 抓取紅城 48 款原物料即時訂單簿深度 (僅耗時 ~1 秒)
+        caer_depth_map = {}
+        try:
+            caer_ob_url = f"{self.base_url}/orderbook/{','.join(all_ids)}?locations=Caerleon&qualities=1"
+            ob_resp = requests.get(caer_ob_url, headers=headers, timeout=12)
+            if ob_resp.status_code == 200:
+                now_ts = time.time()
+                for entry in ob_resp.json():
+                    eid = entry.get("item_id")
+                    sells = entry.get("sell", [])
+                    buys = entry.get("buy", [])
+                    ck = (self.server_key, "Caerleon", eid)
+                    self.orderbook_cache[ck] = {
+                        "timestamp": now_ts,
+                        "sell": sells,
+                        "buy": buys
+                    }
+                    caer_depth_map[eid] = sells
+        except Exception as e:
+            print(f"[警告] 抓取紅城原料訂單簿失敗: {e}")
+
         structured_materials = {}
         for (mat_type, tier), api_id in mat_map.items():
             # 1. 紅城本地價格
             caer_info = mat_prices.get((api_id, "Caerleon"), {"sell_min": 0, "buy_max": 0, "updated_at": ""})
             caer_p = caer_info[self.price_basis] if caer_info[self.price_basis] > 0 else caer_info["sell_min"]
+            
+            # 計算紅城訂單簿現貨總量 (已透過 _calculate_depth_walk 徹底排除幽靈單)
+            caer_sells = caer_depth_map.get(api_id, [])
+            caer_depth = self._calculate_depth_walk(caer_sells, needed_qty=0, gross_qty=0, fallback_price=caer_p)
+            caer_available_qty = caer_depth.get("available_qty", 0)
             
             # 2. 對應皇家精煉加成產地城價格 (木材->白城, 皮革->藍城, 布料->綠城, 鐵錠->紫城, 石磚->黃城)
             refining_meta = MATERIAL_REFINING_CITIES.get(mat_type, {})
@@ -230,6 +257,10 @@ class MarketScanner:
                 "caerleon_age_badge": caer_badge,
                 "caerleon_age_level": caer_level,
                 "caerleon_age_hours": round(caer_hours, 1),
+                "available_qty": caer_available_qty,
+                "is_depth_sufficient": caer_available_qty > 0,
+                "depth_lowest_price": caer_depth.get("lowest_price", caer_p),
+                "depth_status": caer_depth.get("status", "未知"),
                 # 皇家精煉產地直供行情
                 "refining_city": refining_city,
                 "refining_city_zh": refining_city_zh,
@@ -429,13 +460,31 @@ class MarketScanner:
                 tier = eq["tier"]
                 recipe = eq["recipe"]
                 
-                # 直購材料原成本
+                # 直購材料原成本與紅城現貨盤口深度審核
                 raw_cost = 0
+                craftable_qty = 999999
+                has_invalid_mat = False
+                
                 for mat_type, count in recipe.items():
                     mat_info = mat_dict.get((mat_type, tier))
-                    p = mat_info["price"] if mat_info else 0
-                    if p > 0:
-                        raw_cost += count * p
+                    p = mat_info.get("caerleon_price", 0) if mat_info else 0
+                    if not mat_info or p <= 0:
+                        has_invalid_mat = True
+                        craftable_qty = 0
+                        break
+                    raw_cost += count * p
+                    
+                    # 盤口現貨深度判定：原料現貨是否足以製造至少 1 件
+                    mat_avail = mat_info.get("available_qty", 0)
+                    if mat_avail < count:
+                        craftable_qty = 0
+                    else:
+                        craftable_qty = min(craftable_qty, mat_avail // count)
+                        
+                if has_invalid_mat or craftable_qty == 999999:
+                    craftable_qty = 0
+                    
+                is_depth_sufficient = (craftable_qty >= 1)
                 
                 # 無專注 (15.2% 返還) 與 專注 (47.9% 返還) 實質成本
                 cost_no_focus = int(round(raw_cost * (1.0 - self.rrr_no_focus))) if raw_cost > 0 else 0
@@ -769,9 +818,11 @@ class MarketScanner:
                     "price_age_badge": price_age_badge,
                     "price_age_level": price_age_level,
 
-                    # 6. 專注效率
+                    # 6. 專注效率與紅城現貨深度指標
                     "focus_cost": focus_cost,
                     "silver_per_focus": silver_per_focus,
+                    "craftable_qty": craftable_qty,
+                    "is_depth_sufficient": is_depth_sufficient,
                     
                     "status": status,
                     "qualities": qualities_data,
@@ -834,6 +885,7 @@ class MarketScanner:
         base_url = SERVERS.get(server, self.base_url)
         headers = {'User-Agent': 'AlbionRadar/2.0'}
         now = time.time()
+        norm_location = unquote(location).strip()
         
         # 1. 整理需要向 AODP 抓取訂單簿的 item_id (有快取且未過期 60 秒則重用)
         ids_to_fetch = []
@@ -841,8 +893,8 @@ class MarketScanner:
             api_id = item.get("api_id")
             if not api_id:
                 continue
-            cache_key = (server, location, api_id)
-            cached = self.orderbook_cache.get(cache_key)
+            cache_key = (server, norm_location, api_id)
+            cached = self.orderbook_cache.get(cache_key) or self.orderbook_cache.get((server, location, api_id))
             if not cached or (now - cached.get("timestamp", 0) > 60):
                 ids_to_fetch.append(api_id)
                 
@@ -851,13 +903,13 @@ class MarketScanner:
             chunk_size = 50
             chunks = [ids_to_fetch[i:i + chunk_size] for i in range(0, len(ids_to_fetch), chunk_size)]
             for ch in chunks:
-                url = f"{base_url}/orderbook/{','.join(ch)}?locations={location}&qualities=1"
+                url = f"{base_url}/orderbook/{','.join(ch)}?locations={norm_location}&qualities=1"
                 try:
                     resp = requests.get(url, headers=headers, timeout=12)
                     if resp.status_code == 200:
                         for entry in resp.json():
                             eid = entry.get("item_id")
-                            eloc = entry.get("city", location)
+                            eloc = unquote(entry.get("city", norm_location)).strip()
                             cache_key = (server, eloc, eid)
                             self.orderbook_cache[cache_key] = {
                                 "timestamp": now,
@@ -877,19 +929,47 @@ class MarketScanner:
             gross_qty = int(item.get("gross_qty", needed_qty))
             fallback_price = int(item.get("fallback_price", 0))
             
-            cache_key = (server, location, api_id)
-            order_data = self.orderbook_cache.get(cache_key, {})
+            cache_key = (server, norm_location, api_id)
+            order_data = self.orderbook_cache.get(cache_key) or self.orderbook_cache.get((server, location, api_id), {})
             sell_orders = order_data.get("sell", [])
             
             depth_info = self._calculate_depth_walk(sell_orders, needed_qty, gross_qty, fallback_price)
             depth_info["api_id"] = api_id
-            depth_info["location"] = location
+            depth_info["location"] = norm_location
             depth_info["cached_at"] = order_data.get("timestamp", now)
+            depth_info["cached_at_formatted"] = datetime.fromtimestamp(order_data.get("timestamp", now)).strftime("%H:%M:%S")
             results[api_id] = depth_info
             
         return results
 
     def _calculate_depth_walk(self, raw_sell_orders: List[Dict[str, Any]], needed_qty: int, gross_qty: int, fallback_price: int = 0) -> Dict[str, Any]:
+        # 1. 找出訂單簿中最新的快照時間戳記
+        latest_ts = ""
+        for o in raw_sell_orders:
+            up_at = o.get("updated_at", "")
+            if up_at > latest_ts:
+                latest_ts = up_at
+                
+        # 2. 決定最低有效掛售價格門檻，徹底剔除已成交/已過期之幽靈單
+        # 在阿爾比恩 AODP 中，若訂單已被買光，資料庫不會即時刪除舊單，造成陳舊低價幽靈單殘留。
+        # 若最新快照已有掛單，則最新快照的最低報價即為真實盤口起點；
+        # 同時配合 API 驗證的 sell_price_min (fallback_price)，低於此價格者必為已成交幽靈單。
+        min_allowed_price = fallback_price
+        if latest_ts:
+            latest_prices = [
+                int(o.get("price", 0))
+                for o in raw_sell_orders
+                if o.get("price", 0) > 0 and o.get("updated_at", "") == latest_ts
+            ]
+            if latest_prices:
+                snapshot_min = min(latest_prices)
+                if min_allowed_price > 0:
+                    min_allowed_price = min(min_allowed_price, snapshot_min)
+                else:
+                    min_allowed_price = snapshot_min
+                    
+        price_threshold = min_allowed_price if min_allowed_price > 0 else 1
+
         valid_orders = [
             {
                 "price": int(o.get("price", 0)),
@@ -897,7 +977,7 @@ class MarketScanner:
                 "updated_at": o.get("updated_at", "")
             }
             for o in raw_sell_orders
-            if o.get("price", 0) > 0 and o.get("amount", 0) > 0
+            if o.get("price", 0) >= price_threshold and o.get("amount", 0) > 0
         ]
         valid_orders.sort(key=lambda x: x["price"])
         
