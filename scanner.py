@@ -346,6 +346,7 @@ class MarketScanner:
             print(f"Error fetching rune prices: {e}")
 
         # 計算實效單價 (支援使用者自訂覆寫優先)
+        # 嚴格遵照使用者指示：符石只考慮採用掛單 (Buy Order) 方式收，以免直購溢價！
         for t_key, fallback in fallback_map.items():
             custom_p = self.custom_rune_prices.get(t_key)
             if custom_p is not None and custom_p > 0:
@@ -353,8 +354,8 @@ class MarketScanner:
                 results[t_key]["is_custom"] = True
             else:
                 b_max = results[t_key]["api_buy"]
-                s_min = results[t_key]["api_sell"]
-                eff = b_max if b_max > 0 else (s_min if s_min > 0 else fallback)
+                # 符石一律優先採納市場最高買單收購價 (Buy Order)，若 API 暫無買單價則退回保守保底掛單行情，絕不吃直購賣單價
+                eff = b_max if b_max > 0 else fallback
                 results[t_key]["effective_price"] = eff
                 results[t_key]["is_custom"] = False
 
@@ -752,7 +753,8 @@ class MarketScanner:
                 liquidity_rating = hist_info.get("liquidity_rating", "低流通")
                 
                 # ================== 4. 日誌補貼與紅城島工人產出 ==================
-                journal_info = get_journal_stats(eq["cat"], tier, recipe, journal_prices=journal_prices)
+                is_rune_craft = bool(rune_enchant_info.get("is_cheaper") or rune_enchant_info.get("royal_is_cheaper"))
+                journal_info = get_journal_stats(eq["cat"], tier, recipe, journal_prices=journal_prices, is_rune_enchant=is_rune_craft)
                 
                 # ================== 5. 黑市風控定價引擎與雙軌建議 ==================
                 # 穩健掛單價邏輯：
@@ -1104,13 +1106,48 @@ class MarketScanner:
             cache_key = (server, norm_location, api_id)
             order_data = self.orderbook_cache.get(cache_key) or self.orderbook_cache.get((server, location, api_id), {})
             sell_orders = order_data.get("sell", [])
+            buy_orders = order_data.get("buy", [])
             
-            depth_info = self._calculate_depth_walk(sell_orders, needed_qty, gross_qty, fallback_price)
-            depth_info["api_id"] = api_id
-            depth_info["location"] = norm_location
-            depth_info["cached_at"] = order_data.get("timestamp", now)
-            depth_info["cached_at_formatted"] = datetime.fromtimestamp(order_data.get("timestamp", now)).strftime("%H:%M:%S")
-            results[api_id] = depth_info
+            # 🔴 符石一律採用集市買單 (Buy Order) 掛單收購，不吃直購賣單深度滑價與溢價
+            if api_id.endswith("_RUNE"):
+                valid_buy_prices = [int(o.get("price", 0)) for o in buy_orders if int(o.get("price", 0)) > 0]
+                best_buy = max(valid_buy_prices) if valid_buy_prices else fallback_price
+                if best_buy <= 0:
+                    best_buy = fallback_price
+                if best_buy <= 0:
+                    t_k = api_id.split("_")[0]
+                    best_buy = {"T4": 14, "T5": 50, "T6": 320}.get(t_k, 50)
+
+                total_cost = needed_qty * best_buy
+                results[api_id] = {
+                    "api_id": api_id,
+                    "location": norm_location,
+                    "is_sufficient": True,
+                    "gross_sufficient": True,
+                    "available_qty": sum(int(o.get("amount", 0)) for o in sell_orders) if sell_orders else needed_qty,
+                    "needed_qty": needed_qty,
+                    "gross_qty": gross_qty,
+                    "shortfall": 0,
+                    "avg_unit_price": best_buy,
+                    "lowest_price": best_buy,
+                    "total_cost": total_cost,
+                    "slippage_pct": 0.0,
+                    "status": "充足 (買單掛單收購)",
+                    "consumed_orders": [],
+                    "sell_orders": sell_orders[:20] if sell_orders else [],
+                    "is_buy_order_mode": True,
+                    "buy_order_unit_price": best_buy,
+                    "buy_order_note": "📌 符石一律採用集市買單 (Buy Order) 掛單收購，避免直購吃單溢價",
+                    "cached_at": order_data.get("timestamp", now),
+                    "cached_at_formatted": datetime.fromtimestamp(order_data.get("timestamp", now)).strftime("%H:%M:%S")
+                }
+            else:
+                depth_info = self._calculate_depth_walk(sell_orders, needed_qty, gross_qty, fallback_price)
+                depth_info["api_id"] = api_id
+                depth_info["location"] = norm_location
+                depth_info["cached_at"] = order_data.get("timestamp", now)
+                depth_info["cached_at_formatted"] = datetime.fromtimestamp(order_data.get("timestamp", now)).strftime("%H:%M:%S")
+                results[api_id] = depth_info
             
         return results
 

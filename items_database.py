@@ -365,10 +365,20 @@ def calculate_quality_chances(inner_spec: int = 0, outer_spec: int = 0, food: st
         }
     }
 
-def get_journal_stats(cat: str, tier: str, recipe: dict, journal_prices: dict = None) -> dict:
+def get_journal_stats(cat: str, tier: str, recipe: dict, journal_prices: dict = None, is_rune_enchant: bool = False) -> dict:
     """
     計算單件裝備製作時的日誌聲望填充、可填本數、真實市場直售淨收益與紅城島工人產能換算。
-    日誌無品質與附魔等級，高附魔裝備僅加速填充；單本市價依紅城實際買賣價格計算。
+    日誌無品質與附魔等級，單本市價依紅城實際買賣價格計算。
+    
+    【阿爾比恩官方製造聲望與日誌填充機制】：
+    1. 基礎聲望基準 (每單位原料): T4: 22.5, T5: 90.0, T6: 270.0, T7: 810.0, T8: 2430.0
+    2. 官方直接製造附魔倍率: .0: 1.0x, .1: 1.5x, .2: 3.0x, .3: 6.0x (非 2.0x/4.0x)
+    3. 神器工坊符石附魔路線 (is_rune_enchant=True):
+       玩家在工坊製造的是「.0 裝備」，僅獲得 .0 基礎製造聲望 (enchant_mult=1.0)；
+       後續在神器工坊升級附魔不提供任何製造日誌聲望。
+       例如: T6.0 鞋子 (8皮革) 製造聲望 = 8 * 270 = 2,160 Fame；
+       T6 日誌容量為 14,400 Fame，單雙填寫 2,160 / 14,400 = 0.15 本；
+       搓 50 雙 T6 鞋子總計填寫 50 * 0.15 = 7.5 本 (約 7~8 本)！
     """
     try:
         tier_str = str(tier)
@@ -380,15 +390,20 @@ def get_journal_stats(cat: str, tier: str, recipe: dict, journal_prices: dict = 
 
     total_mats = sum(recipe.values()) if recipe else 0
 
-    # 官方聲望基準 (每單位原料) 與 日誌容量 (製造類日誌無附魔，附魔裝備倍增聲望加速填充)
-    # 官方基礎聲望: T4: 22.5, T5: 90.0, T6: 270.0, T7: 810.0, T8: 2430.0
+    # 官方聲望基準 (每單位原料) 與 日誌容量
     fame_per_mat = {4: 22.5, 5: 90.0, 6: 270.0, 7: 810.0, 8: 2430.0}.get(base_tier, 22.5)
-    enchant_mult = {0: 1.0, 1: 2.0, 2: 4.0, 3: 8.0}.get(enchant, 1.0)
+    
+    # 官方正確附魔倍率 (.0: 1.0x, .1: 1.5x, .2: 3.0x, .3: 6.0x)
+    direct_enchant_mult = {0: 1.0, 1: 1.5, 2: 3.0, 3: 6.0}.get(enchant, 1.0)
+    enchant_mult = 1.0 if is_rune_enchant else direct_enchant_mult
+    
     craft_fame = total_mats * fame_per_mat * enchant_mult
+    base_craft_fame = total_mats * fame_per_mat * 1.0
 
     # 官方製造日誌聲望容量 (T4: 3600, T5: 7200, T6: 14400, T7: 28800, T8: 57600)
     journal_capacity = {4: 3600, 5: 7200, 6: 14400, 7: 28800, 8: 57600}.get(base_tier, 3600)
     journals_filled = craft_fame / journal_capacity if journal_capacity > 0 else 0.0
+    base_journals_filled = base_craft_fame / journal_capacity if journal_capacity > 0 else 0.0
 
     cfg = WORKSHOP_JOURNAL_MAP.get(cat, WORKSHOP_JOURNAL_MAP["獵人小屋"])
     j_type = cfg["type"]
@@ -433,6 +448,9 @@ def get_journal_stats(cat: str, tier: str, recipe: dict, journal_prices: dict = 
         "suggested_action": suggested_action,
         "craft_fame": int(round(craft_fame)),
         "journals_filled": round(journals_filled, 3),
+        "base_journals_filled": round(base_journals_filled, 3),
+        "enchant_mult": enchant_mult,
+        "is_rune_enchant": is_rune_enchant,
         "crafts_for_15_journals": crafts_for_15_journals,
         "unit_net_journal": unit_net_journal,
         "full_journal_price": full_p,

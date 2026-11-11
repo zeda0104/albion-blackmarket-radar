@@ -1992,6 +1992,10 @@
                           <!-- 市場供貨深度 -->
                           <td v-if="batchSourceMode === 'buy'" class="py-1.5 text-center font-sans">
                             <div v-if="isFetchingDepth" class="text-[10px] text-gray-400 animate-pulse">⏳ 查詢...</div>
+                            <div v-else-if="m.is_rune" class="inline-flex items-center space-x-1">
+                              <span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-amber-950/80 text-amber-300 border border-amber-800" title="符石只考慮採用掛單收購，以免直購溢價">📌 掛單收購</span>
+                              <button @click="openDepthModal(m)" title="查看盤口明細與掛單價" class="px-1 py-0.2 rounded bg-sky-950 hover:bg-sky-900 text-sky-300 border border-sky-800 text-[9px] font-bold">🔍</button>
+                            </div>
                             <div v-else-if="m.is_depth_loaded" class="inline-flex items-center space-x-1">
                               <span v-if="m.available_qty === 0" class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-rose-950/80 text-rose-300 border border-rose-800">⚪ 無貨</span>
                               <span v-else-if="m.is_sufficient" class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-emerald-950/80 text-emerald-300 border border-emerald-800">🟢 充足 ({{ m.available_qty }})</span>
@@ -2006,7 +2010,8 @@
                           <!-- 單價 -->
                           <td v-if="batchSourceMode === 'buy'" class="py-1.5 text-right">
                             <div class="text-white font-bold">{{ formatNumber(m.unit_price) }}</div>
-                            <div v-if="m.slippage_pct > 0" class="text-[9px] text-amber-400 font-sans">+{{ m.slippage_pct }}%滑價</div>
+                            <div v-if="m.is_rune" class="text-[9px] text-amber-400 font-sans">買單掛單價</div>
+                            <div v-else-if="m.slippage_pct > 0" class="text-[9px] text-amber-400 font-sans">+{{ m.slippage_pct }}%滑價</div>
                           </td>
 
                           <!-- 預算 -->
@@ -2622,7 +2627,14 @@
             <div class="text-sm font-bold font-mono text-amber-300">{{ selectedDepthMat.actual_buy_qty }} 件</div>
             <div class="text-[9px] text-gray-500 font-mono">需備: {{ selectedDepthMat.gross_qty }}</div>
           </div>
-          <div class="bg-albion-card p-2 rounded border border-albion-border">
+
+          <!-- 卡片 2: 市場現貨 / 符石採購模式 -->
+          <div v-if="selectedDepthMat.is_rune" class="bg-albion-card p-2 rounded border border-albion-border">
+            <div class="text-[10px] text-gray-400">採購作業模式</div>
+            <div class="text-sm font-bold font-mono text-amber-300">集市買單收購</div>
+            <div class="text-[9px] font-bold text-emerald-400">🟢 免直購溢價</div>
+          </div>
+          <div v-else class="bg-albion-card p-2 rounded border border-albion-border">
             <div class="text-[10px] text-gray-400">市場現貨總量</div>
             <div class="text-sm font-bold font-mono" :class="selectedDepthMat.is_sufficient ? 'text-emerald-400' : 'text-rose-400'">
               {{ selectedDepthMat.available_qty }} 件
@@ -2631,25 +2643,39 @@
               {{ selectedDepthMat.is_sufficient ? '🟢 供貨充足' : `⚠️ 缺 ${selectedDepthMat.shortfall} 件` }}
             </div>
           </div>
-          <div class="bg-albion-card p-2 rounded border border-albion-border">
+
+          <!-- 卡片 3: 單價 (掛單收購單價 vs 直購加權均價) -->
+          <div v-if="selectedDepthMat.is_rune" class="bg-albion-card p-2 rounded border border-albion-border">
+            <div class="text-[10px] text-gray-400">買單掛單單價</div>
+            <div class="text-sm font-bold font-mono text-white">{{ formatNumber(selectedDepthMat.avg_unit_price || selectedDepthMat.unit_price) }} 銀</div>
+            <div class="text-[9px] text-emerald-400 font-bold">無滑價 (買單鎖定)</div>
+          </div>
+          <div v-else class="bg-albion-card p-2 rounded border border-albion-border">
             <div class="text-[10px] text-gray-400">直購加權均價</div>
             <div class="text-sm font-bold font-mono text-white">{{ formatNumber(selectedDepthMat.avg_unit_price || selectedDepthMat.unit_price) }} 銀</div>
             <div class="text-[9px]" :class="selectedDepthMat.slippage_pct > 0 ? 'text-amber-400 font-bold' : 'text-gray-500'">
               {{ selectedDepthMat.slippage_pct > 0 ? `+${selectedDepthMat.slippage_pct}% 滑價` : '無滑價 (最低檔)' }}
             </div>
           </div>
+
+          <!-- 卡片 4: 總花費 -->
           <div class="bg-albion-card p-2 rounded border border-albion-border">
-            <div class="text-[10px] text-gray-400">買齊總花費</div>
+            <div class="text-[10px] text-gray-400">{{ selectedDepthMat.is_rune ? '掛單總預算' : '買齊總花費' }}</div>
             <div class="text-sm font-bold font-mono text-emerald-400">{{ formatNumber(selectedDepthMat.total_budget || selectedDepthMat.depth_total_cost) }} 銀</div>
             <div class="text-[9px] text-amber-300 font-medium font-sans">
-              📍 {{ selectedDepthMat.purchase_city_zh || selectedDepthMat.purchase_city || '紅城' }} 市場
+              📍 {{ selectedDepthMat.purchase_city_zh || selectedDepthMat.purchase_city || '紅城' }} {{ selectedDepthMat.is_rune ? '買單' : '市場' }}
             </div>
           </div>
         </div>
 
         <!-- 說明文字 -->
         <div class="text-[11px] text-gray-300 bg-albion-card/60 p-2.5 rounded border border-albion-border/40 flex items-center justify-between">
-          <span>💡 模擬在 <b>{{ selectedDepthMat.purchase_city_zh || selectedDepthMat.purchase_city || '紅城市場' }}</b> 直購 <b>{{ selectedDepthMat.actual_buy_qty }} 件</b> 時，吃單深度與各檔梯隊消耗：</span>
+          <span v-if="selectedDepthMat.is_rune">
+            💡 <b>符石採購風控指南：</b>符石一律建議在紅城集市發布【買單 (Buy Order) 掛單收購】，避免直購吃賣單深度產生嚴重溢價與滑價！預算依買單價鎖定。
+          </span>
+          <span v-else>
+            💡 模擬在 <b>{{ selectedDepthMat.purchase_city_zh || selectedDepthMat.purchase_city || '紅城市場' }}</b> 直購 <b>{{ selectedDepthMat.actual_buy_qty }} 件</b> 時，吃單深度與各檔梯隊消耗：
+          </span>
           <button @click="fetchBatchMarketDepth(true)" class="text-sky-400 hover:underline text-[10px] flex items-center space-x-1">
             <span>🔄 重新查詢盤口</span>
           </button>
@@ -2657,11 +2683,16 @@
 
         <!-- 訂單簿深度列表 -->
         <div class="overflow-y-auto flex-1 border border-albion-border/50 rounded-lg max-h-[320px]">
+          <!-- 若為符石: 顯示買單掛單指引與賣單行情參考 -->
+          <div v-if="selectedDepthMat.is_rune" class="p-3 bg-amber-950/20 border-b border-albion-border/40 text-[11px] text-amber-200">
+            📌 <b>掛單防溢價策略：</b>以下為集市現有賣單行情參考。直購會迅速推高均價，請務必在紅城集市以 <b>{{ formatNumber(selectedDepthMat.unit_price) }} 銀</b> 發布買單 (Buy Order) 掛單等待玩家拋售，可保證 0% 吃單溢價完成採購！
+          </div>
+
           <table class="w-full text-left text-xs">
             <thead class="bg-albion-card sticky top-0 border-b border-albion-border text-gray-400 z-10">
               <tr>
                 <th class="py-1.5 px-2.5">檔位</th>
-                <th class="py-1.5 px-2 text-right">掛售單價</th>
+                <th class="py-1.5 px-2 text-right">{{ selectedDepthMat.is_rune ? '集市賣單報價' : '掛售單價' }}</th>
                 <th class="py-1.5 px-2 text-right">該檔現貨</th>
                 <th class="py-1.5 px-2 text-right text-amber-300">本單吃單</th>
                 <th class="py-1.5 px-2 text-right">小計</th>
@@ -2669,50 +2700,74 @@
               </tr>
             </thead>
             <tbody class="divide-y divide-albion-border/30 font-mono">
-              <tr v-for="ord in selectedDepthMat.consumed_orders" :key="ord.tier_index" class="bg-emerald-950/20 hover:bg-emerald-950/30">
-                <td class="py-1.5 px-2.5 font-bold text-gray-400">#{{ ord.tier_index }}</td>
-                <td class="py-1.5 px-2 text-right font-bold text-white">{{ formatNumber(ord.price) }}</td>
-                <td class="py-1.5 px-2 text-right text-gray-300">{{ ord.amount }}</td>
-                <td class="py-1.5 px-2 text-right font-bold text-amber-300">{{ ord.used_qty }}</td>
-                <td class="py-1.5 px-2 text-right text-gray-200">{{ formatNumber(ord.subtotal) }}</td>
-                <td class="py-1.5 px-2.5 text-center font-sans">
-                  <span class="px-1.5 py-0.2 rounded text-[10px] font-bold" :class="ord.is_full_take ? 'bg-emerald-900/80 text-emerald-300' : 'bg-indigo-900/80 text-indigo-300'">
-                    {{ ord.is_full_take ? '吃完' : '吃部分' }}
-                  </span>
-                </td>
-              </tr>
+              <!-- 符石模式：展示賣單但吃單為 0，提示高價賣單不直購 -->
+              <template v-if="selectedDepthMat.is_rune">
+                <tr v-for="(ord, idx) in (selectedDepthMat.sell_orders || []).slice(0, 15)" :key="'rune_sell_' + idx" class="hover:bg-albion-hover/40">
+                  <td class="py-1.5 px-2.5 font-bold text-gray-400">#{{ idx + 1 }}</td>
+                  <td class="py-1.5 px-2 text-right font-bold text-white">{{ formatNumber(ord.price) }}</td>
+                  <td class="py-1.5 px-2 text-right text-gray-300">{{ ord.amount }}</td>
+                  <td class="py-1.5 px-2 text-right text-gray-500 font-sans">0 (不直購)</td>
+                  <td class="py-1.5 px-2 text-right text-gray-500">-</td>
+                  <td class="py-1.5 px-2.5 text-center font-sans">
+                    <span class="px-1.5 py-0.2 rounded text-[10px] font-bold bg-amber-950 text-amber-300 border border-amber-800">
+                      高價賣單 (避免吃單)
+                    </span>
+                  </td>
+                </tr>
+                <tr v-if="!selectedDepthMat.sell_orders || selectedDepthMat.sell_orders.length === 0">
+                  <td colspan="6" class="py-4 text-center text-gray-400 font-sans">
+                    暫無賣單盤口數據，請依買單行情掛單
+                  </td>
+                </tr>
+              </template>
 
-              <!-- 短缺警示行 -->
-              <tr v-if="selectedDepthMat.shortfall > 0" class="bg-rose-950/40 text-rose-300">
-                <td class="py-2 px-2.5 font-bold text-rose-400">缺貨</td>
-                <td class="py-2 px-2 text-right font-bold">-</td>
-                <td class="py-2 px-2 text-right font-bold text-rose-400">0</td>
-                <td class="py-2 px-2 text-right font-bold text-rose-300">缺 {{ selectedDepthMat.shortfall }} 件</td>
-                <td class="py-2 px-2 text-right font-bold text-rose-400">無法買齊</td>
-                <td class="py-2 px-2.5 text-center font-sans">
-                  <span class="px-1.5 py-0.2 rounded text-[10px] font-bold bg-rose-900 text-rose-200">
-                    ⚠️ 現貨不足
-                  </span>
-                </td>
-              </tr>
+              <!-- 普通原料模式：吃單深度走訪 -->
+              <template v-else>
+                <tr v-for="ord in selectedDepthMat.consumed_orders" :key="ord.tier_index" class="bg-emerald-950/20 hover:bg-emerald-950/30">
+                  <td class="py-1.5 px-2.5 font-bold text-gray-400">#{{ ord.tier_index }}</td>
+                  <td class="py-1.5 px-2 text-right font-bold text-white">{{ formatNumber(ord.price) }}</td>
+                  <td class="py-1.5 px-2 text-right text-gray-300">{{ ord.amount }}</td>
+                  <td class="py-1.5 px-2 text-right font-bold text-amber-300">{{ ord.used_qty }}</td>
+                  <td class="py-1.5 px-2 text-right text-gray-200">{{ formatNumber(ord.subtotal) }}</td>
+                  <td class="py-1.5 px-2.5 text-center font-sans">
+                    <span class="px-1.5 py-0.2 rounded text-[10px] font-bold" :class="ord.is_full_take ? 'bg-emerald-900/80 text-emerald-300' : 'bg-indigo-900/80 text-indigo-300'">
+                      {{ ord.is_full_take ? '吃完' : '吃部分' }}
+                    </span>
+                  </td>
+                </tr>
 
-              <!-- 未吃到的後續高價訂單 (預覽市場深度) -->
-              <tr v-for="(ord, idx) in (selectedDepthMat.sell_orders || []).slice(selectedDepthMat.consumed_orders ? selectedDepthMat.consumed_orders.length : 0, 15)"
-                  :key="'rem_' + idx"
-                  class="opacity-40 hover:opacity-75 transition">
-                <td class="py-1 px-2.5 text-gray-500">#{{ (selectedDepthMat.consumed_orders ? selectedDepthMat.consumed_orders.length : 0) + idx + 1 }}</td>
-                <td class="py-1 px-2 text-right text-gray-400">{{ formatNumber(ord.price) }}</td>
-                <td class="py-1 px-2 text-right text-gray-500">{{ ord.amount }}</td>
-                <td class="py-1 px-2 text-right text-gray-500">0</td>
-                <td class="py-1 px-2 text-right text-gray-500">-</td>
-                <td class="py-1.5 px-2.5 text-center font-sans text-gray-500 text-[10px]">未動用</td>
-              </tr>
+                <!-- 短缺警示行 -->
+                <tr v-if="selectedDepthMat.shortfall > 0" class="bg-rose-950/40 text-rose-300">
+                  <td class="py-2 px-2.5 font-bold text-rose-400">缺貨</td>
+                  <td class="py-2 px-2 text-right font-bold">-</td>
+                  <td class="py-2 px-2 text-right font-bold text-rose-400">0</td>
+                  <td class="py-2 px-2 text-right font-bold text-rose-300">缺 {{ selectedDepthMat.shortfall }} 件</td>
+                  <td class="py-2 px-2 text-right font-bold text-rose-400">無法買齊</td>
+                  <td class="py-2 px-2.5 text-center font-sans">
+                    <span class="px-1.5 py-0.2 rounded text-[10px] font-bold bg-rose-900 text-rose-200">
+                      ⚠️ 現貨不足
+                    </span>
+                  </td>
+                </tr>
 
-              <tr v-if="(!selectedDepthMat.consumed_orders || selectedDepthMat.consumed_orders.length === 0) && selectedDepthMat.shortfall <= 0">
-                <td colspan="6" class="py-4 text-center text-gray-500 font-sans">
-                  暫無掛單數據，請點擊上方重新查詢盤口
-                </td>
-              </tr>
+                <!-- 未吃到的後續高價訂單 (預覽市場深度) -->
+                <tr v-for="(ord, idx) in (selectedDepthMat.sell_orders || []).slice(selectedDepthMat.consumed_orders ? selectedDepthMat.consumed_orders.length : 0, 15)"
+                    :key="'rem_' + idx"
+                    class="opacity-40 hover:opacity-75 transition">
+                  <td class="py-1 px-2.5 text-gray-500">#{{ (selectedDepthMat.consumed_orders ? selectedDepthMat.consumed_orders.length : 0) + idx + 1 }}</td>
+                  <td class="py-1 px-2 text-right text-gray-400">{{ formatNumber(ord.price) }}</td>
+                  <td class="py-1 px-2 text-right text-gray-500">{{ ord.amount }}</td>
+                  <td class="py-1 px-2 text-right text-gray-500">0</td>
+                  <td class="py-1 px-2 text-right text-gray-500">-</td>
+                  <td class="py-1.5 px-2.5 text-center font-sans text-gray-500 text-[10px]">未動用</td>
+                </tr>
+
+                <tr v-if="(!selectedDepthMat.consumed_orders || selectedDepthMat.consumed_orders.length === 0) && selectedDepthMat.shortfall <= 0">
+                  <td colspan="6" class="py-4 text-center text-gray-500 font-sans">
+                    暫無掛單數據，請點擊上方重新查詢盤口
+                  </td>
+                </tr>
+              </template>
             </tbody>
           </table>
         </div>
@@ -4389,16 +4444,27 @@
             estOrderRev += itemOrdRev;
             totalRevenue += itemOrdRev;
 
-            // 統計滿日誌本數
-            if (fullEq.journal) {
-              const jName = fullEq.journal.journal_name;
-              const jFilled = (fullEq.journal.journals_filled || 0) * qty;
-              journalSummary[jName] = (journalSummary[jName] || 0) + jFilled;
-            }
-
             // 判斷該 .1 裝備是否以符石附魔較划算
             const useRuneEnchant = fullEq.rune_enchant && (isRoyal ? fullEq.rune_enchant.royal_is_cheaper : fullEq.rune_enchant.is_cheaper);
             const effectiveCraftTier = useRuneEnchant ? (fullEq.tier.split('.')[0] + '.0') : fullEq.tier;
+
+            // 統計滿日誌本數
+            if (fullEq.journal) {
+              const jName = fullEq.journal.journal_name;
+              // 🔴 關鍵修正：若走符石附魔，裝備在工坊製造時是 .0 裝備，聲望為 .0 基準聲望 (1.0x)！
+              let singleFilled = fullEq.journal.journals_filled || 0;
+              if (useRuneEnchant) {
+                if (fullEq.journal.base_journals_filled !== undefined) {
+                  singleFilled = fullEq.journal.base_journals_filled;
+                } else if (fullEq.journal.enchant_mult && fullEq.journal.enchant_mult > 1.0) {
+                  singleFilled = singleFilled / fullEq.journal.enchant_mult;
+                } else if (fullEq.tier && fullEq.tier.endsWith('.1')) {
+                  singleFilled = singleFilled / 1.5;
+                }
+              }
+              const jFilled = singleFilled * qty;
+              journalSummary[jName] = (journalSummary[jName] || 0) + jFilled;
+            }
 
             // 方案 A: 原料依採購城市與產地精煉價分流匯總
             if (fullEq.recipe && Object.keys(fullEq.recipe).length > 0) {
@@ -4489,7 +4555,23 @@
             // 方案 A: 依城市檢查是否有抓取到此原料之產地市場供貨深度
             const depthKey = `${m.api_id}_${m.purchase_city}`;
             const depth = (enableMarketDepth.value && m.api_id) ? (marketDepthMap.value[depthKey] || (m.purchase_city === 'Caerleon' ? marketDepthMap.value[`${m.api_id}_Caerleon`] : null)) : null;
-            if (depth) {
+            if (m.is_rune) {
+              // 🔴 符石一律採用買單 (Buy Order) 掛單收購模式，絕不套用直購吃單深度滑價與溢價！
+              m.is_depth_loaded = true;
+              m.available_qty = (depth && depth.available_qty) || m.actual_buy_qty;
+              m.is_sufficient = true;
+              m.gross_sufficient = true;
+              m.shortfall = 0;
+              m.slippage_pct = 0;
+              m.avg_unit_price = m.base_sell_min || m.unit_price;
+              m.lowest_price = m.avg_unit_price;
+              m.depth_total_cost = m.actual_buy_qty * m.avg_unit_price;
+              m.total_budget = m.depth_total_cost;
+              m.consumed_orders = [];
+              m.sell_orders = (depth && depth.sell_orders) || [];
+              m.status = '充足 (買單掛單收購)';
+              m.is_buy_order_mode = true;
+            } else if (depth) {
               m.depth = depth;
               m.is_depth_loaded = true;
               m.available_qty = depth.available_qty || 0;
