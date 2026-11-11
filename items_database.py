@@ -246,11 +246,24 @@ def get_all_material_ids():
             mat_ids[(mat_type, tier)] = get_material_api_id(mat_type, tier)
     return mat_ids
 
+def get_equipment_rune_requirement(recipe: dict) -> int:
+    """
+    計算裝備在神器工坊 (Artifact Foundry) 由 .0 升級為 .1 所需之符石數量。
+    阿爾比恩官方精確公式：總原料數量 * 12
+    - 8 原料 (頭盔, 鞋子, 披風, 副手): 96 顆
+    - 16 原料 (胸甲, 背包): 192 顆
+    - 24 原料 (單手武器): 288 顆
+    - 32 原料 (雙手武器): 384 顆
+    """
+    total_mats = sum(recipe.values()) if recipe else 0
+    return total_mats * 12
+
 def get_all_equipment_items():
     """獲取全部 80 項裝備在 12 個階級下的完整清單 (共 960 項)"""
     load_definitions_from_excel()
     all_items = []
     for eq in EQUIPMENT_DEFINITIONS:
+        rune_count = get_equipment_rune_requirement(eq["recipe"])
         for tier in TIERS:
             api_id = get_equipment_api_id(eq["id"], tier)
             recipe_readable = " + ".join([f"{count} {MATERIAL_TYPES[m]}" for m, count in eq["recipe"].items()])
@@ -262,7 +275,8 @@ def get_all_equipment_items():
                 "cat": eq["cat"],
                 "subcat": eq["subcat"],
                 "recipe": eq["recipe"],
-                "recipe_str": recipe_readable
+                "recipe_str": recipe_readable,
+                "rune_count": rune_count
             })
     return all_items
 

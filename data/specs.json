@@ -9,5 +9,10 @@
   },
   "mastery_specs": {
     "弓箭": 100
+  },
+  "rune_custom_prices": {
+    "T4": null,
+    "T5": null,
+    "T6": null
   }
 }

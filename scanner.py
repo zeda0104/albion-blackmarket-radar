@@ -76,6 +76,8 @@ class MarketScanner:
         self.materials_cache: List[Dict[str, Any]] = []
         self.equipment_cache: List[Dict[str, Any]] = []
         self.orderbook_cache: Dict[tuple, Dict[str, Any]] = {}
+        self.custom_rune_prices: Dict[str, Optional[int]] = {"T4": None, "T5": None, "T6": None}
+        self.rune_prices_cache: Dict[str, Dict[str, Any]] = {}
         self.is_scanning: bool = False
         self.scan_progress: str = "就緒"
 
@@ -94,7 +96,8 @@ class MarketScanner:
                    safe_batch_pct: Optional[float] = None,
                    safe_batch_cap: Optional[int] = None,
                    bubble_threshold: Optional[float] = None,
-                   royal_batch_qty: Optional[int] = None):
+                   royal_batch_qty: Optional[int] = None,
+                   custom_rune_prices: Optional[Dict[str, Optional[int]]] = None):
         if server_key and server_key in SERVERS:
             self.server_key = server_key
             self.base_url = SERVERS[server_key]
@@ -128,6 +131,8 @@ class MarketScanner:
             self.bubble_threshold = max(0.10, min(2.0, float(bubble_threshold)))
         if royal_batch_qty is not None:
             self.royal_batch_qty = max(1, int(royal_batch_qty))
+        if custom_rune_prices is not None:
+            self.custom_rune_prices = custom_rune_prices
 
     def calculate_safe_batch(self, daily_vol: float) -> int:
         """依黑市真實消化量與日銷階梯計算安全批量，並加入上限封頂保護"""
@@ -304,6 +309,58 @@ class MarketScanner:
             print(f"Error fetching journal prices: {e}")
         return prices
 
+    def fetch_rune_prices(self) -> Dict[str, Dict[str, Any]]:
+        """
+        抓取紅城集市 T4、T5、T6 符石行情（掛單收購價 buy_price_max 與 直購價 sell_price_min）。
+        若 API 無買單價則退回賣單價，若完全無數據則採用保底行情 (T4: 14, T5: 50, T6: 320)。
+        """
+        rune_ids = ["T4_RUNE", "T5_RUNE", "T6_RUNE"]
+        headers = {'User-Agent': 'AlbionRadar/2.0'}
+        url = f"{self.base_url}/prices/{','.join(rune_ids)}?locations=Caerleon"
+        
+        fallback_map = {
+            "T4": 14,
+            "T5": 50,
+            "T6": 320
+        }
+        
+        results = {
+            "T4": {"api_buy": 0, "api_sell": 0, "effective_price": fallback_map["T4"], "updated_at": "", "is_custom": False},
+            "T5": {"api_buy": 0, "api_sell": 0, "effective_price": fallback_map["T5"], "updated_at": "", "is_custom": False},
+            "T6": {"api_buy": 0, "api_sell": 0, "effective_price": fallback_map["T6"], "updated_at": "", "is_custom": False},
+        }
+        
+        try:
+            resp = requests.get(url, headers=headers, timeout=10)
+            if resp.status_code == 200:
+                for item in resp.json():
+                    iid = item.get("item_id", "")
+                    tier_key = iid.split("_")[0]  # "T4", "T5", "T6"
+                    if tier_key in results:
+                        b_max = item.get("buy_price_max", 0)
+                        s_min = item.get("sell_price_min", 0)
+                        results[tier_key]["api_buy"] = b_max
+                        results[tier_key]["api_sell"] = s_min
+                        results[tier_key]["updated_at"] = item.get("buy_price_max_date") or item.get("sell_price_min_date") or ""
+        except Exception as e:
+            print(f"Error fetching rune prices: {e}")
+
+        # 計算實效單價 (支援使用者自訂覆寫優先)
+        for t_key, fallback in fallback_map.items():
+            custom_p = self.custom_rune_prices.get(t_key)
+            if custom_p is not None and custom_p > 0:
+                results[t_key]["effective_price"] = custom_p
+                results[t_key]["is_custom"] = True
+            else:
+                b_max = results[t_key]["api_buy"]
+                s_min = results[t_key]["api_sell"]
+                eff = b_max if b_max > 0 else (s_min if s_min > 0 else fallback)
+                results[t_key]["effective_price"] = eff
+                results[t_key]["is_custom"] = False
+
+        self.rune_prices_cache = results
+        return results
+
     def fetch_black_market_prices(self, item_ids: List[str]) -> Dict[str, Dict[str, Any]]:
         headers = {'User-Agent': 'AlbionRadar/2.0'}
         results = {api_id: {"prices": {}, "dates": {}} for api_id in item_ids}
@@ -436,17 +493,19 @@ class MarketScanner:
             equipments = get_all_equipment_items()
             all_equipment_ids = [eq["api_id"] for eq in equipments]
             
-            # 並發執行四個核心網路查詢任務 (材料、黑市收單、一週歷史深度、紅城日誌市價)
-            with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
+            # 並發執行五個核心網路查詢任務 (材料、黑市收單、一週歷史深度、紅城日誌市價、紅城符石行情)
+            with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
                 fut_mat = executor.submit(self.fetch_materials)
                 fut_bm = executor.submit(self.fetch_black_market_prices, all_equipment_ids)
                 fut_hist = executor.submit(self.fetch_black_market_history, all_equipment_ids)
                 fut_journal = executor.submit(self.fetch_journal_prices)
+                fut_rune = executor.submit(self.fetch_rune_prices)
                 
                 mat_dict = fut_mat.result()
                 bm_prices = fut_bm.result()
                 bm_history = fut_hist.result()
                 journal_prices = fut_journal.result()
+                rune_prices_map = fut_rune.result()
             
             self.scan_progress = "正在計算利潤、向下相容保底與日誌工人收益..."
             processed_equipments = []
@@ -524,6 +583,114 @@ class MarketScanner:
                 # 皇家加成城市實質成本 (完全無運費/物流扣除)
                 royal_cost_no_focus = int(round(royal_raw_cost * (1.0 - royal_rrr_nf))) if royal_raw_cost > 0 else 0
                 royal_cost_focus = int(round(royal_raw_cost * (1.0 - royal_rrr_f))) if royal_raw_cost > 0 else 0
+                
+                # ================== 紅城 .1 符石附魔比價與最適成本引擎 ==================
+                rune_enchant_info = {
+                    "applicable": False,
+                    "rune_id": "",
+                    "rune_tier": "",
+                    "rune_count": 0,
+                    "rune_price": 0,
+                    "total_rune_cost": 0,
+                    "direct_cost_no_focus": cost_no_focus,
+                    "direct_cost_focus": cost_focus,
+                    "enchant_cost_no_focus": 0,
+                    "enchant_cost_focus": 0,
+                    "is_cheaper": False,
+                    "saved_silver": 0,
+                    "royal_direct_cost_no_focus": royal_cost_no_focus,
+                    "royal_direct_cost_focus": royal_cost_focus,
+                    "royal_enchant_cost_no_focus": 0,
+                    "royal_enchant_cost_focus": 0,
+                    "royal_is_cheaper": False,
+                    "royal_saved_silver": 0,
+                }
+                
+                if str(tier).endswith(".1"):
+                    base_tier = str(tier).split(".")[0]
+                    rune_tier_key = f"T{base_tier}"
+                    rune_id = f"T{base_tier}_RUNE"
+                    rune_data = rune_prices_map.get(rune_tier_key, {})
+                    rune_unit_price = rune_data.get("effective_price", 0)
+                    rune_count = eq.get("rune_count") or (sum(recipe.values()) * 12)
+                    total_rune_cost = rune_count * rune_unit_price
+                    
+                    # 計算 .0 裝備的製造原成本 (紅城材料)
+                    flat_tier = f"{base_tier}.0"
+                    flat_raw_cost = 0
+                    flat_has_invalid = False
+                    for mat_type, count in recipe.items():
+                        mat_0_info = mat_dict.get((mat_type, flat_tier))
+                        p0 = mat_0_info.get("caerleon_price", 0) if mat_0_info else 0
+                        if not mat_0_info or p0 <= 0:
+                            flat_has_invalid = True
+                            break
+                        flat_raw_cost += count * p0
+                        
+                    # 皇家精煉產地的 .0 原成本
+                    royal_flat_raw_cost = 0
+                    royal_flat_has_invalid = False
+                    for mat_type, count in recipe.items():
+                        mat_0_info = mat_dict.get((mat_type, flat_tier))
+                        ref_p0 = mat_0_info.get("refining_price", 0) if mat_0_info else 0
+                        if ref_p0 <= 0:
+                            royal_flat_has_invalid = True
+                            break
+                        royal_flat_raw_cost += count * ref_p0
+
+                    if not flat_has_invalid and flat_raw_cost > 0:
+                        flat_cost_nf = int(round(flat_raw_cost * (1.0 - self.rrr_no_focus)))
+                        flat_cost_f = int(round(flat_raw_cost * (1.0 - self.rrr_focus)))
+                        enchant_cost_nf = flat_cost_nf + total_rune_cost
+                        enchant_cost_f = flat_cost_f + total_rune_cost
+                        
+                        is_cheaper = (enchant_cost_nf < cost_no_focus) if cost_no_focus > 0 else True
+                        saved_silver = max(0, cost_no_focus - enchant_cost_nf) if is_cheaper else 0
+                        
+                        rune_enchant_info.update({
+                            "applicable": True,
+                            "rune_id": rune_id,
+                            "rune_tier": rune_tier_key,
+                            "rune_count": rune_count,
+                            "rune_price": rune_unit_price,
+                            "total_rune_cost": total_rune_cost,
+                            "flat_raw_cost": flat_raw_cost,
+                            "flat_cost_no_focus": flat_cost_nf,
+                            "flat_cost_focus": flat_cost_f,
+                            "enchant_cost_no_focus": enchant_cost_nf,
+                            "enchant_cost_focus": enchant_cost_f,
+                            "is_cheaper": is_cheaper,
+                            "saved_silver": saved_silver,
+                        })
+                        
+                        # 自動採用最優成本作為淨利計算基準
+                        if is_cheaper and enchant_cost_nf > 0:
+                            cost_no_focus = enchant_cost_nf
+                            cost_focus = enchant_cost_f
+
+                    if not royal_flat_has_invalid and royal_flat_raw_cost > 0:
+                        royal_flat_cost_nf = int(round(royal_flat_raw_cost * (1.0 - royal_rrr_nf)))
+                        royal_flat_cost_f = int(round(royal_flat_raw_cost * (1.0 - royal_rrr_f)))
+                        royal_enchant_cost_nf = royal_flat_cost_nf + total_rune_cost
+                        royal_enchant_cost_f = royal_flat_cost_f + total_rune_cost
+                        
+                        royal_is_cheaper = (royal_enchant_cost_nf < royal_cost_no_focus) if royal_cost_no_focus > 0 else True
+                        royal_saved_silver = max(0, royal_cost_no_focus - royal_enchant_cost_nf) if royal_is_cheaper else 0
+                        
+                        rune_enchant_info.update({
+                            "royal_flat_raw_cost": royal_flat_raw_cost,
+                            "royal_flat_cost_no_focus": royal_flat_cost_nf,
+                            "royal_flat_cost_focus": royal_flat_cost_f,
+                            "royal_enchant_cost_no_focus": royal_enchant_cost_nf,
+                            "royal_enchant_cost_focus": royal_enchant_cost_f,
+                            "royal_is_cheaper": royal_is_cheaper,
+                            "royal_saved_silver": royal_saved_silver,
+                        })
+                        
+                        # 皇家自動採用最優成本作為淨利計算基準
+                        if royal_is_cheaper and royal_enchant_cost_nf > 0:
+                            royal_cost_no_focus = royal_enchant_cost_nf
+                            royal_cost_focus = royal_enchant_cost_f
                 
                 # 即時黑市原始收單價與時間戳記
                 item_bm = bm_prices.get(api_id, {"prices": {}, "dates": {}})
@@ -852,7 +1019,11 @@ class MarketScanner:
                     "royal_realistic_potential": royal_realistic_potential,
                     "royal_weekly_unit_profit_nf": royal_weekly_unit_profit_nf,
                     "royal_status": royal_status,
-                    "royal_mats_breakdown": royal_mats_breakdown
+                    "royal_mats_breakdown": royal_mats_breakdown,
+
+                    # 6. 紅城 .1 符石附魔比價
+                    "rune_enchant": rune_enchant_info,
+                    "rune_count": rune_enchant_info["rune_count"] if rune_enchant_info["applicable"] else (eq.get("rune_count") or (sum(recipe.values()) * 12))
                 })
 
             materials_list = list(mat_dict.values())
@@ -868,7 +1039,8 @@ class MarketScanner:
                 "total_items": len(processed_equipments),
                 "timestamp": self.last_scan_time,
                 "materials": materials_list,
-                "equipments": processed_equipments
+                "equipments": processed_equipments,
+                "rune_prices": rune_prices_map
             }
         except Exception as e:
             self.scan_progress = f"掃描失敗: {str(e)}"

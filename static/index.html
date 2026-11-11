@@ -423,20 +423,53 @@
             </button>
           </div>
 
-          <!-- 階級選擇 -->
-          <div class="flex flex-wrap items-center gap-1 text-xs">
-            <span class="text-gray-400 mr-1">階級:</span>
-            <button @click="selectedTier = 'all'"
-                    :class="selectedTier === 'all' ? 'bg-indigo-600 text-white font-bold' : 'bg-albion-card text-gray-300 border border-albion-border'"
-                    class="px-2 py-0.5 rounded">
-              全部
-            </button>
-            <button v-for="t in tierOptions" :key="t"
-                    @click="selectedTier = t"
-                    :class="selectedTier === t ? 'bg-indigo-600 text-white font-bold' : 'bg-albion-card text-gray-300 hover:bg-albion-hover border border-albion-border'"
-                    class="px-1.5 py-0.5 rounded font-mono">
-              T{{ t }}
-            </button>
+          <!-- 雙層階級篩選：大階級系列 + 附魔等級 -->
+          <div class="space-y-1.5 pt-1 border-t border-albion-border/40">
+            <!-- 第一層：大階級系列 -->
+            <div class="flex flex-wrap items-center gap-1.5 text-xs">
+              <span class="text-gray-400 mr-1 shrink-0 font-medium">系列:</span>
+              <button @click="selectedMajorTier = 'all'; selectedTier = 'all'"
+                      :class="selectedMajorTier === 'all' ? 'bg-indigo-600 text-white font-bold shadow-sm ring-1 ring-indigo-400' : 'bg-albion-card text-gray-300 hover:bg-albion-hover border border-albion-border'"
+                      class="px-2.5 py-0.5 rounded transition">
+                全部系列
+              </button>
+              <button v-for="m in ['4', '5', '6']" :key="'major_' + m"
+                      @click="selectedMajorTier = m; selectedTier = 'all'"
+                      :class="selectedMajorTier === m ? 'bg-indigo-600 text-white font-bold shadow-sm ring-1 ring-indigo-400' : 'bg-albion-card text-gray-300 hover:bg-albion-hover border border-albion-border'"
+                      class="px-2.5 py-0.5 rounded font-bold font-mono transition">
+                T{{ m }} 系列
+              </button>
+            </div>
+
+            <!-- 第二層：附魔等級 -->
+            <div class="flex flex-wrap items-center gap-1.5 text-xs">
+              <span class="text-gray-400 mr-1 shrink-0 font-medium">附魔:</span>
+              <button @click="selectedEnchant = 'all'; selectedTier = 'all'"
+                      :class="selectedEnchant === 'all' ? 'bg-purple-600 text-white font-bold shadow-sm ring-1 ring-purple-400' : 'bg-albion-card text-gray-300 hover:bg-albion-hover border border-albion-border'"
+                      class="px-2 py-0.5 rounded transition">
+                全部附魔
+              </button>
+              <button @click="selectedEnchant = '0'; selectedTier = 'all'"
+                      :class="selectedEnchant === '0' ? 'bg-gray-600 text-white font-bold shadow-sm ring-1 ring-gray-400' : 'bg-albion-card text-gray-300 hover:bg-albion-hover border border-albion-border'"
+                      class="px-2 py-0.5 rounded font-mono transition">
+                .0 (無附魔)
+              </button>
+              <button @click="selectedEnchant = '1'; selectedTier = 'all'"
+                      :class="selectedEnchant === '1' ? 'bg-emerald-600 text-white font-bold shadow-sm ring-1 ring-emerald-400' : 'bg-albion-card text-emerald-400 hover:bg-albion-hover border border-emerald-900/60'"
+                      class="px-2 py-0.5 rounded font-mono transition">
+                .1 (符石/綠)
+              </button>
+              <button @click="selectedEnchant = '2'; selectedTier = 'all'"
+                      :class="selectedEnchant === '2' ? 'bg-sky-600 text-white font-bold shadow-sm ring-1 ring-sky-400' : 'bg-albion-card text-sky-400 hover:bg-albion-hover border border-sky-900/60'"
+                      class="px-2 py-0.5 rounded font-mono transition">
+                .2 (魂/藍)
+              </button>
+              <button @click="selectedEnchant = '3'; selectedTier = 'all'"
+                      :class="selectedEnchant === '3' ? 'bg-purple-700 text-white font-bold shadow-sm ring-1 ring-purple-400' : 'bg-albion-card text-purple-400 hover:bg-albion-hover border border-purple-900/60'"
+                      class="px-2 py-0.5 rounded font-mono transition">
+                .3 (聖物/紫)
+              </button>
+            </div>
           </div>
 
           <!-- 關鍵參數：參考品質、成本模式、搜尋、排序 -->
@@ -613,6 +646,12 @@
                                   class="text-[9px] px-1 py-0.2 rounded font-mono font-bold bg-rose-950/80 text-rose-300 border border-rose-800"
                                   title="紅城市場原料盤口不足或缺貨，無法買齊製造！">
                               ⚠️ 深度不足 (缺料)
+                            </span>
+                            <!-- ✨ 紅城 .1 符石附魔省錢徽章 -->
+                            <span v-if="item.rune_enchant && item.rune_enchant.is_cheaper"
+                                  class="text-[9px] px-1.5 py-0.2 rounded font-mono font-bold bg-amber-950/90 text-amber-300 border border-amber-600/70 shadow-sm"
+                                  :title="`✨ 符石附魔比直搓更賺！\n• 直搓 .1 成本: ${formatNumber(item.rune_enchant.direct_cost_no_focus)} 銀\n• 搓 .0 成本: ${formatNumber(item.rune_enchant.flat_cost_no_focus)} 銀\n• 符石成本: ${formatNumber(item.rune_enchant.total_rune_cost)} 銀 (${item.rune_enchant.rune_count}顆 × ${item.rune_enchant.rune_price}銀)\n• 附魔總成本: ${formatNumber(item.rune_enchant.enchant_cost_no_focus)} 銀\n🎯 單件現省: +${formatNumber(item.rune_enchant.saved_silver)} 銀`">
+                              ✨ 符石附魔省 {{ formatNumber(item.rune_enchant.saved_silver) }} (需{{ item.rune_enchant.rune_count }}符石)
                             </span>
                           </div>
                         </div>
@@ -819,6 +858,16 @@
                               <span>🛡️</span>
                               <span>加入安全批量 (+{{ item.safe_batch_qty || 5 }}件)</span>
                             </button>
+                            <!-- 🔮 紅城 .1 符石製程分析 -->
+                            <div v-if="item.rune_enchant && item.rune_enchant.applicable" class="w-full text-[11px] text-amber-300/90 bg-amber-950/40 p-2 rounded border border-amber-800/40 flex flex-wrap items-center gap-2 mt-1 font-mono">
+                              <span class="font-bold text-amber-300">🔮 紅城 .1 符石附魔比價：</span>
+                              <span>需 {{ item.rune_enchant.rune_count }} 顆 {{ item.rune_enchant.rune_id }} (單價 {{ formatNumber(item.rune_enchant.rune_price) }} 銀)</span>
+                              <span>| 直搓 .1 成本: {{ formatNumber(item.rune_enchant.direct_cost_no_focus) }} 銀</span>
+                              <span>| 搓 .0 + 符石: {{ formatNumber(item.rune_enchant.enchant_cost_no_focus) }} 銀</span>
+                              <span :class="item.rune_enchant.is_cheaper ? 'text-emerald-400 font-bold' : 'text-gray-400'">
+                                {{ item.rune_enchant.is_cheaper ? `✨ 符石附魔省 ${formatNumber(item.rune_enchant.saved_silver)} 銀 (已採最優利潤)` : '(目前直接買 .1 原料製作更划算)' }}
+                              </span>
+                            </div>
                           </div>
                         </div>
 
@@ -1139,7 +1188,7 @@
 
         <!-- 篩選與排序控制欄 -->
         <div class="bg-albion-panel border border-albion-border rounded-lg p-3 space-y-3">
-          <div class="grid grid-cols-2 sm:grid-cols-6 gap-2.5 text-xs">
+          <div class="grid grid-cols-2 sm:grid-cols-7 gap-2.5 text-xs">
             
             <!-- 關鍵字搜尋 -->
             <div class="col-span-2 sm:col-span-1">
@@ -1160,12 +1209,26 @@
               </select>
             </div>
 
-            <!-- 階級 -->
+            <!-- 階級系列 -->
             <div>
-              <label class="block text-gray-400 mb-1 text-[11px]">裝備階級</label>
-              <select v-model="royalSelectedTier" class="w-full py-1.5 px-2 bg-albion-card border border-albion-border rounded text-white focus:outline-none">
-                <option value="all">全部階級</option>
-                <option v-for="t in tierOptions" :key="t" :value="t">T{{ t }}</option>
+              <label class="block text-gray-400 mb-1 text-[11px]">階級系列</label>
+              <select v-model="royalSelectedMajorTier" class="w-full py-1.5 px-2 bg-albion-card border border-albion-border rounded text-white focus:outline-none font-medium">
+                <option value="all">🌟 全部系列</option>
+                <option value="4">🛡️ T4 系列</option>
+                <option value="5">🛡️ T5 系列</option>
+                <option value="6">🛡️ T6 系列</option>
+              </select>
+            </div>
+
+            <!-- 附魔等級 -->
+            <div>
+              <label class="block text-gray-400 mb-1 text-[11px]">附魔等級</label>
+              <select v-model="royalSelectedEnchant" class="w-full py-1.5 px-2 bg-albion-card border border-albion-border rounded text-white focus:outline-none font-medium">
+                <option value="all">🌟 全部附魔</option>
+                <option value="0">⚪ .0 (無附魔)</option>
+                <option value="1">🟢 .1 (符石附魔)</option>
+                <option value="2">🔵 .2 (魂附魔)</option>
+                <option value="3">🟣 .3 (聖物附魔)</option>
               </select>
             </div>
 
@@ -1288,6 +1351,12 @@
                                   class="text-[9px] px-1 py-0.2 rounded font-mono font-bold bg-rose-950/80 text-rose-300 border border-rose-800"
                                   title="紅城市場原料盤口不足或缺貨，無法買齊製造！">
                               ⚠️ 深度不足 (缺料)
+                            </span>
+                            <!-- ✨ 皇家 .1 符石附魔省錢徽章 -->
+                            <span v-if="item.rune_enchant && item.rune_enchant.royal_is_cheaper"
+                                  class="text-[9px] px-1.5 py-0.2 rounded font-mono font-bold bg-amber-950/90 text-amber-300 border border-amber-600/70 shadow-sm"
+                                  :title="`✨ 符石附魔比直搓更賺！\n• 皇家直搓 .1: ${formatNumber(item.rune_enchant.royal_direct_cost_no_focus)} 銀\n• 皇家搓 .0: ${formatNumber(item.rune_enchant.royal_flat_cost_no_focus)} 銀\n• 符石成本: ${formatNumber(item.rune_enchant.total_rune_cost)} 銀 (${item.rune_enchant.rune_count}顆 × ${item.rune_enchant.rune_price}銀)\n• 附魔總成本: ${formatNumber(item.rune_enchant.royal_enchant_cost_no_focus)} 銀\n🎯 單件現省: +${formatNumber(item.rune_enchant.royal_saved_silver)} 銀`">
+                              ✨ 符石附魔省 {{ formatNumber(item.rune_enchant.royal_saved_silver) }} (需{{ item.rune_enchant.rune_count }}符石)
                             </span>
                           </div>
                         </div>
@@ -1460,6 +1529,22 @@
                                 <div class="text-[10px] text-gray-400">小計: {{ formatNumber(m.subtotal) }} 銀</div>
                               </div>
                             </div>
+                          </div>
+                        </div>
+
+                        <!-- 🔮 皇家 .1 符石製程分析 -->
+                        <div v-if="item.rune_enchant && item.rune_enchant.applicable" class="p-2.5 rounded bg-albion-card/80 border border-amber-600/40 text-xs space-y-1.5">
+                          <div class="font-bold text-amber-300 flex items-center space-x-1.5">
+                            <span>🔮</span>
+                            <span>皇家 .1 符石製程分析 (工坊附魔 vs 產地直搓)：</span>
+                          </div>
+                          <div class="flex flex-wrap items-center gap-3 text-gray-300 font-mono text-[11px]">
+                            <span>需 {{ item.rune_enchant.rune_count }} 顆 {{ item.rune_enchant.rune_id }} (單價 {{ formatNumber(item.rune_enchant.rune_price) }} 銀)</span>
+                            <span>| 皇家直搓成本: {{ formatNumber(item.rune_enchant.royal_direct_cost_no_focus) }} 銀</span>
+                            <span>| 搓 .0 + 符石: {{ formatNumber(item.rune_enchant.royal_enchant_cost_no_focus) }} 銀</span>
+                            <span :class="item.rune_enchant.royal_is_cheaper ? 'text-emerald-400 font-bold' : 'text-gray-400'">
+                              {{ item.rune_enchant.royal_is_cheaper ? `✨ 符石附魔更省，單件多賺 +${formatNumber(item.rune_enchant.royal_saved_silver)} 銀` : '(產地直購 .1 原料製作更划算)' }}
+                            </span>
                           </div>
                         </div>
 
@@ -1654,6 +1739,11 @@
                           <span class="px-1.5 py-0.2 rounded text-[10px] font-bold"
                                 :class="b.is_royal ? 'bg-amber-950 text-amber-300 border border-amber-800' : 'bg-rose-950 text-rose-300 border border-rose-800'">
                             {{ b.craft_city_icon || (b.is_royal ? '🏰' : '🦹') }} {{ b.craft_city_zh || '紅城' }}
+                          </span>
+                          <!-- 🔮 符石附魔提示標籤 -->
+                          <span v-if="getBatchItemRuneEnchant(b)" class="px-1.5 py-0.2 rounded text-[10px] font-bold bg-purple-950 text-purple-300 border border-purple-800 shadow-sm"
+                                :title="`✨ 此裝備符石附魔比直搓更賺，採購單已自動分拆為 .0 原料 + 符石！\n單件省下: +${formatNumber(getBatchItemRuneEnchant(b).savedSilver)} 銀`">
+                            ✨ 工坊附魔 (省 {{ formatNumber(getBatchItemRuneEnchant(b).savedSilver) }}銀/件)
                           </span>
                         </div>
                         <div class="flex items-center space-x-2 text-[11px] text-gray-400 mt-0.5">
@@ -2130,6 +2220,60 @@
 
       <!-- ================= 5. 專精配置 TAB ================= -->
       <div v-show="currentTab === 'specs'" class="space-y-4">
+
+        <!-- 🔮 紅城符石收單成本配置 (T4 / T5 / T6) -->
+        <div class="bg-gradient-to-r from-amber-950/40 via-albion-panel to-albion-card border border-amber-500/40 rounded-lg p-3.5 space-y-2 text-xs shadow-sm">
+          <div class="flex flex-wrap items-center justify-between gap-2 border-b border-amber-500/20 pb-2">
+            <div class="flex items-center space-x-2">
+              <span class="text-base">🔮</span>
+              <div>
+                <span class="font-bold text-amber-300 text-sm">紅城 .1 符石收單成本 (掛單附魔製程)</span>
+                <span class="text-gray-400 text-[11px] ml-2">預設以 AODP 紅城最高買單價 (Buy Order) 自動比價；填入數字可手動鎖定單價</span>
+              </div>
+            </div>
+            <button @click="resetRunePrices" class="px-2.5 py-1 rounded bg-albion-card hover:bg-albion-hover text-amber-300 border border-amber-500/40 text-[11px] font-bold transition">
+              🔄 重設為 API 行情
+            </button>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+            <div class="p-2.5 rounded bg-albion-panel/80 border border-sky-800/40 flex items-center justify-between">
+              <div>
+                <span class="font-bold text-sky-300">T4 符石 (T4_RUNE)</span>
+                <div class="text-[10px] text-gray-400 mt-0.5">API買單: {{ runePrices.T4?.api_buy || 13 }} 銀 | 實效: {{ getEffectiveRunePrice('T4') }} 銀</div>
+              </div>
+              <div class="flex items-center space-x-1.5">
+                <input type="number" min="1" step="1" v-model.number="customRunePrices.T4" placeholder="自動API"
+                       @change="saveCustomRunePrices"
+                       class="w-24 p-1.5 bg-albion-card border border-sky-600/40 rounded text-sky-200 text-right font-mono font-bold text-xs">
+                <span class="text-gray-400 text-xs">銀</span>
+              </div>
+            </div>
+            <div class="p-2.5 rounded bg-albion-panel/80 border border-red-800/40 flex items-center justify-between">
+              <div>
+                <span class="font-bold text-red-300">T5 符石 (T5_RUNE)</span>
+                <div class="text-[10px] text-gray-400 mt-0.5">API買單: {{ runePrices.T5?.api_buy || 48 }} 銀 | 實效: {{ getEffectiveRunePrice('T5') }} 銀</div>
+              </div>
+              <div class="flex items-center space-x-1.5">
+                <input type="number" min="1" step="1" v-model.number="customRunePrices.T5" placeholder="自動API"
+                       @change="saveCustomRunePrices"
+                       class="w-24 p-1.5 bg-albion-card border border-red-600/40 rounded text-red-200 text-right font-mono font-bold text-xs">
+                <span class="text-gray-400 text-xs">銀</span>
+              </div>
+            </div>
+            <div class="p-2.5 rounded bg-albion-panel/80 border border-amber-800/40 flex items-center justify-between">
+              <div>
+                <span class="font-bold text-amber-300">T6 符石 (T6_RUNE)</span>
+                <div class="text-[10px] text-gray-400 mt-0.5">API買單: {{ runePrices.T6?.api_buy || 308 }} 銀 | 實效: {{ getEffectiveRunePrice('T6') }} 銀</div>
+              </div>
+              <div class="flex items-center space-x-1.5">
+                <input type="number" min="1" step="1" v-model.number="customRunePrices.T6" placeholder="自動API"
+                       @change="saveCustomRunePrices"
+                       class="w-24 p-1.5 bg-albion-card border border-amber-600/40 rounded text-amber-200 text-right font-mono font-bold text-xs">
+                <span class="text-gray-400 text-xs">銀</span>
+              </div>
+            </div>
+          </div>
+        </div>
 
         <!-- 頂部說明與快捷操作欄 -->
         <div class="bg-gradient-to-r from-purple-950/50 via-albion-panel to-albion-card border border-purple-500/40 rounded-lg p-3.5 space-y-3 text-xs shadow-sm">
@@ -2667,7 +2811,39 @@
           <span class="text-[10px] text-gray-500 mt-0.5 block">即時買單超出此比例時標註暴漲警示，防範做完被壓回均價賠錢</span>
         </div>
 
-                <div class="flex space-x-2 pt-2 border-t border-albion-border">
+                <!-- 紅城符石收單成本 (掛單製程) -->
+        <div class="border-t border-albion-border/60 pt-2.5 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-amber-300">🔮 紅城符石收單成本 (掛單製程)</span>
+            <button @click="resetRunePrices" class="text-[10px] text-gray-400 hover:text-white underline">重設為 API 行情</button>
+          </div>
+          <div class="grid grid-cols-3 gap-2 text-center">
+            <div>
+              <label class="block text-gray-400 text-[10px] mb-0.5 font-bold">T4 符石</label>
+              <input type="number" v-model.number="customRunePrices.T4" :placeholder="`API: ${runePrices.T4?.api_buy || 13}`"
+                     @change="saveCustomRunePrices"
+                     class="w-full p-1 bg-albion-card border border-albion-border rounded text-white text-center font-mono text-xs font-bold">
+              <span class="text-[9px] text-gray-400 block mt-0.5">實效: {{ getEffectiveRunePrice('T4') }} 銀</span>
+            </div>
+            <div>
+              <label class="block text-gray-400 text-[10px] mb-0.5 font-bold">T5 符石</label>
+              <input type="number" v-model.number="customRunePrices.T5" :placeholder="`API: ${runePrices.T5?.api_buy || 48}`"
+                     @change="saveCustomRunePrices"
+                     class="w-full p-1 bg-albion-card border border-albion-border rounded text-white text-center font-mono text-xs font-bold">
+              <span class="text-[9px] text-gray-400 block mt-0.5">實效: {{ getEffectiveRunePrice('T5') }} 銀</span>
+            </div>
+            <div>
+              <label class="block text-gray-400 text-[10px] mb-0.5 font-bold">T6 符石</label>
+              <input type="number" v-model.number="customRunePrices.T6" :placeholder="`API: ${runePrices.T6?.api_buy || 308}`"
+                     @change="saveCustomRunePrices"
+                     class="w-full p-1 bg-albion-card border border-albion-border rounded text-white text-center font-mono text-xs font-bold">
+              <span class="text-[9px] text-gray-400 block mt-0.5">實效: {{ getEffectiveRunePrice('T6') }} 銀</span>
+            </div>
+          </div>
+          <span class="text-[10px] text-gray-500 block">留空自動採用 AODP 紅城掛單買價；自訂輸入即刻鎖價。</span>
+        </div>
+
+        <div class="flex space-x-2 pt-2 border-t border-albion-border">
           <button @click="showSettingsModal = false" class="w-1/2 py-1.5 rounded bg-albion-card text-gray-300">取消</button>
           <button @click="saveSettings" class="w-1/2 py-1.5 rounded bg-indigo-600 text-white font-bold">儲存</button>
         </div>
@@ -2695,6 +2871,83 @@
 
         const selectedWorkshop = ref('all');
         const selectedTier = ref('all');
+        const selectedMajorTier = ref('all'); // 'all', '4', '5', '6'
+        const selectedEnchant = ref('all');   // 'all', '0', '1', '2', '3'
+
+        // 🔮 紅城符石價格快取與自訂鎖價
+        const runePrices = ref({
+          T4: { api_buy: 13, api_sell: 15, effective_price: 13 },
+          T5: { api_buy: 48, api_sell: 74, effective_price: 48 },
+          T6: { api_buy: 308, api_sell: 385, effective_price: 308 }
+        });
+        const savedCustomRunes = localStorage.getItem('albion_custom_rune_prices');
+        const customRunePrices = ref(savedCustomRunes ? JSON.parse(savedCustomRunes) : { T4: null, T5: null, T6: null });
+
+        const getEffectiveRunePrice = (tierKey) => {
+          const tKey = String(tierKey).startsWith('T') ? tierKey : ('T' + tierKey);
+          if (customRunePrices.value && customRunePrices.value[tKey] !== null && customRunePrices.value[tKey] !== undefined && customRunePrices.value[tKey] > 0) {
+            return Number(customRunePrices.value[tKey]);
+          }
+          return runePrices.value[tKey]?.effective_price || (tKey === 'T4' ? 14 : (tKey === 'T5' ? 50 : 320));
+        };
+
+        const recomputeItemRuneEnchant = (item) => {
+          if (!item || !item.rune_enchant || !item.rune_enchant.applicable) return;
+          const runeTier = item.rune_enchant.rune_tier || ('T' + item.tier.split('.')[0]);
+          const runePrice = getEffectiveRunePrice(runeTier);
+          const totalRuneCost = item.rune_enchant.rune_count * runePrice;
+          item.rune_enchant.rune_price = runePrice;
+          item.rune_enchant.total_rune_cost = totalRuneCost;
+          
+          if (item.rune_enchant.flat_cost_no_focus !== undefined) {
+            const enchantCostNf = item.rune_enchant.flat_cost_no_focus + totalRuneCost;
+            const enchantCostF = item.rune_enchant.flat_cost_focus + totalRuneCost;
+            const directCostNf = item.rune_enchant.direct_cost_no_focus;
+            item.rune_enchant.enchant_cost_no_focus = enchantCostNf;
+            item.rune_enchant.enchant_cost_focus = enchantCostF;
+            item.rune_enchant.is_cheaper = directCostNf > 0 && enchantCostNf < directCostNf;
+            item.rune_enchant.saved_silver = item.rune_enchant.is_cheaper ? (directCostNf - enchantCostNf) : 0;
+          }
+          
+          if (item.rune_enchant.royal_flat_cost_no_focus !== undefined) {
+            const royalEnchantNf = item.rune_enchant.royal_flat_cost_no_focus + totalRuneCost;
+            const royalEnchantF = item.rune_enchant.royal_flat_cost_focus + totalRuneCost;
+            const royalDirectNf = item.rune_enchant.royal_direct_cost_no_focus;
+            item.rune_enchant.royal_enchant_cost_no_focus = royalEnchantNf;
+            item.rune_enchant.royal_enchant_cost_focus = royalEnchantF;
+            item.rune_enchant.royal_is_cheaper = royalDirectNf > 0 && royalEnchantNf < royalDirectNf;
+            item.rune_enchant.royal_saved_silver = item.rune_enchant.royal_is_cheaper ? (royalDirectNf - royalEnchantNf) : 0;
+          }
+        };
+
+        const saveCustomRunePrices = async () => {
+          localStorage.setItem('albion_custom_rune_prices', JSON.stringify(customRunePrices.value));
+          equipments.value.forEach(recomputeItemRuneEnchant);
+          try {
+            await fetch('/api/specs', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                inner_spec: innerSpecGlobal.value,
+                outer_spec: outerSpecGlobal.value,
+                food_type: selectedFood.value,
+                item_specs: itemSpecs.value,
+                mastery_specs: masterySpecs.value,
+                rune_custom_prices: customRunePrices.value
+              })
+            });
+          } catch (e) {
+            console.error('儲存符石自訂單價至後端失敗:', e);
+          }
+        };
+
+        const resetRunePrices = () => {
+          customRunePrices.value = { T4: null, T5: null, T6: null };
+          localStorage.removeItem('albion_custom_rune_prices');
+          equipments.value.forEach(recomputeItemRuneEnchant);
+          saveCustomRunePrices();
+        };
+
         const searchQuery = ref('');
         const profitFilter = ref('profitable'); // 預設只看賺錢
         const sortBy = ref(localStorage.getItem('albion_sort_by') || 'batch_profit_desc'); // 預設按單批淨利潤排序
@@ -2922,6 +3175,10 @@
               if (data.mammoth_target !== undefined && !localStorage.getItem('albion_mammoth_target')) {
                 mammothTarget.value = data.mammoth_target;
               }
+              if (data.rune_custom_prices && !savedCustomRunes) {
+                customRunePrices.value = data.rune_custom_prices;
+                equipments.value.forEach(recomputeItemRuneEnchant);
+              }
 
               console.log('[系統] 成功同步專精與資產配置');
             }
@@ -2942,7 +3199,8 @@
                 item_specs: itemSpecs.value,
                 mastery_specs: masterySpecs.value,
                 user_base_capital: userBaseCapital.value,
-                mammoth_target: mammothTarget.value
+                mammoth_target: mammothTarget.value,
+                rune_custom_prices: customRunePrices.value
               };
               const res = await fetch('/api/specs', {
                 method: 'POST',
@@ -3270,6 +3528,20 @@
           };
         };
 
+        const getBatchItemRuneEnchant = (b) => {
+          const fullEq = equipments.value.find(e => e.api_id === b.api_id);
+          if (!fullEq || !fullEq.rune_enchant || !fullEq.rune_enchant.applicable) return null;
+          const isRoyal = b.is_royal || (b.craft_city && b.craft_city !== 'Caerleon');
+          const isCheaper = isRoyal ? fullEq.rune_enchant.royal_is_cheaper : fullEq.rune_enchant.is_cheaper;
+          if (!isCheaper) return null;
+          return {
+            savedSilver: isRoyal ? fullEq.rune_enchant.royal_saved_silver : fullEq.rune_enchant.saved_silver,
+            runeCount: fullEq.rune_enchant.rune_count,
+            runePrice: fullEq.rune_enchant.rune_price,
+            runeId: fullEq.rune_enchant.rune_id
+          };
+        };
+
         const batchSourceMode = ref('buy'); // 'buy' (市場直購) or 'gather' (自備採集)
         const marketDepthMap = ref({});
         const isFetchingDepth = ref(false);
@@ -3389,9 +3661,12 @@
               : getItemRrr(fullEq, isFocus);
             const qty = bItem.qty || 1;
 
+            const useRuneEnchant = fullEq.rune_enchant && (isRoyal ? fullEq.rune_enchant.royal_is_cheaper : fullEq.rune_enchant.is_cheaper);
+            const effectiveCraftTier = useRuneEnchant ? (fullEq.tier.split('.')[0] + '.0') : fullEq.tier;
+
             for (const [matType, countPerPiece] of Object.entries(fullEq.recipe)) {
-              const matInfo = materials.value.find(m => m.mat_type === matType && m.tier === fullEq.tier);
-              const apiId = matInfo ? matInfo.api_id : getMaterialApiId(matType, fullEq.tier);
+              const matInfo = materials.value.find(m => m.mat_type === matType && m.tier === effectiveCraftTier);
+              const apiId = matInfo ? matInfo.api_id : getMaterialApiId(matType, effectiveCraftTier);
               const pCity = isRoyal ? (matInfo?.refining_city || 'Caerleon') : 'Caerleon';
 
               if (!cityMatNeeds[pCity]) cityMatNeeds[pCity] = {};
@@ -3399,7 +3674,7 @@
                 cityMatNeeds[pCity][apiId] = {
                   api_id: apiId,
                   mat_type: matType,
-                  tier: fullEq.tier,
+                  tier: effectiveCraftTier,
                   gross_qty: 0,
                   net_qty: 0,
                   fallback_price: isRoyal ? (matInfo?.refining_price || matInfo?.price || 0) : (matInfo?.caerleon_price || matInfo?.price || 0)
@@ -3409,6 +3684,28 @@
               const net = Math.round(gross * (1.0 - rrr));
               cityMatNeeds[pCity][apiId].gross_qty += gross;
               cityMatNeeds[pCity][apiId].net_qty += net;
+            }
+
+            if (useRuneEnchant) {
+              const baseTierNum = fullEq.tier.split('.')[0];
+              const runeTier = `T${baseTierNum}`;
+              const runeId = `${runeTier}_RUNE`;
+              const runeCount = (fullEq.rune_enchant.rune_count || (Object.values(fullEq.recipe).reduce((a, b) => a + b, 0) * 12)) * qty;
+              const runeUnitPrice = fullEq.rune_enchant.rune_price || getEffectiveRunePrice(runeTier);
+
+              if (!cityMatNeeds['Caerleon']) cityMatNeeds['Caerleon'] = {};
+              if (!cityMatNeeds['Caerleon'][runeId]) {
+                cityMatNeeds['Caerleon'][runeId] = {
+                  api_id: runeId,
+                  mat_type: 'RUNE',
+                  tier: runeTier,
+                  gross_qty: 0,
+                  net_qty: 0,
+                  fallback_price: runeUnitPrice
+                };
+              }
+              cityMatNeeds['Caerleon'][runeId].gross_qty += runeCount;
+              cityMatNeeds['Caerleon'][runeId].net_qty += runeCount;
             }
           });
 
@@ -3591,8 +3888,12 @@
           return Math.round(totalIv * 0.1125 * (feeRate / 100.0));
         };
 
-        // 取得動態成本 (自動計算每日加成)
+        // 取得動態成本 (自動計算每日加成與符石附魔最優路徑)
         const getItemCost = (item, isFocus) => {
+          if (!item) return 0;
+          if (item.rune_enchant && item.rune_enchant.is_cheaper) {
+            return isFocus ? item.rune_enchant.enchant_cost_focus : item.rune_enchant.enchant_cost_no_focus;
+          }
           if (!item.raw_cost || item.raw_cost <= 0) return 0;
           const rrr = getItemRrr(item, isFocus);
           return Math.round(item.raw_cost * (1.0 - rrr));
@@ -4095,11 +4396,15 @@
               journalSummary[jName] = (journalSummary[jName] || 0) + jFilled;
             }
 
+            // 判斷該 .1 裝備是否以符石附魔較划算
+            const useRuneEnchant = fullEq.rune_enchant && (isRoyal ? fullEq.rune_enchant.royal_is_cheaper : fullEq.rune_enchant.is_cheaper);
+            const effectiveCraftTier = useRuneEnchant ? (fullEq.tier.split('.')[0] + '.0') : fullEq.tier;
+
             // 方案 A: 原料依採購城市與產地精煉價分流匯總
             if (fullEq.recipe && Object.keys(fullEq.recipe).length > 0) {
               for (const [matType, countPerPiece] of Object.entries(fullEq.recipe)) {
-                const matInfo = materials.value.find(m => m.mat_type === matType && m.tier === fullEq.tier);
-                const apiId = matInfo ? matInfo.api_id : getMaterialApiId(matType, fullEq.tier);
+                const matInfo = materials.value.find(m => m.mat_type === matType && m.tier === effectiveCraftTier);
+                const apiId = matInfo ? matInfo.api_id : getMaterialApiId(matType, effectiveCraftTier);
                 const matFriendlyName = (matInfo && matInfo.mat_name) ? matInfo.mat_name : (MAT_NAME_MAP[matType] || matType);
 
                 let purchaseCity = 'Caerleon';
@@ -4112,13 +4417,13 @@
                   unitPrice = (matInfo && matInfo.refining_price > 0) ? matInfo.refining_price : (matInfo ? matInfo.price : 0);
                 }
 
-                const key = `${matType}_${fullEq.tier}_${purchaseCity}`;
+                const key = `${matType}_${effectiveCraftTier}_${purchaseCity}`;
                 if (!matMap[key]) {
                   matMap[key] = {
                     key: key,
                     mat_type: matType,
                     mat_name: matFriendlyName,
-                    tier: fullEq.tier,
+                    tier: effectiveCraftTier,
                     api_id: apiId,
                     purchase_city: purchaseCity,
                     purchase_city_zh: purchaseCityZh,
@@ -4139,6 +4444,39 @@
                 matMap[key].gross_qty += gross;
                 matMap[key].net_qty += net;
                 matMap[key].return_qty += ret;
+              }
+
+              // 若符石附魔更划算，自動彙整紅城符石採購
+              if (useRuneEnchant) {
+                const baseTierNum = fullEq.tier.split('.')[0];
+                const runeTier = `T${baseTierNum}`;
+                const runeId = `${runeTier}_RUNE`;
+                const runeCount = (fullEq.rune_enchant.rune_count || (Object.values(fullEq.recipe).reduce((a, b) => a + b, 0) * 12)) * qty;
+                const runeUnitPrice = fullEq.rune_enchant.rune_price || getEffectiveRunePrice(runeTier);
+                const runeKey = `RUNE_${runeId}_Caerleon`;
+
+                if (!matMap[runeKey]) {
+                  matMap[runeKey] = {
+                    key: runeKey,
+                    mat_type: 'RUNE',
+                    mat_name: `${runeTier} 符石 (工坊附魔)`,
+                    tier: runeTier,
+                    api_id: runeId,
+                    purchase_city: 'Caerleon',
+                    purchase_city_zh: '紅城 (Caerleon)',
+                    unit_price: runeUnitPrice,
+                    base_sell_min: runeUnitPrice,
+                    gross_qty: 0,
+                    net_qty: 0,
+                    return_qty: 0,
+                    laborer_qty: 0,
+                    actual_buy_qty: 0,
+                    total_budget: 0,
+                    is_rune: true
+                  };
+                }
+                matMap[runeKey].gross_qty += runeCount;
+                matMap[runeKey].net_qty += runeCount;
               }
             }
           });
@@ -4272,7 +4610,9 @@
           text += `出貨模式: 批量掛單制 (手續費 6.5%)\n`;
           text += `製造裝備項目 (${batchList.value.length} 款，共 ${bd.totalPieces} 件):\n`;
           batchList.value.forEach(b => {
-            text += `  • ${b.name} x ${b.qty} 件 [${b.craft_city_zh || '紅城'}, ${b.costMode === 'focus' ? '下專注' : '無專注'}]\n`;
+            const rEnchant = getBatchItemRuneEnchant(b);
+            const enchantNote = rEnchant ? ` - ✨建議搓.0後工坊附魔 (省${formatNumber(rEnchant.savedSilver)}銀/件)` : '';
+            text += `  • ${b.name} x ${b.qty} 件 [${b.craft_city_zh || '紅城'}, ${b.costMode === 'focus' ? '下專注' : '無專注'}${enchantNote}]\n`;
           });
 
           if (bd.journals.length > 0) {
@@ -4417,6 +4757,8 @@
         const royalProfitFilter = ref('profitable');
         const royalSearchQuery = ref('');
         const royalSelectedTier = ref('all');
+        const royalSelectedMajorTier = ref('all'); // 'all', '4', '5', '6'
+        const royalSelectedEnchant = ref('all');   // 'all', '0', '1', '2', '3'
         const royalSelectedWorkshop = ref('all');
         const royalCurrentPage = ref(1);
         const royalPageSize = ref(40);
@@ -4443,6 +4785,9 @@
 
         const getRoyalItemCost = (item, isFocus) => {
           if (!item) return 0;
+          if (item.rune_enchant && item.rune_enchant.royal_is_cheaper) {
+            return isFocus ? item.rune_enchant.royal_enchant_cost_focus : item.rune_enchant.royal_enchant_cost_no_focus;
+          }
           const raw = item.royal_raw_cost || item.raw_cost || 0;
           if (raw <= 0) return 0;
           const rrr = isFocus 
@@ -4581,6 +4926,20 @@
             });
           }
 
+          // 雙層階級篩選 (大階級系列 + 附魔等級)
+          if (royalSelectedMajorTier.value !== 'all') {
+            list = list.filter(e => {
+              const baseT = e.tier.split('.')[0];
+              return baseT === royalSelectedMajorTier.value || ('T' + baseT) === royalSelectedMajorTier.value;
+            });
+          }
+          if (royalSelectedEnchant.value !== 'all') {
+            list = list.filter(e => {
+              const enc = e.tier.includes('.') ? e.tier.split('.')[1] : '0';
+              return enc === royalSelectedEnchant.value;
+            });
+          }
+
           if (royalSelectedTier.value !== 'all') {
             list = list.filter(e => e.tier === royalSelectedTier.value || ('T' + e.tier) === royalSelectedTier.value);
           }
@@ -4708,6 +5067,20 @@
                 return e.cat === '工匠' || e.cat === '冒險者配件';
               }
               return e.cat === selectedWorkshop.value;
+            });
+          }
+
+          // 雙層階級篩選 (大階級系列 + 附魔等級)
+          if (selectedMajorTier.value !== 'all') {
+            list = list.filter(e => {
+              const baseT = e.tier.split('.')[0];
+              return baseT === selectedMajorTier.value || ('T' + baseT) === selectedMajorTier.value;
+            });
+          }
+          if (selectedEnchant.value !== 'all') {
+            list = list.filter(e => {
+              const enc = e.tier.includes('.') ? e.tier.split('.')[1] : '0';
+              return enc === selectedEnchant.value;
             });
           }
 
@@ -4892,6 +5265,13 @@
             }
             lastScanTime.value = data.last_scan_time;
             serverKey.value = data.server || 'east';
+            if (data.rune_prices) {
+              runePrices.value = data.rune_prices;
+            }
+            if (data.custom_rune_prices && !savedCustomRunes) {
+              customRunePrices.value = data.custom_rune_prices;
+            }
+            equipments.value.forEach(recomputeItemRuneEnchant);
           } catch (e) {
             console.error(e);
           }
@@ -5034,7 +5414,8 @@
                 safe_batch_pct: safeBatchPct.value,
                 safe_batch_cap: safeBatchCap.value,
                 royal_batch_qty: royalBatchQty.value,
-                bubble_threshold: bubbleThreshold.value
+                bubble_threshold: bubbleThreshold.value,
+                custom_rune_prices: customRunePrices.value
               })
             });
             const data = await res.json();
@@ -5187,6 +5568,16 @@
           royalProfitFilter,
           royalSearchQuery,
           royalSelectedTier,
+          royalSelectedMajorTier,
+          royalSelectedEnchant,
+          selectedMajorTier,
+          selectedEnchant,
+          runePrices,
+          customRunePrices,
+          getEffectiveRunePrice,
+          saveCustomRunePrices,
+          resetRunePrices,
+          getBatchItemRuneEnchant,
           royalSelectedWorkshop,
           royalCurrentPage,
           royalPageSize,

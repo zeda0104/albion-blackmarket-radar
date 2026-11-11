@@ -64,6 +64,7 @@ _init_specs = load_saved_specs()
 scanner.inner_spec = _init_specs.get("inner_spec", 100)
 scanner.outer_spec = _init_specs.get("outer_spec", 100)
 scanner.food = _init_specs.get("food_type", "kraken")
+scanner.custom_rune_prices = _init_specs.get("rune_custom_prices", {"T4": None, "T5": None, "T6": None})
 os.makedirs("static", exist_ok=True)
 
 @asynccontextmanager
@@ -95,6 +96,7 @@ class ConfigRequest(BaseModel):
     safe_batch_cap: Optional[int] = None
     bubble_threshold: Optional[float] = None
     royal_batch_qty: Optional[int] = None
+    custom_rune_prices: Optional[Dict[str, Optional[int]]] = None
 
 class LedgerRequest(BaseModel):
     date: Optional[str] = None
@@ -171,6 +173,8 @@ def get_radar_data():
         "safe_batch_cap": scanner.safe_batch_cap,
         "bubble_threshold": scanner.bubble_threshold,
         "royal_batch_qty": getattr(scanner, "royal_batch_qty", 100),
+        "rune_prices": getattr(scanner, "rune_prices_cache", {}),
+        "custom_rune_prices": getattr(scanner, "custom_rune_prices", {}),
         "quality_stats": calculate_quality_chances(scanner.inner_spec, scanner.outer_spec, scanner.food, False),
         "materials": scanner.materials_cache,
         "equipments": scanner.equipment_cache,
@@ -195,7 +199,9 @@ def get_config():
         "safe_batch_pct": scanner.safe_batch_pct,
         "safe_batch_cap": scanner.safe_batch_cap,
         "bubble_threshold": scanner.bubble_threshold,
-        "royal_batch_qty": getattr(scanner, "royal_batch_qty", 100)
+        "royal_batch_qty": getattr(scanner, "royal_batch_qty", 100),
+        "rune_prices": getattr(scanner, "rune_prices_cache", {}),
+        "custom_rune_prices": getattr(scanner, "custom_rune_prices", {})
     }
 
 @app.post("/api/config")
@@ -219,7 +225,8 @@ def update_config(cfg: ConfigRequest):
         safe_batch_pct=cfg.safe_batch_pct,
         safe_batch_cap=cfg.safe_batch_cap,
         bubble_threshold=cfg.bubble_threshold,
-        royal_batch_qty=cfg.royal_batch_qty
+        royal_batch_qty=cfg.royal_batch_qty,
+        custom_rune_prices=cfg.custom_rune_prices
     )
     
     if need_rescan:
@@ -431,6 +438,7 @@ class SpecsRequest(BaseModel):
     mastery_specs: Optional[Dict[str, int]] = {}
     user_base_capital: Optional[int] = None
     mammoth_target: Optional[int] = None
+    rune_custom_prices: Optional[Dict[str, Optional[int]]] = {}
 
 @app.get("/api/specs")
 def get_specs():
@@ -451,6 +459,8 @@ def save_specs(req: SpecsRequest):
         scanner.outer_spec = req.outer_spec
     if req.food_type is not None:
         scanner.food = req.food_type
+    if req.rune_custom_prices is not None:
+        scanner.custom_rune_prices = req.rune_custom_prices
         
     return {"success": True, "message": "專精配置已成功儲存至 data/specs.json", "data": data}
 
