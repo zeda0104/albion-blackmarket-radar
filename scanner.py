@@ -7,7 +7,7 @@ Albion Online 黑市製造利潤掃描引擎
 import time
 import requests
 import concurrent.futures
-from urllib.parse import unquote
+from urllib.parse import unquote, quote
 from datetime import datetime, timezone
 from typing import Dict, List, Any, Optional
 from items_database import (
@@ -204,6 +204,46 @@ class MarketScanner:
         except Exception as e:
             print(f"[警告] 抓取紅城原料訂單簿失敗: {e}")
 
+        # 同步抓取五大皇家精煉產地城原物料即時訂單簿深度 (白城木材、藍城皮革、綠城布料、紫城鐵礦、黃城石塊)
+        refining_depth_map = {}
+        city_mat_ids = {}
+        for (mat_type, tier), api_id in mat_map.items():
+            refining_meta = MATERIAL_REFINING_CITIES.get(mat_type, {})
+            rcity = refining_meta.get("city", "Caerleon")
+            city_mat_ids.setdefault(rcity, set()).add(api_id)
+
+        def fetch_city_orderbook(city, ids):
+            if not ids or city == "Caerleon":
+                return city, {}
+            u = f"{self.base_url}/orderbook/{','.join(ids)}?locations={quote(city)}&qualities=1"
+            try:
+                r = requests.get(u, headers=headers, timeout=12)
+                if r.status_code == 200:
+                    c_map = {}
+                    now_ts = time.time()
+                    for entry in r.json():
+                        eid = entry.get("item_id")
+                        sells = entry.get("sell", [])
+                        buys = entry.get("buy", [])
+                        ck = (self.server_key, city, eid)
+                        self.orderbook_cache[ck] = {
+                            "timestamp": now_ts,
+                            "sell": sells,
+                            "buy": buys
+                        }
+                        c_map[eid] = sells
+                    return city, c_map
+            except Exception as e:
+                print(f"[警告] 抓取 {city} 原料訂單簿失敗: {e}")
+            return city, {}
+
+        with concurrent.futures.ThreadPoolExecutor(max_workers=5) as ob_executor:
+            ob_futures = [ob_executor.submit(fetch_city_orderbook, city, list(ids)) for city, ids in city_mat_ids.items()]
+            for fut in concurrent.futures.as_completed(ob_futures):
+                c_name, c_sells = fut.result()
+                for eid, sells in c_sells.items():
+                    refining_depth_map[(c_name, eid)] = sells
+
         structured_materials = {}
         for (mat_type, tier), api_id in mat_map.items():
             # 1. 紅城本地價格
@@ -227,6 +267,11 @@ class MarketScanner:
             # 若產地價格為 0 (無數據)，安全保底退回紅城價
             if ref_p <= 0:
                 ref_p = caer_p
+
+            # 計算精煉產地城訂單簿現貨總量
+            ref_sells = refining_depth_map.get((refining_city, api_id), [])
+            ref_depth = self._calculate_depth_walk(ref_sells, needed_qty=0, gross_qty=0, fallback_price=ref_p)
+            ref_available_qty = ref_depth.get("available_qty", 0)
 
             # 價差與省錢幅度
             price_diff = caer_p - ref_p if (caer_p > 0 and ref_p > 0) else 0
@@ -277,6 +322,10 @@ class MarketScanner:
                 "refining_age_badge": ref_badge,
                 "refining_age_level": ref_level,
                 "refining_age_hours": round(ref_hours, 1),
+                "refining_available_qty": ref_available_qty,
+                "refining_is_depth_sufficient": ref_available_qty > 0,
+                "refining_depth_lowest_price": ref_depth.get("lowest_price", ref_p),
+                "refining_depth_status": ref_depth.get("status", "未知"),
                 "price_diff": price_diff,
                 "price_diff_pct": price_diff_pct,
                 "city_prices": all_city_prices
@@ -560,26 +609,45 @@ class MarketScanner:
                 royal_rrr_nf = royal_info["rrr_no_focus"]  # 0.248 (或紅城 0.152)
                 royal_rrr_f = royal_info["rrr_focus"]      # 0.479
 
-                # 皇家精煉產地原成本
+                # 皇家精煉產地原成本與現貨盤口深度審核
                 royal_raw_cost = 0
                 royal_mats_breakdown = []
+                royal_craftable_qty = 999999
+                royal_has_invalid_mat = False
+
                 for mat_type, count in recipe.items():
                     mat_info = mat_dict.get((mat_type, tier))
                     ref_p = mat_info.get("refining_price", 0) if mat_info else 0
                     ref_city_zh = mat_info.get("refining_city_zh", "產地城") if mat_info else "產地城"
                     caer_p = mat_info.get("caerleon_price", 0) if mat_info else 0
-                    if ref_p > 0:
-                        subtotal = count * ref_p
-                        royal_raw_cost += subtotal
-                        royal_mats_breakdown.append({
-                            "mat_type": mat_type,
-                            "mat_name": MATERIAL_TYPES.get(mat_type, mat_type),
-                            "count": count,
-                            "city_zh": ref_city_zh,
-                            "unit_price": ref_p,
-                            "caerleon_unit_price": caer_p,
-                            "subtotal": subtotal
-                        })
+                    if not mat_info or ref_p <= 0:
+                        royal_has_invalid_mat = True
+                        royal_craftable_qty = 0
+                        break
+
+                    subtotal = count * ref_p
+                    royal_raw_cost += subtotal
+                    royal_mats_breakdown.append({
+                        "mat_type": mat_type,
+                        "mat_name": MATERIAL_TYPES.get(mat_type, mat_type),
+                        "count": count,
+                        "city_zh": ref_city_zh,
+                        "unit_price": ref_p,
+                        "caerleon_unit_price": caer_p,
+                        "subtotal": subtotal
+                    })
+
+                    # 皇家精煉產地現貨深度判定
+                    ref_avail = mat_info.get("refining_available_qty", 0)
+                    if ref_avail < count:
+                        royal_craftable_qty = 0
+                    else:
+                        royal_craftable_qty = min(royal_craftable_qty, ref_avail // count)
+
+                if royal_has_invalid_mat or royal_craftable_qty == 999999:
+                    royal_craftable_qty = 0
+
+                royal_is_depth_sufficient = (royal_craftable_qty >= 1)
 
                 # 皇家加成城市實質成本 (完全無運費/物流扣除)
                 royal_cost_no_focus = int(round(royal_raw_cost * (1.0 - royal_rrr_nf))) if royal_raw_cost > 0 else 0
@@ -1002,6 +1070,8 @@ class MarketScanner:
                     "royal_city_short": royal_city_short,
                     "royal_city_badge": royal_city_badge,
                     "royal_city_icon": royal_city_icon,
+                    "royal_craftable_qty": royal_craftable_qty,
+                    "royal_is_depth_sufficient": royal_is_depth_sufficient,
                     "royal_rrr_no_focus": royal_rrr_nf,
                     "royal_rrr_focus": royal_rrr_f,
                     "royal_raw_cost": royal_raw_cost,

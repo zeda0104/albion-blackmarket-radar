@@ -409,33 +409,38 @@
 
         </div>
 
-        <!-- 篩選與控制欄 -->
+        <!-- 篩選與控制欄 (工坊/系列/附魔支援複選，計算模式按鈕切換，推薦3大排序) -->
         <div class="bg-albion-panel border border-albion-border rounded-lg p-3 space-y-3">
           
-          <!-- 工坊類別 -->
+          <!-- 工坊類別 (支援複選) -->
           <div class="flex flex-wrap items-center gap-1.5 text-xs">
-            <span class="text-gray-400 mr-1">工坊:</span>
+            <span class="text-gray-400 mr-1 font-medium">工坊:</span>
+            <button @click="resetWorkshops"
+                    :class="selectedWorkshops.length === 0 ? 'bg-indigo-600 text-white font-bold shadow-sm ring-1 ring-indigo-400' : 'bg-albion-card text-gray-300 hover:bg-albion-hover border border-albion-border'"
+                    class="px-2.5 py-1 rounded transition">
+              全部
+            </button>
             <button v-for="cat in workshopOptions" :key="cat.value"
-                    @click="selectedWorkshop = cat.value"
-                    :class="selectedWorkshop === cat.value ? 'bg-indigo-600 text-white font-bold' : 'bg-albion-card text-gray-300 hover:bg-albion-hover border border-albion-border'"
+                    @click="toggleWorkshop(cat.value)"
+                    :class="selectedWorkshops.includes(cat.value) ? 'bg-indigo-600 text-white font-bold shadow-sm ring-1 ring-indigo-400' : 'bg-albion-card text-gray-300 hover:bg-albion-hover border border-albion-border'"
                     class="px-2.5 py-1 rounded transition">
               {{ cat.label }}
             </button>
           </div>
 
-          <!-- 雙層階級篩選：大階級系列 + 附魔等級 -->
+          <!-- 雙層階級篩選：大階級系列 + 附魔等級 (支援複選) -->
           <div class="space-y-1.5 pt-1 border-t border-albion-border/40">
             <!-- 第一層：大階級系列 -->
             <div class="flex flex-wrap items-center gap-1.5 text-xs">
               <span class="text-gray-400 mr-1 shrink-0 font-medium">系列:</span>
-              <button @click="selectedMajorTier = 'all'; selectedTier = 'all'"
-                      :class="selectedMajorTier === 'all' ? 'bg-indigo-600 text-white font-bold shadow-sm ring-1 ring-indigo-400' : 'bg-albion-card text-gray-300 hover:bg-albion-hover border border-albion-border'"
+              <button @click="resetMajorTiers"
+                      :class="selectedMajorTiers.length === 0 ? 'bg-indigo-600 text-white font-bold shadow-sm ring-1 ring-indigo-400' : 'bg-albion-card text-gray-300 hover:bg-albion-hover border border-albion-border'"
                       class="px-2.5 py-0.5 rounded transition">
                 全部系列
               </button>
               <button v-for="m in ['4', '5', '6']" :key="'major_' + m"
-                      @click="selectedMajorTier = m; selectedTier = 'all'"
-                      :class="selectedMajorTier === m ? 'bg-indigo-600 text-white font-bold shadow-sm ring-1 ring-indigo-400' : 'bg-albion-card text-gray-300 hover:bg-albion-hover border border-albion-border'"
+                      @click="toggleMajorTier(m)"
+                      :class="selectedMajorTiers.includes(m) ? 'bg-indigo-600 text-white font-bold shadow-sm ring-1 ring-indigo-400' : 'bg-albion-card text-gray-300 hover:bg-albion-hover border border-albion-border'"
                       class="px-2.5 py-0.5 rounded font-bold font-mono transition">
                 T{{ m }} 系列
               </button>
@@ -444,104 +449,74 @@
             <!-- 第二層：附魔等級 -->
             <div class="flex flex-wrap items-center gap-1.5 text-xs">
               <span class="text-gray-400 mr-1 shrink-0 font-medium">附魔:</span>
-              <button @click="selectedEnchant = 'all'; selectedTier = 'all'"
-                      :class="selectedEnchant === 'all' ? 'bg-purple-600 text-white font-bold shadow-sm ring-1 ring-purple-400' : 'bg-albion-card text-gray-300 hover:bg-albion-hover border border-albion-border'"
+              <button @click="resetEnchants"
+                      :class="selectedEnchants.length === 0 ? 'bg-purple-600 text-white font-bold shadow-sm ring-1 ring-purple-400' : 'bg-albion-card text-gray-300 hover:bg-albion-hover border border-albion-border'"
                       class="px-2 py-0.5 rounded transition">
                 全部附魔
               </button>
-              <button @click="selectedEnchant = '0'; selectedTier = 'all'"
-                      :class="selectedEnchant === '0' ? 'bg-gray-600 text-white font-bold shadow-sm ring-1 ring-gray-400' : 'bg-albion-card text-gray-300 hover:bg-albion-hover border border-albion-border'"
+              <button @click="toggleEnchant('0')"
+                      :class="selectedEnchants.includes('0') ? 'bg-gray-600 text-white font-bold shadow-sm ring-1 ring-gray-400' : 'bg-albion-card text-gray-300 hover:bg-albion-hover border border-albion-border'"
                       class="px-2 py-0.5 rounded font-mono transition">
                 .0 (無附魔)
               </button>
-              <button @click="selectedEnchant = '1'; selectedTier = 'all'"
-                      :class="selectedEnchant === '1' ? 'bg-emerald-600 text-white font-bold shadow-sm ring-1 ring-emerald-400' : 'bg-albion-card text-emerald-400 hover:bg-albion-hover border border-emerald-900/60'"
+              <button @click="toggleEnchant('1')"
+                      :class="selectedEnchants.includes('1') ? 'bg-emerald-600 text-white font-bold shadow-sm ring-1 ring-emerald-400' : 'bg-albion-card text-emerald-400 hover:bg-albion-hover border border-emerald-900/60'"
                       class="px-2 py-0.5 rounded font-mono transition">
                 .1 (符石/綠)
               </button>
-              <button @click="selectedEnchant = '2'; selectedTier = 'all'"
-                      :class="selectedEnchant === '2' ? 'bg-sky-600 text-white font-bold shadow-sm ring-1 ring-sky-400' : 'bg-albion-card text-sky-400 hover:bg-albion-hover border border-sky-900/60'"
+              <button @click="toggleEnchant('2')"
+                      :class="selectedEnchants.includes('2') ? 'bg-sky-600 text-white font-bold shadow-sm ring-1 ring-sky-400' : 'bg-albion-card text-sky-400 hover:bg-albion-hover border border-sky-900/60'"
                       class="px-2 py-0.5 rounded font-mono transition">
                 .2 (魂/藍)
               </button>
-              <button @click="selectedEnchant = '3'; selectedTier = 'all'"
-                      :class="selectedEnchant === '3' ? 'bg-purple-700 text-white font-bold shadow-sm ring-1 ring-purple-400' : 'bg-albion-card text-purple-400 hover:bg-albion-hover border border-purple-900/60'"
+              <button @click="toggleEnchant('3')"
+                      :class="selectedEnchants.includes('3') ? 'bg-purple-700 text-white font-bold shadow-sm ring-1 ring-purple-400' : 'bg-albion-card text-purple-400 hover:bg-albion-hover border border-purple-900/60'"
                       class="px-2 py-0.5 rounded font-mono transition">
                 .3 (聖物/紫)
               </button>
             </div>
           </div>
 
-          <!-- 關鍵參數：參考品質、成本模式、搜尋、排序 -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 pt-2 border-t border-albion-border/40 text-xs">
+          <!-- 關鍵參數：搜尋、計算模式(按鈕組)、排序(推薦3項)、現貨可造 (收單基準綁定7日均價，狀態過濾綁定只看賺錢) -->
+          <div class="flex flex-wrap items-center justify-between gap-2.5 pt-2 border-t border-albion-border/40 text-xs">
             
             <!-- 搜尋 -->
-            <input type="text" v-model="searchQuery" 
-                   placeholder="搜尋裝備名稱 (例: 闊劍, 長弓, 4.2)..." 
-                   class="w-full px-3 py-1.5 bg-albion-card border border-albion-border rounded text-gray-200 placeholder-gray-500 focus:outline-none focus:border-indigo-500">
-
-            <!-- 參考收單品質基準 -->
-            <div class="flex items-center space-x-1.5">
-              <span class="text-gray-400 shrink-0">收單基準:</span>
-              <select v-model="qualityBenchmark" 
-                      class="w-full py-1.5 px-2 bg-albion-card border border-albion-border rounded text-gray-200 focus:outline-none focus:border-indigo-500 font-medium">
-                <option value="history_7d">📈 7天黑市均價 (核心)</option>
-                <option value="compat_max">⬇️ 即時最高價 (向下相容)</option>
-                <option value="expected">📊 加權期望價</option>
-              </select>
+            <div class="flex-1 min-w-[200px]">
+              <input type="text" v-model="searchQuery" 
+                     placeholder="搜尋裝備名稱 (例: 闊劍, 長弓, 4.2)..." 
+                     class="w-full px-3 py-1.5 bg-albion-card border border-albion-border rounded text-gray-200 placeholder-gray-500 focus:outline-none focus:border-indigo-500">
             </div>
 
-            <!-- 利潤計算成本模式 (無專注 vs 下專注) -->
-            <div class="flex items-center space-x-1.5">
-              <span class="text-gray-400 shrink-0">計算模式:</span>
-              <select v-model="costMode" 
-                      class="w-full py-1.5 px-2 bg-albion-card border border-albion-border rounded text-gray-200 focus:outline-none focus:border-indigo-500 font-medium">
-                <option value="no_focus">無專注 (15.2% 返還)</option>
-                <option value="focus">下專注 (47.9% 返還)</option>
-              </select>
+            <!-- 利潤計算成本模式按鈕組 (無專注 15.2% vs 下專注 47.9%) -->
+            <div class="flex items-center space-x-1.5 shrink-0">
+              <span class="text-gray-400 font-medium">計算模式:</span>
+              <div class="inline-flex rounded p-0.5 bg-albion-card border border-albion-border">
+                <button @click="costMode = 'no_focus'"
+                        :class="costMode === 'no_focus' ? 'bg-indigo-600 text-white font-bold shadow-sm ring-1 ring-indigo-400' : 'text-gray-400 hover:text-white'"
+                        class="px-2.5 py-1 rounded transition text-xs">
+                  無專注
+                </button>
+                <button @click="costMode = 'focus'"
+                        :class="costMode === 'focus' ? 'bg-sky-600 text-white font-bold shadow-sm ring-1 ring-sky-400' : 'text-gray-400 hover:text-white'"
+                        class="px-2.5 py-1 rounded transition text-xs">
+                  下專注
+                </button>
+              </div>
             </div>
 
-            <!-- 排序 -->
-            <div class="flex items-center space-x-1.5">
-              <span class="text-gray-400 shrink-0">排序:</span>
+            <!-- 排序 (精簡為 3 個最推薦核心指標) -->
+            <div class="flex items-center space-x-1.5 shrink-0">
+              <span class="text-gray-400">排序:</span>
               <select v-model="sortBy" 
-                      class="w-full py-1.5 px-2 bg-albion-card border border-albion-border rounded text-gray-200 focus:outline-none focus:border-indigo-500 font-medium">
-                <option value="batch_profit_desc">💰 單批淨利潤</option>
+                      class="py-1.5 px-2 bg-albion-card border border-albion-border rounded text-amber-300 font-bold focus:outline-none focus:border-indigo-500">
                 <option value="potential_desc">🌟 每日利潤 (理論極限)</option>
                 <option value="profit_desc">💵 單件淨利潤</option>
-                <option value="history_price_desc">📈 7天黑市均價</option>
-                <option value="daily_vol_desc">📦 黑市日均銷量</option>
                 <option value="roi_desc">📊 ROI 投報率</option>
-                <option value="tier_desc">🛡️ 裝備階級</option>
               </select>
             </div>
 
-          </div>
-
-          <!-- 利潤狀態篩選標籤 & T4/T5 走量流 -->
-          <div class="flex flex-wrap items-center justify-between gap-2 pt-1 text-xs border-t border-albion-border/40 mt-1">
-            <div class="flex items-center space-x-2">
-              <span class="text-gray-400">狀態過濾:</span>
-              <button @click="profitFilter = 'all'"
-                      :class="profitFilter === 'all' && !isVolumeOnly ? 'bg-gray-700 text-white' : 'text-gray-400 hover:text-white'"
-                      class="px-2 py-0.5 rounded">
-                全部
-              </button>
-              <button @click="profitFilter = 'profitable'"
-                      :class="profitFilter === 'profitable' && !isVolumeOnly ? 'bg-emerald-800 text-emerald-200 font-bold' : 'text-gray-400 hover:text-emerald-400'"
-                      class="px-2 py-0.5 rounded">
-                只看賺錢
-              </button>
-              <button @click="profitFilter = 'has_orders'"
-                      :class="profitFilter === 'has_orders' && !isVolumeOnly ? 'bg-indigo-800 text-indigo-200' : 'text-gray-400 hover:text-indigo-400'"
-                      class="px-2 py-0.5 rounded">
-                有收購單
-              </button>
-            </div>
-
-            <!-- 快捷過濾群組 -->
-            <div class="flex items-center space-x-2">
-              <!-- 🛡️ 現貨深度可製造過濾 (預設啟用) -->
+            <!-- 🛡️ 現貨深度可製造過濾 (預設啟用) -->
+            <div class="flex items-center space-x-2 shrink-0">
               <button @click="onlyCraftable = !onlyCraftable"
                       :class="onlyCraftable ? 'bg-emerald-600 text-white font-extrabold shadow ring-1 ring-emerald-400' : 'bg-albion-card hover:bg-albion-hover text-emerald-300 border border-emerald-600/50'"
                       class="px-2.5 py-1 rounded text-xs transition flex items-center space-x-1"
@@ -551,15 +526,8 @@
                   {{ countCraftableItems }} 件
                 </span>
               </button>
-
-              <!-- ⚡ T4/T5 走量爆款快捷鍵 -->
-              <button @click="toggleVolumeOnly"
-                      :class="isVolumeOnly ? 'bg-amber-600 text-white font-extrabold shadow ring-1 ring-amber-400' : 'bg-albion-card hover:bg-albion-hover text-amber-300 border border-amber-600/50'"
-                      class="px-2.5 py-1 rounded text-xs transition flex items-center space-x-1"
-                      title="一鍵過濾 T4/T5、高銷量、無專注獲利的走量製造爆款">
-                <span>⚡ T4/T5 走量爆款</span>
-              </button>
             </div>
+
           </div>
 
         </div>
@@ -647,11 +615,11 @@
                                   title="紅城市場原料盤口不足或缺貨，無法買齊製造！">
                               ⚠️ 深度不足 (缺料)
                             </span>
-                            <!-- ✨ 紅城 .1 符石附魔省錢徽章 -->
+                            <!-- 💎 紅城符石附魔省錢標誌 (純圖標) -->
                             <span v-if="item.rune_enchant && item.rune_enchant.is_cheaper"
-                                  class="text-[9px] px-1.5 py-0.2 rounded font-mono font-bold bg-amber-950/90 text-amber-300 border border-amber-600/70 shadow-sm"
-                                  :title="`✨ 符石附魔比直搓更賺！\n• 直搓 .1 成本: ${formatNumber(item.rune_enchant.direct_cost_no_focus)} 銀\n• 搓 .0 成本: ${formatNumber(item.rune_enchant.flat_cost_no_focus)} 銀\n• 符石成本: ${formatNumber(item.rune_enchant.total_rune_cost)} 銀 (${item.rune_enchant.rune_count}顆 × ${item.rune_enchant.rune_price}銀)\n• 附魔總成本: ${formatNumber(item.rune_enchant.enchant_cost_no_focus)} 銀\n🎯 單件現省: +${formatNumber(item.rune_enchant.saved_silver)} 銀`">
-                              ✨ 符石附魔省 {{ formatNumber(item.rune_enchant.saved_silver) }} (需{{ item.rune_enchant.rune_count }}符石)
+                                  class="text-xs px-1 py-0.2 rounded font-mono font-bold bg-amber-950/90 text-amber-300 border border-amber-600/70 shadow-sm cursor-help inline-flex items-center"
+                                  :title="`✨ 符石附魔省 ${formatNumber(item.rune_enchant.saved_silver)} 銀 (需 ${item.rune_enchant.rune_count} 顆符石)\n• 直搓 .1 成本: ${formatNumber(item.rune_enchant.direct_cost_no_focus)} 銀\n• 搓 .0 成本: ${formatNumber(item.rune_enchant.flat_cost_no_focus)} 銀\n• 符石成本: ${formatNumber(item.rune_enchant.total_rune_cost)} 銀 (${item.rune_enchant.rune_count}顆 × ${item.rune_enchant.rune_price}銀)\n• 附魔總成本: ${formatNumber(item.rune_enchant.enchant_cost_no_focus)} 銀`">
+                              💎
                             </span>
                           </div>
                         </div>
@@ -782,21 +750,11 @@
                       <span v-else class="text-gray-600">-</span>
                     </td>
 
-                    <!-- 每日理論極限與穩健日收 -->
-                    <td class="py-2.5 px-2 text-right font-mono whitespace-nowrap min-w-[130px]"
-                        :title="`💡 全伺服器理論上限 (日銷量 100% 全部賣出): +${formatNumber(getItemDailyPotential(item))} 銀/日\n📈 穩健單日估計 (平穩消化 2 批安全量): +${formatNumber(getRealisticDailyPotential(item))} 銀/日\n🎯 單批推薦獲利 (${getSafeBatchQty(item)}件 × 單件淨利): +${formatNumber(getBatchProfit(item))} 銀`">
-                      <div v-if="getItemDailyPotential(item) > 0">
-                        <!-- 理論每日極限總利潤 (與上方榜首看板完全對齊) -->
-                        <div class="font-extrabold text-amber-400 text-sm leading-tight">
-                          +{{ formatNumber(getItemDailyPotential(item)) }}<span class="text-[10px] text-amber-300/80 font-normal ml-0.5">/日</span>
-                        </div>
-                        <div v-if="getRealisticDailyPotential(item) > 0" 
-                             class="text-[10px] text-emerald-400/90 block font-mono mt-0.5">
-                          穩健 +{{ formatNumber(getRealisticDailyPotential(item)) }}/日
-                        </div>
-                        <div class="text-[9px] text-gray-400 font-sans mt-0.5">
-                          單批 +{{ formatNumber(getBatchProfit(item)) }} ({{ getSafeBatchQty(item) }}件)
-                        </div>
+                    <!-- 每日理論極限 (單一數值) -->
+                    <td class="py-2.5 px-2 text-right font-mono whitespace-nowrap min-w-[110px]"
+                        :title="`💡 理論每日利潤 (全日銷量全部賣出): +${formatNumber(getItemDailyPotential(item))} 銀/日\n📈 穩健單日估計: +${formatNumber(getRealisticDailyPotential(item))} 銀/日\n🎯 單批推薦獲利 (${getSafeBatchQty(item)}件): +${formatNumber(getBatchProfit(item))} 銀`">
+                      <div v-if="getItemDailyPotential(item) > 0" class="font-extrabold text-amber-400 text-sm leading-tight">
+                        +{{ formatNumber(getItemDailyPotential(item)) }}<span class="text-[10px] text-amber-300/80 font-normal ml-0.5">/日</span>
                       </div>
                       <span v-else class="text-gray-600">-</span>
                     </td>
@@ -1186,118 +1144,126 @@
           </div>
         </div>
 
-        <!-- 篩選與排序控制欄 -->
+        <!-- 皇家城市製造篩選與控制欄 (與紅城製造完全對齊，支援工坊、系列、附魔多選) -->
         <div class="bg-albion-panel border border-albion-border rounded-lg p-3 space-y-3">
-          <div class="grid grid-cols-2 sm:grid-cols-7 gap-2.5 text-xs">
+          
+          <!-- 工坊類別 (支援複選) -->
+          <div class="flex flex-wrap items-center gap-1.5 text-xs">
+            <span class="text-gray-400 mr-1 font-medium">工坊:</span>
+            <button @click="resetRoyalWorkshops"
+                    :class="royalSelectedWorkshops.length === 0 ? 'bg-amber-600 text-white font-bold shadow-sm ring-1 ring-amber-400' : 'bg-albion-card text-gray-300 hover:bg-albion-hover border border-albion-border'"
+                    class="px-2.5 py-1 rounded transition">
+              全部
+            </button>
+            <button v-for="cat in workshopOptions" :key="'royal_' + cat.value"
+                    @click="toggleRoyalWorkshop(cat.value)"
+                    :class="royalSelectedWorkshops.includes(cat.value) ? 'bg-amber-600 text-white font-bold shadow-sm ring-1 ring-amber-400' : 'bg-albion-card text-gray-300 hover:bg-albion-hover border border-albion-border'"
+                    class="px-2.5 py-1 rounded transition">
+              {{ cat.label }}
+            </button>
+          </div>
+
+          <!-- 雙層階級篩選：大階級系列 + 附魔等級 (支援複選) -->
+          <div class="space-y-1.5 pt-1 border-t border-albion-border/40">
+            <!-- 第一層：大階級系列 -->
+            <div class="flex flex-wrap items-center gap-1.5 text-xs">
+              <span class="text-gray-400 mr-1 shrink-0 font-medium">系列:</span>
+              <button @click="resetRoyalMajorTiers"
+                      :class="royalSelectedMajorTiers.length === 0 ? 'bg-amber-600 text-white font-bold shadow-sm ring-1 ring-amber-400' : 'bg-albion-card text-gray-300 hover:bg-albion-hover border border-albion-border'"
+                      class="px-2.5 py-0.5 rounded transition">
+                全部系列
+              </button>
+              <button v-for="m in ['4', '5', '6']" :key="'royal_major_' + m"
+                      @click="toggleRoyalMajorTier(m)"
+                      :class="royalSelectedMajorTiers.includes(m) ? 'bg-amber-600 text-white font-bold shadow-sm ring-1 ring-amber-400' : 'bg-albion-card text-gray-300 hover:bg-albion-hover border border-albion-border'"
+                      class="px-2.5 py-0.5 rounded font-bold font-mono transition">
+                T{{ m }} 系列
+              </button>
+            </div>
+
+            <!-- 第二層：附魔等級 -->
+            <div class="flex flex-wrap items-center gap-1.5 text-xs">
+              <span class="text-gray-400 mr-1 shrink-0 font-medium">附魔:</span>
+              <button @click="resetRoyalEnchants"
+                      :class="royalSelectedEnchants.length === 0 ? 'bg-purple-600 text-white font-bold shadow-sm ring-1 ring-purple-400' : 'bg-albion-card text-gray-300 hover:bg-albion-hover border border-albion-border'"
+                      class="px-2 py-0.5 rounded transition">
+                全部附魔
+              </button>
+              <button @click="toggleRoyalEnchant('0')"
+                      :class="royalSelectedEnchants.includes('0') ? 'bg-gray-600 text-white font-bold shadow-sm ring-1 ring-gray-400' : 'bg-albion-card text-gray-300 hover:bg-albion-hover border border-albion-border'"
+                      class="px-2 py-0.5 rounded font-mono transition">
+                .0 (無附魔)
+              </button>
+              <button @click="toggleRoyalEnchant('1')"
+                      :class="royalSelectedEnchants.includes('1') ? 'bg-emerald-600 text-white font-bold shadow-sm ring-1 ring-emerald-400' : 'bg-albion-card text-emerald-400 hover:bg-albion-hover border border-emerald-900/60'"
+                      class="px-2 py-0.5 rounded font-mono transition">
+                .1 (符石/綠)
+              </button>
+              <button @click="toggleRoyalEnchant('2')"
+                      :class="royalSelectedEnchants.includes('2') ? 'bg-sky-600 text-white font-bold shadow-sm ring-1 ring-sky-400' : 'bg-albion-card text-sky-400 hover:bg-albion-hover border border-sky-900/60'"
+                      class="px-2 py-0.5 rounded font-mono transition">
+                .2 (魂/藍)
+              </button>
+              <button @click="toggleRoyalEnchant('3')"
+                      :class="royalSelectedEnchants.includes('3') ? 'bg-purple-700 text-white font-bold shadow-sm ring-1 ring-purple-400' : 'bg-albion-card text-purple-400 hover:bg-albion-hover border border-purple-900/60'"
+                      class="px-2 py-0.5 rounded font-mono transition">
+                .3 (聖物/紫)
+              </button>
+            </div>
+          </div>
+
+          <!-- 關鍵參數：搜尋、計算模式(按鈕組)、排序(推薦4項)、現貨可造 (收單基準綁定7日均價，狀態過濾綁定只看賺錢，出貨模式綁定掛單制) -->
+          <div class="flex flex-wrap items-center justify-between gap-2.5 pt-2 border-t border-albion-border/40 text-xs">
             
-            <!-- 關鍵字搜尋 -->
-            <div class="col-span-2 sm:col-span-1">
-              <label class="block text-gray-400 mb-1 text-[11px]">🔍 搜尋裝備/城市</label>
-              <input type="text" v-model="royalSearchQuery" placeholder="弓箭, 闊劍, 白城..."
-                     class="w-full py-1.5 px-2 bg-albion-card border border-albion-border rounded text-white focus:outline-none focus:border-amber-500">
+            <!-- 搜尋 -->
+            <div class="flex-1 min-w-[200px]">
+              <input type="text" v-model="royalSearchQuery" 
+                     placeholder="搜尋裝備名稱/城市 (例: 闊劍, 長弓, 白城)..." 
+                     class="w-full px-3 py-1.5 bg-albion-card border border-albion-border rounded text-gray-200 placeholder-gray-500 focus:outline-none focus:border-amber-500">
             </div>
 
-            <!-- 工坊類別 -->
-            <div>
-              <label class="block text-gray-400 mb-1 text-[11px]">工坊類別</label>
-              <select v-model="royalSelectedWorkshop" class="w-full py-1.5 px-2 bg-albion-card border border-albion-border rounded text-white focus:outline-none">
-                <option value="all">全部類別</option>
-                <option value="獵人小屋">🏹 獵人小屋</option>
-                <option value="法師之塔">🔮 法師之塔</option>
-                <option value="戰士鐵匠鋪">⚔️ 戰士鐵匠鋪</option>
-                <option value="工匠">🎒 工匠/配件</option>
-              </select>
+            <!-- 利潤計算成本模式按鈕組 (無專注 24.8% vs 下專注 47.9%) -->
+            <div class="flex items-center space-x-1.5 shrink-0">
+              <span class="text-gray-400 font-medium">計算模式:</span>
+              <div class="inline-flex rounded p-0.5 bg-albion-card border border-albion-border">
+                <button @click="costMode = 'no_focus'"
+                        :class="costMode === 'no_focus' ? 'bg-amber-600 text-white font-bold shadow-sm ring-1 ring-amber-400' : 'text-gray-400 hover:text-white'"
+                        class="px-2.5 py-1 rounded transition text-xs">
+                  無專注
+                </button>
+                <button @click="costMode = 'focus'"
+                        :class="costMode === 'focus' ? 'bg-sky-600 text-white font-bold shadow-sm ring-1 ring-sky-400' : 'text-gray-400 hover:text-white'"
+                        class="px-2.5 py-1 rounded transition text-xs">
+                  下專注
+                </button>
+              </div>
             </div>
 
-            <!-- 階級系列 -->
-            <div>
-              <label class="block text-gray-400 mb-1 text-[11px]">階級系列</label>
-              <select v-model="royalSelectedMajorTier" class="w-full py-1.5 px-2 bg-albion-card border border-albion-border rounded text-white focus:outline-none font-medium">
-                <option value="all">🌟 全部系列</option>
-                <option value="4">🛡️ T4 系列</option>
-                <option value="5">🛡️ T5 系列</option>
-                <option value="6">🛡️ T6 系列</option>
-              </select>
-            </div>
-
-            <!-- 附魔等級 -->
-            <div>
-              <label class="block text-gray-400 mb-1 text-[11px]">附魔等級</label>
-              <select v-model="royalSelectedEnchant" class="w-full py-1.5 px-2 bg-albion-card border border-albion-border rounded text-white focus:outline-none font-medium">
-                <option value="all">🌟 全部附魔</option>
-                <option value="0">⚪ .0 (無附魔)</option>
-                <option value="1">🟢 .1 (符石附魔)</option>
-                <option value="2">🔵 .2 (魂附魔)</option>
-                <option value="3">🟣 .3 (聖物附魔)</option>
-              </select>
-            </div>
-
-            <!-- 收單基準 (支援無單週均保底與防暴漲) -->
-            <div>
-              <label class="block text-gray-400 mb-1 text-[11px]">收單基準</label>
-              <select v-model="qualityBenchmark" class="w-full py-1.5 px-2 bg-albion-card border border-albion-border rounded text-white focus:outline-none">
-                <option value="history_7d">📈 7天黑市均價 (核心)</option>
-                <option value="compat_max">⬇️ 即時最高價 (向下相容)</option>
-                <option value="expected">📊 加權期望價</option>
-              </select>
-            </div>
-
-            <!-- 獲利狀態 -->
-            <div>
-              <label class="block text-gray-400 mb-1 text-[11px]">獲利篩選</label>
-              <select v-model="royalProfitFilter" class="w-full py-1.5 px-2 bg-albion-card border border-albion-border rounded text-white focus:outline-none">
-                <option value="profitable">🟢 僅看可獲利裝備</option>
-                <option value="all">全部狀態</option>
-                <option value="no_focus">無專注即獲利</option>
-                <option value="focus">需下專注才獲利</option>
-                <option value="loss">虧損品項</option>
-              </select>
-            </div>
-
-            <!-- 排序方式 (聚焦自身利潤與日誌產出) -->
-            <div>
-              <label class="block text-gray-400 mb-1 text-[11px]">排序方式</label>
-              <select v-model="royalSortBy" class="w-full py-1.5 px-2 bg-albion-card border border-albion-border rounded text-amber-300 font-bold focus:outline-none">
-                <option value="royal_batch_profit_desc">📦 皇家批量利潤 ({{ royalBatchQty }}件)</option>
+            <!-- 排序 (精簡為 4 個核心指標：每日利潤、單件淨利、ROI、批量利潤100件) -->
+            <div class="flex items-center space-x-1.5 shrink-0">
+              <span class="text-gray-400">排序:</span>
+              <select v-model="royalSortBy" 
+                      class="py-1.5 px-2 bg-albion-card border border-albion-border rounded text-amber-300 font-bold focus:outline-none focus:border-amber-500">
                 <option value="royal_potential_desc">🌟 皇家每日利潤 (理論極限)</option>
                 <option value="royal_profit_desc">💵 單件淨利潤</option>
                 <option value="royal_roi_desc">📊 皇家投報率 (ROI)</option>
-                <option value="daily_vol_desc">📦 黑市日均銷量</option>
-                <option value="tier_desc">🛡️ 裝備階級</option>
+                <option value="royal_batch_profit_desc">📦 皇家批量利潤 (100件)</option>
               </select>
             </div>
 
-          </div>
-
-          <!-- 模式切換列 (出貨模式 & 專注模式) -->
-          <div class="flex flex-wrap items-center justify-between border-t border-albion-border/40 pt-2 text-xs gap-2">
-            <div class="flex items-center space-x-2">
-              <span class="text-gray-400 text-[11px]">出貨模式:</span>
-              <span class="px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-800 font-bold">📋 掛單制 (6.5% 稅費)</span>
-
-              <button @click="toggleVolumeOnly"
-                      :class="isVolumeOnly ? 'bg-amber-600 text-white font-extrabold shadow ring-1 ring-amber-400' : 'bg-albion-card hover:bg-albion-hover text-amber-300 border border-amber-600/50'"
-                      class="ml-2 px-2.5 py-0.5 rounded text-xs transition flex items-center space-x-1"
-                      title="一鍵過濾 T4/T5、高銷量、無專注獲利的走量製造爆款">
-                <span>⚡ T4/T5 走量爆款</span>
-              </button>
-
-              <span class="text-gray-400 text-[11px] ml-2">成本模式:</span>
-              <button @click="costMode = 'no_focus'"
-                      :class="costMode === 'no_focus' ? 'bg-gray-700 text-white font-bold' : 'text-gray-400 hover:text-white'"
-                      class="px-2 py-0.5 rounded transition">
-                無專注 (加成24.8%)
-              </button>
-              <button @click="costMode = 'focus'"
-                      :class="costMode === 'focus' ? 'bg-sky-700 text-white font-bold' : 'text-gray-400 hover:text-white'"
-                      class="px-2 py-0.5 rounded transition">
-                下專注 (47.9%)
+            <!-- 🛡️ 皇家現貨深度可製造過濾 (預設啟用) -->
+            <div class="flex items-center space-x-2 shrink-0">
+              <button @click="royalOnlyCraftable = !royalOnlyCraftable"
+                      :class="royalOnlyCraftable ? 'bg-emerald-600 text-white font-extrabold shadow ring-1 ring-emerald-400' : 'bg-albion-card hover:bg-albion-hover text-emerald-300 border border-emerald-600/50'"
+                      class="px-2.5 py-1 rounded text-xs transition flex items-center space-x-1"
+                      title="一鍵過濾精煉產地原料盤口不足的裝備，僅顯示能夠立即採購製造的品項">
+                <span>🛡️ 僅看現貨可造</span>
+                <span class="text-[10px] px-1.5 py-0.2 rounded font-mono" :class="royalOnlyCraftable ? 'bg-black text-emerald-300' : 'bg-emerald-950 text-emerald-200'">
+                  {{ countRoyalCraftableItems }} 件
+                </span>
               </button>
             </div>
 
-            <div class="text-[11px] text-gray-400">
-              💡 點擊任一行展開查看「產地原料採購明細」與「多品質保底買單」
-            </div>
           </div>
         </div>
 
@@ -1342,21 +1308,21 @@
                           </div>
                           <div class="flex items-center space-x-1.5 mt-0.5">
                             <span class="text-[11px] text-gray-500">{{ item.subcat }} ({{ item.cat }})</span>
-                            <span v-if="(item.craftable_qty || 0) >= 1" 
+                            <span v-if="(item.royal_craftable_qty || 0) >= 1" 
                                   class="text-[9px] px-1 py-0.2 rounded font-mono font-bold bg-emerald-950/80 text-emerald-300 border border-emerald-800"
-                                  :title="`紅城原料現貨充足，當前盤口深度最多可直造 ${item.craftable_qty} 件`">
-                              🟢 現貨可造 {{ item.craftable_qty }} 件
+                                  :title="`產地原料現貨充足，當前產地盤口深度最多可直造 ${item.royal_craftable_qty} 件`">
+                              🟢 現貨可造 {{ item.royal_craftable_qty }} 件
                             </span>
                             <span v-else 
                                   class="text-[9px] px-1 py-0.2 rounded font-mono font-bold bg-rose-950/80 text-rose-300 border border-rose-800"
-                                  title="紅城市場原料盤口不足或缺貨，無法買齊製造！">
+                                  title="精煉產地市場原料盤口不足或缺貨，無法買齊製造！">
                               ⚠️ 深度不足 (缺料)
                             </span>
-                            <!-- ✨ 皇家 .1 符石附魔省錢徽章 -->
+                            <!-- 💎 皇家符石附魔省錢標誌 (純圖標) -->
                             <span v-if="item.rune_enchant && item.rune_enchant.royal_is_cheaper"
-                                  class="text-[9px] px-1.5 py-0.2 rounded font-mono font-bold bg-amber-950/90 text-amber-300 border border-amber-600/70 shadow-sm"
-                                  :title="`✨ 符石附魔比直搓更賺！\n• 皇家直搓 .1: ${formatNumber(item.rune_enchant.royal_direct_cost_no_focus)} 銀\n• 皇家搓 .0: ${formatNumber(item.rune_enchant.royal_flat_cost_no_focus)} 銀\n• 符石成本: ${formatNumber(item.rune_enchant.total_rune_cost)} 銀 (${item.rune_enchant.rune_count}顆 × ${item.rune_enchant.rune_price}銀)\n• 附魔總成本: ${formatNumber(item.rune_enchant.royal_enchant_cost_no_focus)} 銀\n🎯 單件現省: +${formatNumber(item.rune_enchant.royal_saved_silver)} 銀`">
-                              ✨ 符石附魔省 {{ formatNumber(item.rune_enchant.royal_saved_silver) }} (需{{ item.rune_enchant.rune_count }}符石)
+                                  class="text-xs px-1 py-0.2 rounded font-mono font-bold bg-amber-950/90 text-amber-300 border border-amber-600/70 shadow-sm cursor-help inline-flex items-center"
+                                  :title="`✨ 符石附魔比直搓更賺！單件現省 +${formatNumber(item.rune_enchant.royal_saved_silver)} 銀 (需 ${item.rune_enchant.rune_count} 顆符石)\n• 皇家直搓 .1: ${formatNumber(item.rune_enchant.royal_direct_cost_no_focus)} 銀\n• 皇家搓 .0: ${formatNumber(item.rune_enchant.royal_flat_cost_no_focus)} 銀\n• 符石成本: ${formatNumber(item.rune_enchant.total_rune_cost)} 銀 (${item.rune_enchant.rune_count}顆 × ${item.rune_enchant.rune_price}銀)\n• 附魔總成本: ${formatNumber(item.rune_enchant.royal_enchant_cost_no_focus)} 銀`">
+                              💎
                             </span>
                           </div>
                         </div>
@@ -2929,6 +2895,32 @@
         const selectedMajorTier = ref('all'); // 'all', '4', '5', '6'
         const selectedEnchant = ref('all');   // 'all', '0', '1', '2', '3'
 
+        // 🎯 支援工坊、系列、附魔多選 (複選)
+        const selectedWorkshops = ref([]); // 空陣列表示全部
+        const selectedMajorTiers = ref([]); // 空陣列表示全部
+        const selectedEnchants = ref([]);   // 空陣列表示全部
+
+        const toggleWorkshop = (val) => {
+          const idx = selectedWorkshops.value.indexOf(val);
+          if (idx > -1) selectedWorkshops.value.splice(idx, 1);
+          else selectedWorkshops.value.push(val);
+        };
+        const resetWorkshops = () => { selectedWorkshops.value = []; };
+
+        const toggleMajorTier = (val) => {
+          const idx = selectedMajorTiers.value.indexOf(val);
+          if (idx > -1) selectedMajorTiers.value.splice(idx, 1);
+          else selectedMajorTiers.value.push(val);
+        };
+        const resetMajorTiers = () => { selectedMajorTiers.value = []; };
+
+        const toggleEnchant = (val) => {
+          const idx = selectedEnchants.value.indexOf(val);
+          if (idx > -1) selectedEnchants.value.splice(idx, 1);
+          else selectedEnchants.value.push(val);
+        };
+        const resetEnchants = () => { selectedEnchants.value = []; };
+
         // 🔮 紅城符石價格快取與自訂鎖價
         const runePrices = ref({
           T4: { api_buy: 13, api_sell: 15, effective_price: 13 },
@@ -3004,8 +2996,11 @@
         };
 
         const searchQuery = ref('');
-        const profitFilter = ref('profitable'); // 預設只看賺錢
-        const sortBy = ref(localStorage.getItem('albion_sort_by') || 'batch_profit_desc'); // 預設按單批淨利潤排序
+        const profitFilter = ref('profitable'); // 預設並綁定只看賺錢
+        const validSortBys = ['potential_desc', 'profit_desc', 'roi_desc'];
+        const savedSortBy = localStorage.getItem('albion_sort_by');
+        const sortBy = ref(validSortBys.includes(savedSortBy) ? savedSortBy : 'potential_desc'); // 預設按每日利潤排序
+        watch(sortBy, (val) => localStorage.setItem('albion_sort_by', val));
         const isVolumeOnly = ref(false); // ⚡ T4/T5 走量專區篩選開關
         const toggleVolumeOnly = () => {
           isVolumeOnly.value = !isVolumeOnly.value;
@@ -3187,8 +3182,8 @@
           return 'bg-gray-800 text-gray-400 border border-gray-700';
         };
 
-        // 基準品質與成本模式
-        const qualityBenchmark = ref(localStorage.getItem('albion_quality_benchmark') || 'history_7d'); // 預設向下相容最高
+        // 基準品質與成本模式 (收單基準綁定 7 天黑市均價)
+        const qualityBenchmark = ref('history_7d');
         const costMode = ref(localStorage.getItem('albion_cost_mode') || 'no_focus');           // 'no_focus' (15.2%), 'focus' (47.9%)
 
         // 🎲 製作專精與食物設定 (多重擲骰品質系統)
@@ -4835,13 +4830,48 @@
         
         // ================== 🏰 皇家城市製造分業狀態與量化指標 ==================
         const selectedRoyalCity = ref('all');
-        const royalSortBy = ref(localStorage.getItem('albion_royal_sort_by') || 'royal_profit_desc');
+        const validRoyalSortBys = ['royal_potential_desc', 'royal_profit_desc', 'royal_roi_desc', 'royal_batch_profit_desc'];
+        const savedRoyalSortBy = localStorage.getItem('albion_royal_sort_by');
+        const royalSortBy = ref(validRoyalSortBys.includes(savedRoyalSortBy) ? savedRoyalSortBy : 'royal_potential_desc');
         const royalProfitFilter = ref('profitable');
         const royalSearchQuery = ref('');
         const royalSelectedTier = ref('all');
         const royalSelectedMajorTier = ref('all'); // 'all', '4', '5', '6'
         const royalSelectedEnchant = ref('all');   // 'all', '0', '1', '2', '3'
         const royalSelectedWorkshop = ref('all');
+
+        // 🏰 皇家製造工坊、系列、附魔多選 (複選)
+        const royalSelectedWorkshops = ref([]);
+        const royalSelectedMajorTiers = ref([]);
+        const royalSelectedEnchants = ref([]);
+
+        const toggleRoyalWorkshop = (val) => {
+          const idx = royalSelectedWorkshops.value.indexOf(val);
+          if (idx > -1) royalSelectedWorkshops.value.splice(idx, 1);
+          else royalSelectedWorkshops.value.push(val);
+        };
+        const resetRoyalWorkshops = () => { royalSelectedWorkshops.value = []; };
+
+        const toggleRoyalMajorTier = (val) => {
+          const idx = royalSelectedMajorTiers.value.indexOf(val);
+          if (idx > -1) royalSelectedMajorTiers.value.splice(idx, 1);
+          else royalSelectedMajorTiers.value.push(val);
+        };
+        const resetRoyalMajorTiers = () => { royalSelectedMajorTiers.value = []; };
+
+        const toggleRoyalEnchant = (val) => {
+          const idx = royalSelectedEnchants.value.indexOf(val);
+          if (idx > -1) royalSelectedEnchants.value.splice(idx, 1);
+          else royalSelectedEnchants.value.push(val);
+        };
+        const resetRoyalEnchants = () => { royalSelectedEnchants.value = []; };
+
+        // 🛡️ 皇家精煉產地現貨深度過濾
+        const royalOnlyCraftable = ref(true);
+        const countRoyalCraftableItems = computed(() => {
+          return equipments.value.filter(e => (e.royal_craftable_qty !== undefined ? e.royal_craftable_qty >= 1 : (e.craftable_qty || 0) >= 1)).length;
+        });
+
         const royalCurrentPage = ref(1);
         const royalPageSize = ref(40);
         watch(royalSortBy, (val) => localStorage.setItem('albion_royal_sort_by', val));
@@ -4989,17 +5019,29 @@
         const filteredRoyalEquipments = computed(() => {
           let list = equipments.value;
 
-          // ⚡ T4/T5 走量爆款過濾
-          if (isVolumeOnly.value) {
-            const vTiers = ['4.0', '4.1', '5.0', '5.1'];
-            list = list.filter(e => vTiers.includes(e.tier) && (e.daily_avg_vol || 0) >= 20 && getRoyalItemProfit(e) > 0);
+          // 🛡️ 皇家精煉產地原料盤口深度過濾 (預設啟用)
+          if (royalOnlyCraftable.value) {
+            list = list.filter(e => {
+              if (e.royal_craftable_qty !== undefined) {
+                return e.royal_craftable_qty >= 1;
+              }
+              return (e.craftable_qty || 0) >= 1;
+            });
           }
 
           if (selectedRoyalCity.value !== 'all') {
             list = list.filter(e => e.royal_city === selectedRoyalCity.value);
           }
 
-          if (royalSelectedWorkshop.value !== 'all') {
+          // 🏰 工坊類別篩選 (支援複選)
+          if (royalSelectedWorkshops.value && royalSelectedWorkshops.value.length > 0) {
+            list = list.filter(e => {
+              return royalSelectedWorkshops.value.some(w => {
+                if (w === '工匠' || w === '冒險者配件') return e.cat === '工匠' || e.cat === '冒險者配件';
+                return e.cat === w;
+              });
+            });
+          } else if (royalSelectedWorkshop.value !== 'all') {
             list = list.filter(e => {
               if (royalSelectedWorkshop.value === '工匠' || royalSelectedWorkshop.value === '冒險者配件') {
                 return e.cat === '工匠' || e.cat === '冒險者配件';
@@ -5008,14 +5050,25 @@
             });
           }
 
-          // 雙層階級篩選 (大階級系列 + 附魔等級)
-          if (royalSelectedMajorTier.value !== 'all') {
+          // 雙層階級篩選 (大階級系列 + 附魔等級，支援複選)
+          if (royalSelectedMajorTiers.value && royalSelectedMajorTiers.value.length > 0) {
+            list = list.filter(e => {
+              const baseT = e.tier.split('.')[0];
+              return royalSelectedMajorTiers.value.includes(baseT) || royalSelectedMajorTiers.value.includes('T' + baseT);
+            });
+          } else if (royalSelectedMajorTier.value !== 'all') {
             list = list.filter(e => {
               const baseT = e.tier.split('.')[0];
               return baseT === royalSelectedMajorTier.value || ('T' + baseT) === royalSelectedMajorTier.value;
             });
           }
-          if (royalSelectedEnchant.value !== 'all') {
+
+          if (royalSelectedEnchants.value && royalSelectedEnchants.value.length > 0) {
+            list = list.filter(e => {
+              const enc = e.tier.includes('.') ? e.tier.split('.')[1] : '0';
+              return royalSelectedEnchants.value.includes(enc);
+            });
+          } else if (royalSelectedEnchant.value !== 'all') {
             list = list.filter(e => {
               const enc = e.tier.includes('.') ? e.tier.split('.')[1] : '0';
               return enc === royalSelectedEnchant.value;
@@ -5026,15 +5079,8 @@
             list = list.filter(e => e.tier === royalSelectedTier.value || ('T' + e.tier) === royalSelectedTier.value);
           }
 
-          if (royalProfitFilter.value === 'profitable') {
-            list = list.filter(e => getRoyalItemProfit(e) > 0);
-          } else if (royalProfitFilter.value === 'no_focus') {
-            list = list.filter(e => (e.royal_profit_no_focus || 0) > 0);
-          } else if (royalProfitFilter.value === 'focus') {
-            list = list.filter(e => (e.royal_profit_no_focus || 0) <= 0 && (e.royal_profit_focus || 0) > 0);
-          } else if (royalProfitFilter.value === 'loss') {
-            list = list.filter(e => (e.royal_profit_no_focus || 0) <= 0 && (e.royal_profit_focus || 0) <= 0);
-          }
+          // 獲利篩選 (鎖定只看賺錢)
+          list = list.filter(e => getRoyalItemProfit(e) > 0);
 
           const q = royalSearchQuery.value.trim().toLowerCase();
           if (q) {
@@ -5047,24 +5093,16 @@
           }
 
           list = [...list].sort((a, b) => {
-            if (royalSortBy.value === 'royal_batch_profit_desc' || royalSortBy.value === 'royal_potential_desc') {
-              return getRoyalCustomBatchProfit(b) - getRoyalCustomBatchProfit(a);
+            if (royalSortBy.value === 'royal_potential_desc') {
+              return getRoyalDailyPotential(b) - getRoyalDailyPotential(a);
             } else if (royalSortBy.value === 'royal_profit_desc') {
               return getRoyalItemProfit(b) - getRoyalItemProfit(a);
-            } else if (royalSortBy.value === 'royal_potential_desc') {
-              return getRoyalDailyPotential(b) - getRoyalDailyPotential(a);
             } else if (royalSortBy.value === 'royal_roi_desc') {
               return parseFloat(getRoyalItemRoi(b)) - parseFloat(getRoyalItemRoi(a));
-            } else if (royalSortBy.value === 'daily_vol_desc') {
-              return (b.daily_avg_vol || 0) - (a.daily_avg_vol || 0);
-            } else if (royalSortBy.value === 'journal_desc') {
-              const jA = a.journal?.market_subsidy || 0;
-              const jB = b.journal?.market_subsidy || 0;
-              return jB - jA;
-            } else if (royalSortBy.value === 'cost_asc') {
-              return getRoyalItemCost(a, costMode.value === 'focus') - getRoyalItemCost(b, costMode.value === 'focus');
+            } else if (royalSortBy.value === 'royal_batch_profit_desc') {
+              return getRoyalCustomBatchProfit(b) - getRoyalCustomBatchProfit(a);
             }
-            return getRoyalItemProfit(b) - getRoyalItemProfit(a);
+            return getRoyalDailyPotential(b) - getRoyalDailyPotential(a);
           });
 
           return list;
@@ -5143,7 +5181,15 @@
             list = list.filter(e => (e.daily_avg_vol || 0) >= 5 && e.bubble_risk !== 'high_risk');
           }
 
-          if (selectedWorkshop.value !== 'all') {
+          // 工坊類別篩選 (支援複選)
+          if (selectedWorkshops.value && selectedWorkshops.value.length > 0) {
+            list = list.filter(e => {
+              return selectedWorkshops.value.some(w => {
+                if (w === '工匠' || w === '冒險者配件') return e.cat === '工匠' || e.cat === '冒險者配件';
+                return e.cat === w;
+              });
+            });
+          } else if (selectedWorkshop.value !== 'all') {
             list = list.filter(e => {
               if (selectedWorkshop.value === '工匠' || selectedWorkshop.value === '冒險者配件') {
                 return e.cat === '工匠' || e.cat === '冒險者配件';
@@ -5152,14 +5198,25 @@
             });
           }
 
-          // 雙層階級篩選 (大階級系列 + 附魔等級)
-          if (selectedMajorTier.value !== 'all') {
+          // 雙層階級篩選 (大階級系列 + 附魔等級，支援複選)
+          if (selectedMajorTiers.value && selectedMajorTiers.value.length > 0) {
+            list = list.filter(e => {
+              const baseT = e.tier.split('.')[0];
+              return selectedMajorTiers.value.includes(baseT) || selectedMajorTiers.value.includes('T' + baseT);
+            });
+          } else if (selectedMajorTier.value !== 'all') {
             list = list.filter(e => {
               const baseT = e.tier.split('.')[0];
               return baseT === selectedMajorTier.value || ('T' + baseT) === selectedMajorTier.value;
             });
           }
-          if (selectedEnchant.value !== 'all') {
+
+          if (selectedEnchants.value && selectedEnchants.value.length > 0) {
+            list = list.filter(e => {
+              const enc = e.tier.includes('.') ? e.tier.split('.')[1] : '0';
+              return selectedEnchants.value.includes(enc);
+            });
+          } else if (selectedEnchant.value !== 'all') {
             list = list.filter(e => {
               const enc = e.tier.includes('.') ? e.tier.split('.')[1] : '0';
               return enc === selectedEnchant.value;
@@ -5175,11 +5232,8 @@
             list = list.filter(e => isItemInDailyBonus(e));
           }
 
-          if (profitFilter.value === 'profitable') {
-            list = list.filter(e => getItemProfit(e) > 0);
-          } else if (profitFilter.value === 'has_orders') {
-            list = list.filter(e => getItemPrice(e) > 0);
-          }
+          // 狀態過濾 (鎖定只看賺錢)
+          list = list.filter(e => getItemProfit(e) > 0);
 
           if (searchQuery.value.trim()) {
             const q = searchQuery.value.trim().toLowerCase();
@@ -5587,6 +5641,26 @@
           openMaterialDepthModal,
           onlyCraftable,
           countCraftableItems,
+          royalOnlyCraftable,
+          countRoyalCraftableItems,
+          selectedWorkshops,
+          toggleWorkshop,
+          resetWorkshops,
+          selectedMajorTiers,
+          toggleMajorTier,
+          resetMajorTiers,
+          selectedEnchants,
+          toggleEnchant,
+          resetEnchants,
+          royalSelectedWorkshops,
+          toggleRoyalWorkshop,
+          resetRoyalWorkshops,
+          royalSelectedMajorTiers,
+          toggleRoyalMajorTier,
+          resetRoyalMajorTiers,
+          royalSelectedEnchants,
+          toggleRoyalEnchant,
+          resetRoyalEnchants,
           fetchBatchMarketDepth,
           addToBatch,
           removeFromBatch,
