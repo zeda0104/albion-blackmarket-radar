@@ -393,6 +393,23 @@ def update_config(cfg: ConfigRequest):
 
     return {"success": True, "config": get_config()}
 
+@app.post("/api/materials/refresh")
+def refresh_materials():
+    """單獨主動更新跨城材料行情 (極速 ~1-2 秒)，並持久化保存到 data/materials_cache.json"""
+    res = scanner.refresh_materials_only()
+    return res
+
+@app.get("/api/materials")
+def get_materials():
+    """獲取跨城材料行情資料與時效狀態"""
+    if not scanner.materials_cache:
+        scanner.load_materials_cache()
+    return {
+        "success": True,
+        "materials": scanner.materials_cache,
+        "count": len(scanner.materials_cache)
+    }
+
 @app.get("/api/ledger")
 def get_ledger():
     return ledger_manager.get_ledger_records()

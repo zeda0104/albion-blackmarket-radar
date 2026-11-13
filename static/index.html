@@ -1998,16 +1998,65 @@
       </div>
 
     <div v-show="currentTab === 'materials'" class="space-y-4">
-        <div class="flex flex-wrap items-center justify-between gap-2 bg-albion-panel border border-albion-border rounded-lg p-3">
-          <div>
-            <h2 class="text-sm font-bold text-white flex items-center space-x-2">
-              <span>📦 皇家大陸跨城原物料盤口 (加成精煉城 vs 紅城本地)</span>
-            </h2>
-            <div class="text-xs text-gray-400 mt-0.5">
-              木材拉白城、皮革拉藍城、布料拉綠城、鐵錠拉紫城，享產地 36.7%~53.9% 精煉返還與最深現貨買賣盤！
+        <!-- 頂部控制列 & 持久化時效狀態 -->
+        <div class="bg-albion-panel border border-albion-border rounded-lg p-3 space-y-2">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h2 class="text-sm font-bold text-white flex items-center space-x-2">
+                <span>📦 皇家大陸跨城原物料盤口 (加成精煉城 vs 紅城本地)</span>
+                <span class="text-[10px] bg-emerald-950 text-emerald-300 border border-emerald-800 px-2 py-0.5 rounded font-mono font-semibold flex items-center gap-1">
+                  💾 價格已自動永久保存
+                </span>
+              </h2>
+              <div class="text-xs text-gray-400 mt-0.5">
+                木材拉白城、皮革拉藍城、布料拉綠城、鐵錠拉紫城，享產地 36.7%~53.9% 精煉返還與最深現貨買賣盤！
+              </div>
+            </div>
+            
+            <div class="flex items-center space-x-2">
+              <span class="text-xs text-amber-300 font-mono hidden sm:inline">計價依據: 直購最低出售價</span>
+              <button @click="refreshMaterials" 
+                      :disabled="isRefreshingMaterials || isScanning"
+                      class="px-3 py-1.5 rounded bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-white text-xs font-bold shadow flex items-center space-x-1.5 transition">
+                <span :class="{'animate-spin inline-block': isRefreshingMaterials}">🔄</span>
+                <span>{{ isRefreshingMaterials ? '正在刷新跨城行情...' : '主動更新跨城行情' }}</span>
+              </button>
             </div>
           </div>
-          <span class="text-xs text-amber-300 font-mono">計價依據: 直購最低出售價 (Sell Min)</span>
+
+          <!-- 時效統計與超期提醒橫幅 -->
+          <div class="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-albion-border/40 text-[11px]">
+            <div class="flex items-center space-x-2 font-mono">
+              <span class="text-gray-400">時效概況:</span>
+              <span class="px-1.5 py-0.5 rounded bg-emerald-950/80 text-emerald-300 border border-emerald-800 text-[10px]">
+                ⚡ 1天內新鮮: {{ materialsFreshCount }} 款
+              </span>
+              <span v-if="materialsStaleCount > 0" class="px-1.5 py-0.5 rounded bg-amber-950/80 text-amber-300 border border-amber-800 text-[10px]">
+                ⚠️ 1-3天前: {{ materialsStaleCount }} 款
+              </span>
+              <span v-if="materialsExpiredCount > 0" class="px-1.5 py-0.5 rounded bg-rose-950/80 text-rose-300 border border-rose-800 text-[10px] font-bold animate-pulse">
+                🚨 >3天過期: {{ materialsExpiredCount }} 款
+              </span>
+            </div>
+
+            <div v-if="materialsRefreshMsg" class="text-amber-300 font-mono text-[11px]">
+              {{ materialsRefreshMsg }}
+            </div>
+          </div>
+
+          <!-- 若有超過 1 天的舊行情，主動顯示提醒 banner -->
+          <div v-if="materialsExpiredCount > 0 || materialsStaleCount > 0" 
+               class="bg-amber-950/30 border border-amber-700/50 rounded p-2 text-xs text-amber-300 flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+              <span class="text-base">⚠️</span>
+              <span>
+                偵測到部分材料報價已是 <strong>{{ materialsExpiredCount > 0 ? '3天前以上' : '1天前' }}</strong> 的歷史存檔，若要取得最新各城交易盤口與精準價差，建議點擊上方 <strong>【主動更新跨城行情】</strong>。
+              </span>
+            </div>
+            <button @click="refreshMaterials" :disabled="isRefreshingMaterials" class="underline hover:text-white font-bold ml-2 shrink-0">
+              立即更新
+            </button>
+          </div>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
@@ -2038,11 +2087,11 @@
                 </div>
                 <div class="text-right font-mono space-y-0.5">
                   <div class="flex items-center justify-end space-x-1">
-                    <span v-if="m.refining_age_badge"
+                    <span v-if="m.refining_updated_at"
                           class="text-[9px] px-1 py-0.2 rounded font-mono font-bold whitespace-nowrap shrink-0 inline-block leading-tight"
-                          :class="getPriceAgeBadgeClass(m.refining_age_level)"
-                          :title="'產地報價更新時間: ' + (m.refining_updated_at || '無')">
-                      {{ m.refining_age_badge }}
+                          :class="getPriceAgeBadgeClass(formatMaterialAge(m.refining_updated_at).level)"
+                          :title="'產地報價記錄時間: ' + (m.refining_updated_at || '無')">
+                      {{ formatMaterialAge(m.refining_updated_at).badge }}
                     </span>
                     <span class="text-xs font-bold text-amber-300" :title="'產地城 (' + (m.refining_city_short || m.refining_city) + ') 售價'">
                       {{ m.refining_city_short || '產地' }}: {{ m.refining_price > 0 ? formatNumber(m.refining_price) : '-' }}
@@ -2052,11 +2101,11 @@
                             class="px-1 py-0.2 rounded bg-sky-950 hover:bg-sky-900 text-sky-300 border border-sky-800 text-[9px] font-bold">🔍</button>
                   </div>
                   <div class="flex items-center justify-end space-x-1">
-                    <span v-if="m.caerleon_age_badge"
+                    <span v-if="m.caerleon_updated_at"
                           class="text-[9px] px-1 py-0.2 rounded font-mono font-bold whitespace-nowrap shrink-0 inline-block leading-tight"
-                          :class="getPriceAgeBadgeClass(m.caerleon_age_level)"
-                          :title="'紅城報價更新時間: ' + (m.caerleon_updated_at || '無')">
-                      {{ m.caerleon_age_badge }}
+                          :class="getPriceAgeBadgeClass(formatMaterialAge(m.caerleon_updated_at).level)"
+                          :title="'紅城報價記錄時間: ' + (m.caerleon_updated_at || '無')">
+                      {{ formatMaterialAge(m.caerleon_updated_at).badge }}
                     </span>
                     <span class="text-[10px] text-gray-400" title="紅城本地出售價">
                       紅城: {{ m.sell_min > 0 ? formatNumber(m.sell_min) : '-' }}
@@ -2886,7 +2935,93 @@
         const serverKey = ref('east');
         
         const equipments = ref([]);
-        const materials = ref([]);
+        // 💾 本地持久化快取跨城材料行情 (免得下次開啟時忘記)
+        const savedMaterialsCache = localStorage.getItem('albion_materials_cache');
+        const materials = ref(savedMaterialsCache ? JSON.parse(savedMaterialsCache) : []);
+        const isRefreshingMaterials = ref(false);
+        const materialsRefreshMsg = ref('');
+
+        // 🕒 跨城材料行情時效性精算 (動態計算至幾小時前 / 幾天前)
+        const formatMaterialAge = (dateStr) => {
+          if (!dateStr || String(dateStr).startsWith('0001')) {
+            return { badge: '無記錄', level: 'unknown', hours: 999, days: 999 };
+          }
+          try {
+            const dt = new Date(dateStr);
+            const now = Date.now();
+            const diffMs = now - dt.getTime();
+            if (isNaN(diffMs)) return { badge: '無記錄', level: 'unknown', hours: 999, days: 999 };
+            const hours = Math.max(0, diffMs / (1000 * 3600));
+            const days = Math.round(hours / 24);
+            if (hours <= 1.0) {
+              return { badge: '⚡ 1小時內', level: 'fresh', hours: Math.round(hours * 10) / 10, days: 0 };
+            } else if (hours <= 24.0) {
+              return { badge: `🕒 ${Math.round(hours)}小時前`, level: 'recent', hours: Math.round(hours), days: 0 };
+            } else if (hours <= 72.0) {
+              return { badge: `⚠️ ${Math.max(1, days)}天前`, level: 'stale', hours: Math.round(hours), days: Math.max(1, days) };
+            } else {
+              return { badge: `🚨 ${Math.max(1, days)}天前 (需更新)`, level: 'expired', hours: Math.round(hours), days: Math.max(1, days) };
+            }
+          } catch (e) {
+            return { badge: '無記錄', level: 'unknown', hours: 999, days: 999 };
+          }
+        };
+
+        // 統計材料時效狀況
+        const materialsFreshCount = computed(() => {
+          return materials.value.filter(m => {
+            const age = formatMaterialAge(m.refining_updated_at);
+            return age.level === 'fresh' || age.level === 'recent';
+          }).length;
+        });
+
+        const materialsStaleCount = computed(() => {
+          return materials.value.filter(m => {
+            const age = formatMaterialAge(m.refining_updated_at);
+            return age.level === 'stale';
+          }).length;
+        });
+
+        const materialsExpiredCount = computed(() => {
+          return materials.value.filter(m => {
+            const age = formatMaterialAge(m.refining_updated_at);
+            return age.level === 'expired' || age.level === 'unknown';
+          }).length;
+        });
+
+        // 🔄 獨立主動更新跨城材料行情 (極速 ~1-2 秒，並持久化保存)
+        const refreshMaterials = async () => {
+          if (isRefreshingMaterials.value || isScanning.value) return;
+          isRefreshingMaterials.value = true;
+          materialsRefreshMsg.value = '正在主動抓取各城材料最新報價與盤口...';
+          try {
+            const res = await fetch('/api/materials/refresh', { method: 'POST' });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
+            if (data.success && data.materials) {
+              materials.value = data.materials;
+              localStorage.setItem('albion_materials_cache', JSON.stringify(data.materials));
+              copyTextWithFeedback(`跨城材料行情更新成功 (${data.count} 款材料，耗時 ${data.elapsed.toFixed(1)} 秒)`, '材料行情已同步儲存');
+              materialsRefreshMsg.value = `更新成功 (耗時 ${data.elapsed.toFixed(1)}s)`;
+              // 同步更新裝備清單中的材料即時成本與皇家製造產地盤口深度
+              if (equipments.value.length > 0) {
+                equipments.value.forEach(eq => {
+                  recomputeItemRuneEnchant(eq);
+                  recomputeItemRoyalDepth(eq);
+                });
+              }
+            } else {
+              materialsRefreshMsg.value = data.error || '更新失敗';
+            }
+          } catch (e) {
+            console.error('主動更新跨城材料失敗:', e);
+            materialsRefreshMsg.value = '連線失敗，請檢查網路';
+          } finally {
+            isRefreshingMaterials.value = false;
+            setTimeout(() => { materialsRefreshMsg.value = ''; }, 4000);
+          }
+        };
+
         const ledgerRecords = ref([]);
         const ledgerSummary = ref({ total_income: 0, total_expense: 0, net_profit: 0 });
 
@@ -2964,6 +3099,31 @@
             item.rune_enchant.royal_enchant_cost_focus = royalEnchantF;
             item.rune_enchant.royal_is_cheaper = royalDirectNf > 0 && royalEnchantNf < royalDirectNf;
             item.rune_enchant.royal_saved_silver = item.rune_enchant.royal_is_cheaper ? (royalDirectNf - royalEnchantNf) : 0;
+          }
+        };
+
+        // 🏰 校正皇家城市製造專用供貨深度 (嚴格綁定五大精煉產地城原物料現貨訂單簿深度，徹底脫鉤紅城盤口)
+        const recomputeItemRoyalDepth = (item) => {
+          if (!item || !item.recipe) return;
+          if (item.royal_craftable_qty !== undefined && item.royal_craftable_qty > 0) return;
+          if (!materials.value || materials.value.length === 0) return;
+          
+          let maxCraft = 999999;
+          let hasMat = false;
+          for (const [matType, count] of Object.entries(item.recipe)) {
+            const mInfo = materials.value.find(m => m.mat_type === matType && m.tier === item.tier);
+            if (!mInfo) continue;
+            hasMat = true;
+            const avail = mInfo.refining_available_qty || 0;
+            if (avail < count) {
+              maxCraft = 0;
+              break;
+            }
+            maxCraft = Math.min(maxCraft, Math.floor(avail / count));
+          }
+          if (hasMat && maxCraft !== 999999) {
+            item.royal_craftable_qty = maxCraft;
+            item.royal_is_depth_sufficient = maxCraft >= 1;
           }
         };
 
@@ -3227,7 +3387,10 @@
               }
               if (data.rune_custom_prices && !savedCustomRunes) {
                 customRunePrices.value = data.rune_custom_prices;
-                equipments.value.forEach(recomputeItemRuneEnchant);
+                equipments.value.forEach(eq => {
+              recomputeItemRuneEnchant(eq);
+              recomputeItemRoyalDepth(eq);
+            });
               }
 
               console.log('[系統] 成功同步專精與資產配置');
@@ -4866,10 +5029,10 @@
         };
         const resetRoyalEnchants = () => { royalSelectedEnchants.value = []; };
 
-        // 🛡️ 皇家精煉產地現貨深度過濾
+        // 🛡️ 皇家精煉產地現貨深度過濾 (嚴格綁定產地原料現貨，不綁定紅城盤口)
         const royalOnlyCraftable = ref(true);
         const countRoyalCraftableItems = computed(() => {
-          return equipments.value.filter(e => (e.royal_craftable_qty !== undefined ? e.royal_craftable_qty >= 1 : (e.craftable_qty || 0) >= 1)).length;
+          return equipments.value.filter(e => (e.royal_craftable_qty !== undefined ? e.royal_craftable_qty >= 1 : e.royal_is_depth_sufficient !== false)).length;
         });
 
         const royalCurrentPage = ref(1);
@@ -5019,13 +5182,13 @@
         const filteredRoyalEquipments = computed(() => {
           let list = equipments.value;
 
-          // 🛡️ 皇家精煉產地原料盤口深度過濾 (預設啟用)
+          // 🛡️ 皇家精煉產地原料盤口深度過濾 (預設啟用，嚴格綁定產地現貨深度)
           if (royalOnlyCraftable.value) {
             list = list.filter(e => {
               if (e.royal_craftable_qty !== undefined) {
                 return e.royal_craftable_qty >= 1;
               }
-              return (e.craftable_qty || 0) >= 1;
+              return e.royal_is_depth_sufficient !== false;
             });
           }
 
@@ -5395,7 +5558,12 @@
             const res = await fetch('/api/radar');
             const data = await res.json();
             equipments.value = data.equipments || [];
-            materials.value = data.materials || [];
+            if (data.materials && data.materials.length > 0) {
+              materials.value = data.materials;
+              localStorage.setItem('albion_materials_cache', JSON.stringify(data.materials));
+            } else if (savedMaterialsCache && (!materials.value || materials.value.length === 0)) {
+              materials.value = JSON.parse(savedMaterialsCache);
+            }
             if (data.equipment_definitions && data.equipment_definitions.length > 0) {
               equipmentDefinitions.value = data.equipment_definitions;
             }
@@ -5407,7 +5575,10 @@
             if (data.custom_rune_prices && !savedCustomRunes) {
               customRunePrices.value = data.custom_rune_prices;
             }
-            equipments.value.forEach(recomputeItemRuneEnchant);
+            equipments.value.forEach(eq => {
+              recomputeItemRuneEnchant(eq);
+              recomputeItemRoyalDepth(eq);
+            });
           } catch (e) {
             console.error(e);
           }
@@ -5599,6 +5770,13 @@
         });
 
         return {
+          formatMaterialAge,
+          materialsFreshCount,
+          materialsStaleCount,
+          materialsExpiredCount,
+          refreshMaterials,
+          isRefreshingMaterials,
+          materialsRefreshMsg,
           isAllBatchSelected,
           selectedBatchCount,
           toggleSelectAllBatch,

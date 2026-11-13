@@ -4,6 +4,8 @@ Albion Online 黑市製造利潤掃描引擎
 計算基準：以一般(Normal)、優良(Good)、出眾(Outstanding)為實戰參考，排除不實用的傑作灌水
 """
 
+import os
+import json
 import time
 import requests
 import concurrent.futures
@@ -22,6 +24,10 @@ SERVERS = {
     "west": "https://west.albion-online-data.com/api/v2/stats",
     "europe": "https://europe.albion-online-data.com/api/v2/stats"
 }
+
+# 數據目錄與跨城材料行情持久化檔案路徑
+DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
+MATERIALS_CACHE_FILE = os.path.join(DATA_DIR, "materials_cache.json")
 
 # 紅城製造返還率
 RRR_NO_FOCUS = 0.152   # 無專注 15.2%
@@ -45,9 +51,12 @@ def parse_price_age(target_date: str) -> tuple:
         return "⚡ 1小時內", "fresh", price_age_hours
     elif price_age_hours <= 24.0:
         return f"🕒 {int(round(price_age_hours))}小時前", "recent", price_age_hours
+    elif price_age_hours <= 72.0:
+        d = max(1, int(round(price_age_hours / 24.0)))
+        return f"⚠️ {d}天前", "stale", price_age_hours
     elif price_age_hours < 999.0:
         d = int(round(price_age_hours / 24.0))
-        return f"⚠️ {d}天前", "stale", price_age_hours
+        return f"🚨 {d}天前", "expired", price_age_hours
     else:
         return "無記錄", "unknown", price_age_hours
 
@@ -80,6 +89,51 @@ class MarketScanner:
         self.rune_prices_cache: Dict[str, Dict[str, Any]] = {}
         self.is_scanning: bool = False
         self.scan_progress: str = "就緒"
+
+        # 啟動時自動載入本地持久化儲存的跨城材料行情 (免得下次開啟時忘記)
+        self.load_materials_cache()
+
+    def load_materials_cache(self) -> List[Dict[str, Any]]:
+        """從本地 data/materials_cache.json 載入跨城材料歷史行情，並即時重算時效性"""
+        if not os.path.exists(MATERIALS_CACHE_FILE):
+            return []
+        try:
+            with open(MATERIALS_CACHE_FILE, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                if isinstance(data, list) and len(data) > 0:
+                    for m in data:
+                        # 產地時效
+                        ref_up = m.get("refining_updated_at", "")
+                        r_badge, r_lvl, r_hrs = parse_price_age(ref_up)
+                        m["refining_age_badge"] = r_badge
+                        m["refining_age_level"] = r_lvl
+                        m["refining_age_hours"] = round(r_hrs, 1)
+
+                        # 紅城時效
+                        caer_up = m.get("caerleon_updated_at", "")
+                        c_badge, c_lvl, c_hrs = parse_price_age(caer_up)
+                        m["caerleon_age_badge"] = c_badge
+                        m["caerleon_age_level"] = c_lvl
+                        m["caerleon_age_hours"] = round(c_hrs, 1)
+
+                    self.materials_cache = data
+                    print(f"[持久化] 已成功從 {MATERIALS_CACHE_FILE} 載入 {len(data)} 款跨城材料行情快取")
+                    return data
+        except Exception as e:
+            print(f"[警告] 讀取材料行情快取失敗: {e}")
+        return []
+
+    def save_materials_cache(self, materials_list: List[Dict[str, Any]]):
+        """將跨城材料行情持久化寫入本地 data/materials_cache.json，免得下次開啟時忘記"""
+        if not materials_list:
+            return
+        try:
+            os.makedirs(DATA_DIR, exist_ok=True)
+            with open(MATERIALS_CACHE_FILE, "w", encoding="utf-8") as f:
+                json.dump(materials_list, f, ensure_ascii=False, indent=2)
+            print(f"[持久化] 已成功將 {len(materials_list)} 款跨城材料行情寫入 {MATERIALS_CACHE_FILE}")
+        except Exception as e:
+            print(f"[錯誤] 儲存材料行情快取失敗: {e}")
 
     def set_config(self, server_key: Optional[str] = None, 
                    rrr_no_focus: Optional[float] = None,
@@ -244,16 +298,35 @@ class MarketScanner:
                 for eid, sells in c_sells.items():
                     refining_depth_map[(c_name, eid)] = sells
 
+        # 建立本地已持久化之歷史行情對照 (若本次 API 無資料，自動平滑繼承歷史價格，避免丟失)
+        old_cache_map = {}
+        if self.materials_cache:
+            for old_m in self.materials_cache:
+                m_key = (old_m.get("mat_type"), old_m.get("tier"))
+                old_cache_map[m_key] = old_m
+
         structured_materials = {}
         for (mat_type, tier), api_id in mat_map.items():
+            old_item = old_cache_map.get((mat_type, tier), {})
+
             # 1. 紅城本地價格
             caer_info = mat_prices.get((api_id, "Caerleon"), {"sell_min": 0, "buy_max": 0, "updated_at": ""})
             caer_p = caer_info[self.price_basis] if caer_info[self.price_basis] > 0 else caer_info["sell_min"]
+            caer_updated_at = caer_info.get("updated_at", "")
+
+            # 若本次 API 暫無紅城價格，平滑繼承上次儲存之有效行情
+            if caer_p <= 0 and old_item.get("caerleon_price", 0) > 0:
+                caer_p = old_item.get("caerleon_price", 0)
+                caer_info["sell_min"] = old_item.get("sell_min", caer_p)
+                caer_info["buy_max"] = old_item.get("buy_max", 0)
+                caer_updated_at = old_item.get("caerleon_updated_at", "")
             
             # 計算紅城訂單簿現貨總量 (已透過 _calculate_depth_walk 徹底排除幽靈單)
             caer_sells = caer_depth_map.get(api_id, [])
             caer_depth = self._calculate_depth_walk(caer_sells, needed_qty=0, gross_qty=0, fallback_price=caer_p)
             caer_available_qty = caer_depth.get("available_qty", 0)
+            if caer_available_qty <= 0 and old_item.get("available_qty", 0) > 0:
+                caer_available_qty = old_item.get("available_qty", 0)
             
             # 2. 對應皇家精煉加成產地城價格 (木材->白城, 皮革->藍城, 布料->綠城, 鐵錠->紫城, 石磚->黃城)
             refining_meta = MATERIAL_REFINING_CITIES.get(mat_type, {})
@@ -263,32 +336,50 @@ class MarketScanner:
             
             ref_info = mat_prices.get((api_id, refining_city), {"sell_min": 0, "buy_max": 0, "updated_at": ""})
             ref_p = ref_info[self.price_basis] if ref_info[self.price_basis] > 0 else ref_info["sell_min"]
-            
-            # 若產地價格為 0 (無數據)，安全保底退回紅城價
-            if ref_p <= 0:
+            ref_updated_at = ref_info.get("updated_at", "")
+
+            # 若本次 API 暫無產地價格，平滑繼承上次儲存之有效產地行情
+            if ref_p <= 0 and old_item.get("refining_price", 0) > 0:
+                ref_p = old_item.get("refining_price", 0)
+                ref_info["sell_min"] = old_item.get("refining_sell_min", ref_p)
+                ref_info["buy_max"] = old_item.get("refining_buy_max", 0)
+                ref_updated_at = old_item.get("refining_updated_at", "")
+            elif ref_p <= 0:
+                # 若完全無數據，安全保底退回紅城價
                 ref_p = caer_p
+                ref_updated_at = caer_updated_at
 
             # 計算精煉產地城訂單簿現貨總量
             ref_sells = refining_depth_map.get((refining_city, api_id), [])
             ref_depth = self._calculate_depth_walk(ref_sells, needed_qty=0, gross_qty=0, fallback_price=ref_p)
             ref_available_qty = ref_depth.get("available_qty", 0)
+            if ref_available_qty <= 0 and old_item.get("refining_available_qty", 0) > 0:
+                ref_available_qty = old_item.get("refining_available_qty", 0)
 
             # 價差與省錢幅度
             price_diff = caer_p - ref_p if (caer_p > 0 and ref_p > 0) else 0
             price_diff_pct = round((price_diff / caer_p) * 100, 1) if caer_p > 0 and price_diff > 0 else 0.0
 
-            ref_badge, ref_level, ref_hours = parse_price_age(ref_info.get("updated_at", ""))
-            caer_badge, caer_level, caer_hours = parse_price_age(caer_info.get("updated_at", ""))
+            ref_badge, ref_level, ref_hours = parse_price_age(ref_updated_at)
+            caer_badge, caer_level, caer_hours = parse_price_age(caer_updated_at)
 
             # 彙整五大城行情快照
             all_city_prices = {}
             for c_name in ["Caerleon", "Fort Sterling", "Martlock", "Lymhurst", "Thetford", "Bridgewatch"]:
                 c_data = mat_prices.get((api_id, c_name), {"sell_min": 0, "buy_max": 0, "updated_at": ""})
-                c_badge, c_level, c_hours = parse_price_age(c_data.get("updated_at", ""))
+                old_city_data = old_item.get("city_prices", {}).get(c_name, {})
+                s_min = c_data.get("sell_min", 0)
+                b_max = c_data.get("buy_max", 0)
+                c_up = c_data.get("updated_at", "")
+                if s_min <= 0 and old_city_data.get("sell_min", 0) > 0:
+                    s_min = old_city_data.get("sell_min", 0)
+                    b_max = old_city_data.get("buy_max", 0)
+                    c_up = old_city_data.get("updated_at", "")
+                c_badge, c_level, c_hours = parse_price_age(c_up)
                 all_city_prices[c_name] = {
-                    "sell_min": c_data.get("sell_min", 0),
-                    "buy_max": c_data.get("buy_max", 0),
-                    "updated_at": c_data.get("updated_at", ""),
+                    "sell_min": s_min,
+                    "buy_max": b_max,
+                    "updated_at": c_up,
                     "age_badge": c_badge,
                     "age_level": c_level
                 }
@@ -303,7 +394,7 @@ class MarketScanner:
                 "buy_max": caer_info["buy_max"],
                 "price": caer_p if caer_p > 0 else caer_info["sell_min"],
                 "caerleon_price": caer_p if caer_p > 0 else caer_info["sell_min"],
-                "caerleon_updated_at": caer_info.get("updated_at", ""),
+                "caerleon_updated_at": caer_updated_at,
                 "caerleon_age_badge": caer_badge,
                 "caerleon_age_level": caer_level,
                 "caerleon_age_hours": round(caer_hours, 1),
@@ -318,7 +409,7 @@ class MarketScanner:
                 "refining_price": ref_p,
                 "refining_sell_min": ref_info["sell_min"],
                 "refining_buy_max": ref_info["buy_max"],
-                "refining_updated_at": ref_info.get("updated_at", ""),
+                "refining_updated_at": ref_updated_at,
                 "refining_age_badge": ref_badge,
                 "refining_age_level": ref_level,
                 "refining_age_hours": round(ref_hours, 1),
@@ -331,7 +422,46 @@ class MarketScanner:
                 "city_prices": all_city_prices
             }
 
+        # 自動將最新抓取之跨城材料行情持久化寫入本地 data/materials_cache.json
+        materials_list = list(structured_materials.values())
+        self.materials_cache = materials_list
+        self.save_materials_cache(materials_list)
         return structured_materials
+
+    def refresh_materials_only(self) -> Dict[str, Any]:
+        """獨立主動更新跨城材料行情與訂單簿深度 (極速 ~1-2 秒)，並持久化儲存"""
+        t_start = time.time()
+        try:
+            mat_dict = self.fetch_materials()
+            materials_list = list(mat_dict.values())
+            self.materials_cache = materials_list
+            elapsed = time.time() - t_start
+            
+            fresh_cnt = 0
+            stale_cnt = 0
+            exp_cnt = 0
+            for m in materials_list:
+                lvl = m.get("refining_age_level", "unknown")
+                if lvl in ["fresh", "recent"]:
+                    fresh_cnt += 1
+                elif lvl == "stale":
+                    stale_cnt += 1
+                else:
+                    exp_cnt += 1
+
+            return {
+                "success": True,
+                "elapsed": elapsed,
+                "materials": materials_list,
+                "count": len(materials_list),
+                "stats": {
+                    "fresh": fresh_cnt,
+                    "stale": stale_cnt,
+                    "expired": exp_cnt
+                }
+            }
+        except Exception as e:
+            return {"success": False, "error": str(e)}
 
     def fetch_journal_prices(self) -> Dict[str, int]:
         """抓取紅城集市日誌（空本與滿本）即時掛賣最低價，提供最精確的日誌折現補貼依據"""

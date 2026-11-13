@@ -1,0 +1,3746 @@
+[
+  {
+    "mat_type": "PLANKS",
+    "mat_name": "木材",
+    "tier": "4.0",
+    "api_id": "T4_PLANKS",
+    "sell_min": 0,
+    "buy_max": 0,
+    "price": 0,
+    "caerleon_price": 0,
+    "caerleon_updated_at": "0001-01-01T00:00:00",
+    "caerleon_age_badge": "無記錄",
+    "caerleon_age_level": "unknown",
+    "caerleon_age_hours": 999.0,
+    "available_qty": 0,
+    "is_depth_sufficient": false,
+    "depth_lowest_price": 0,
+    "depth_status": "無現貨掛售",
+    "refining_city": "Fort Sterling",
+    "refining_city_zh": "白城 (Fort Sterling)",
+    "refining_city_short": "白城",
+    "refining_price": 289,
+    "refining_sell_min": 289,
+    "refining_buy_max": 279,
+    "refining_updated_at": "2026-11-13T19:45:00",
+    "refining_age_badge": "⚡ 1小時內",
+    "refining_age_level": "fresh",
+    "refining_age_hours": 0.1,
+    "refining_available_qty": 39386,
+    "refining_is_depth_sufficient": true,
+    "refining_depth_lowest_price": 289,
+    "refining_depth_status": "供貨充足",
+    "price_diff": 0,
+    "price_diff_pct": 0.0,
+    "city_prices": {
+      "Caerleon": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Fort Sterling": {
+        "sell_min": 289,
+        "buy_max": 279,
+        "updated_at": "2026-11-13T19:45:00",
+        "age_badge": "⚡ 1小時內",
+        "age_level": "fresh"
+      },
+      "Martlock": {
+        "sell_min": 366,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T08:40:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      },
+      "Lymhurst": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Thetford": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Bridgewatch": {
+        "sell_min": 362,
+        "buy_max": 314,
+        "updated_at": "2026-11-13T09:15:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      }
+    }
+  },
+  {
+    "mat_type": "LEATHER",
+    "mat_name": "皮革",
+    "tier": "4.0",
+    "api_id": "T4_LEATHER",
+    "sell_min": 0,
+    "buy_max": 0,
+    "price": 0,
+    "caerleon_price": 0,
+    "caerleon_updated_at": "0001-01-01T00:00:00",
+    "caerleon_age_badge": "無記錄",
+    "caerleon_age_level": "unknown",
+    "caerleon_age_hours": 999.0,
+    "available_qty": 0,
+    "is_depth_sufficient": false,
+    "depth_lowest_price": 0,
+    "depth_status": "無現貨掛售",
+    "refining_city": "Martlock",
+    "refining_city_zh": "藍城 (Martlock)",
+    "refining_city_short": "藍城",
+    "refining_price": 348,
+    "refining_sell_min": 348,
+    "refining_buy_max": 0,
+    "refining_updated_at": "2026-11-13T08:40:00",
+    "refining_age_badge": "🕒 11小時前",
+    "refining_age_level": "recent",
+    "refining_age_hours": 11.2,
+    "refining_available_qty": 51057,
+    "refining_is_depth_sufficient": true,
+    "refining_depth_lowest_price": 348,
+    "refining_depth_status": "供貨充足",
+    "price_diff": 0,
+    "price_diff_pct": 0.0,
+    "city_prices": {
+      "Caerleon": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Fort Sterling": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Martlock": {
+        "sell_min": 348,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T08:40:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      },
+      "Lymhurst": {
+        "sell_min": 377,
+        "buy_max": 356,
+        "updated_at": "2026-11-13T09:45:00",
+        "age_badge": "🕒 10小時前",
+        "age_level": "recent"
+      },
+      "Thetford": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Bridgewatch": {
+        "sell_min": 362,
+        "buy_max": 334,
+        "updated_at": "2026-11-13T09:30:00",
+        "age_badge": "🕒 10小時前",
+        "age_level": "recent"
+      }
+    }
+  },
+  {
+    "mat_type": "METALBAR",
+    "mat_name": "金屬條",
+    "tier": "4.0",
+    "api_id": "T4_METALBAR",
+    "sell_min": 473,
+    "buy_max": 407,
+    "price": 473,
+    "caerleon_price": 473,
+    "caerleon_updated_at": "2026-11-13T09:10:00",
+    "caerleon_age_badge": "🕒 11小時前",
+    "caerleon_age_level": "recent",
+    "caerleon_age_hours": 10.7,
+    "available_qty": 19758,
+    "is_depth_sufficient": true,
+    "depth_lowest_price": 473,
+    "depth_status": "供貨充足",
+    "refining_city": "Thetford",
+    "refining_city_zh": "紫城 (Thetford)",
+    "refining_city_short": "紫城",
+    "refining_price": 350,
+    "refining_sell_min": 350,
+    "refining_buy_max": 312,
+    "refining_updated_at": "2026-11-13T19:45:00",
+    "refining_age_badge": "⚡ 1小時內",
+    "refining_age_level": "fresh",
+    "refining_age_hours": 0.1,
+    "refining_available_qty": 46905,
+    "refining_is_depth_sufficient": true,
+    "refining_depth_lowest_price": 350,
+    "refining_depth_status": "供貨充足",
+    "price_diff": 123,
+    "price_diff_pct": 26.0,
+    "city_prices": {
+      "Caerleon": {
+        "sell_min": 473,
+        "buy_max": 407,
+        "updated_at": "2026-11-13T09:10:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      },
+      "Fort Sterling": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Martlock": {
+        "sell_min": 320,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T08:40:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      },
+      "Lymhurst": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Thetford": {
+        "sell_min": 350,
+        "buy_max": 312,
+        "updated_at": "2026-11-13T19:45:00",
+        "age_badge": "⚡ 1小時內",
+        "age_level": "fresh"
+      },
+      "Bridgewatch": {
+        "sell_min": 388,
+        "buy_max": 347,
+        "updated_at": "2026-11-13T14:10:00",
+        "age_badge": "🕒 6小時前",
+        "age_level": "recent"
+      }
+    }
+  },
+  {
+    "mat_type": "CLOTH",
+    "mat_name": "布料",
+    "tier": "4.0",
+    "api_id": "T4_CLOTH",
+    "sell_min": 0,
+    "buy_max": 0,
+    "price": 0,
+    "caerleon_price": 0,
+    "caerleon_updated_at": "0001-01-01T00:00:00",
+    "caerleon_age_badge": "無記錄",
+    "caerleon_age_level": "unknown",
+    "caerleon_age_hours": 999.0,
+    "available_qty": 0,
+    "is_depth_sufficient": false,
+    "depth_lowest_price": 0,
+    "depth_status": "無現貨掛售",
+    "refining_city": "Lymhurst",
+    "refining_city_zh": "綠城 (Lymhurst)",
+    "refining_city_short": "綠城",
+    "refining_price": 337,
+    "refining_sell_min": 337,
+    "refining_buy_max": 325,
+    "refining_updated_at": "2026-11-13T12:20:00",
+    "refining_age_badge": "🕒 8小時前",
+    "refining_age_level": "recent",
+    "refining_age_hours": 7.5,
+    "refining_available_qty": 63074,
+    "refining_is_depth_sufficient": true,
+    "refining_depth_lowest_price": 337,
+    "refining_depth_status": "供貨充足",
+    "price_diff": 0,
+    "price_diff_pct": 0.0,
+    "city_prices": {
+      "Caerleon": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Fort Sterling": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Martlock": {
+        "sell_min": 357,
+        "buy_max": 337,
+        "updated_at": "2026-11-13T11:30:00",
+        "age_badge": "🕒 8小時前",
+        "age_level": "recent"
+      },
+      "Lymhurst": {
+        "sell_min": 337,
+        "buy_max": 325,
+        "updated_at": "2026-11-13T12:20:00",
+        "age_badge": "🕒 8小時前",
+        "age_level": "recent"
+      },
+      "Thetford": {
+        "sell_min": 358,
+        "buy_max": 284,
+        "updated_at": "2026-11-13T11:30:00",
+        "age_badge": "🕒 8小時前",
+        "age_level": "recent"
+      },
+      "Bridgewatch": {
+        "sell_min": 320,
+        "buy_max": 319,
+        "updated_at": "2026-11-13T11:30:00",
+        "age_badge": "🕒 8小時前",
+        "age_level": "recent"
+      }
+    }
+  },
+  {
+    "mat_type": "PLANKS",
+    "mat_name": "木材",
+    "tier": "4.1",
+    "api_id": "T4_PLANKS_LEVEL1@1",
+    "sell_min": 0,
+    "buy_max": 0,
+    "price": 0,
+    "caerleon_price": 0,
+    "caerleon_updated_at": "0001-01-01T00:00:00",
+    "caerleon_age_badge": "無記錄",
+    "caerleon_age_level": "unknown",
+    "caerleon_age_hours": 999.0,
+    "available_qty": 0,
+    "is_depth_sufficient": false,
+    "depth_lowest_price": 0,
+    "depth_status": "無現貨掛售",
+    "refining_city": "Fort Sterling",
+    "refining_city_zh": "白城 (Fort Sterling)",
+    "refining_city_short": "白城",
+    "refining_price": 371,
+    "refining_sell_min": 371,
+    "refining_buy_max": 352,
+    "refining_updated_at": "2026-11-13T19:45:00",
+    "refining_age_badge": "⚡ 1小時內",
+    "refining_age_level": "fresh",
+    "refining_age_hours": 0.1,
+    "refining_available_qty": 25965,
+    "refining_is_depth_sufficient": true,
+    "refining_depth_lowest_price": 371,
+    "refining_depth_status": "供貨充足",
+    "price_diff": 0,
+    "price_diff_pct": 0.0,
+    "city_prices": {
+      "Caerleon": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Fort Sterling": {
+        "sell_min": 371,
+        "buy_max": 352,
+        "updated_at": "2026-11-13T19:45:00",
+        "age_badge": "⚡ 1小時內",
+        "age_level": "fresh"
+      },
+      "Martlock": {
+        "sell_min": 411,
+        "buy_max": 399,
+        "updated_at": "2026-11-13T08:40:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      },
+      "Lymhurst": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Thetford": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Bridgewatch": {
+        "sell_min": 441,
+        "buy_max": 400,
+        "updated_at": "2026-11-13T09:15:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      }
+    }
+  },
+  {
+    "mat_type": "LEATHER",
+    "mat_name": "皮革",
+    "tier": "4.1",
+    "api_id": "T4_LEATHER_LEVEL1@1",
+    "sell_min": 0,
+    "buy_max": 0,
+    "price": 0,
+    "caerleon_price": 0,
+    "caerleon_updated_at": "0001-01-01T00:00:00",
+    "caerleon_age_badge": "無記錄",
+    "caerleon_age_level": "unknown",
+    "caerleon_age_hours": 999.0,
+    "available_qty": 0,
+    "is_depth_sufficient": false,
+    "depth_lowest_price": 0,
+    "depth_status": "無現貨掛售",
+    "refining_city": "Martlock",
+    "refining_city_zh": "藍城 (Martlock)",
+    "refining_city_short": "藍城",
+    "refining_price": 497,
+    "refining_sell_min": 497,
+    "refining_buy_max": 0,
+    "refining_updated_at": "2026-11-13T15:10:00",
+    "refining_age_badge": "🕒 5小時前",
+    "refining_age_level": "recent",
+    "refining_age_hours": 4.7,
+    "refining_available_qty": 38175,
+    "refining_is_depth_sufficient": true,
+    "refining_depth_lowest_price": 497,
+    "refining_depth_status": "供貨充足",
+    "price_diff": 0,
+    "price_diff_pct": 0.0,
+    "city_prices": {
+      "Caerleon": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Fort Sterling": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Martlock": {
+        "sell_min": 497,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T15:10:00",
+        "age_badge": "🕒 5小時前",
+        "age_level": "recent"
+      },
+      "Lymhurst": {
+        "sell_min": 519,
+        "buy_max": 487,
+        "updated_at": "2026-11-13T09:45:00",
+        "age_badge": "🕒 10小時前",
+        "age_level": "recent"
+      },
+      "Thetford": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Bridgewatch": {
+        "sell_min": 406,
+        "buy_max": 404,
+        "updated_at": "2026-11-13T16:10:00",
+        "age_badge": "🕒 4小時前",
+        "age_level": "recent"
+      }
+    }
+  },
+  {
+    "mat_type": "METALBAR",
+    "mat_name": "金屬條",
+    "tier": "4.1",
+    "api_id": "T4_METALBAR_LEVEL1@1",
+    "sell_min": 0,
+    "buy_max": 0,
+    "price": 0,
+    "caerleon_price": 0,
+    "caerleon_updated_at": "0001-01-01T00:00:00",
+    "caerleon_age_badge": "無記錄",
+    "caerleon_age_level": "unknown",
+    "caerleon_age_hours": 999.0,
+    "available_qty": 0,
+    "is_depth_sufficient": false,
+    "depth_lowest_price": 0,
+    "depth_status": "無現貨掛售",
+    "refining_city": "Thetford",
+    "refining_city_zh": "紫城 (Thetford)",
+    "refining_city_short": "紫城",
+    "refining_price": 560,
+    "refining_sell_min": 560,
+    "refining_buy_max": 453,
+    "refining_updated_at": "2026-11-13T19:45:00",
+    "refining_age_badge": "⚡ 1小時內",
+    "refining_age_level": "fresh",
+    "refining_age_hours": 0.1,
+    "refining_available_qty": 18951,
+    "refining_is_depth_sufficient": true,
+    "refining_depth_lowest_price": 560,
+    "refining_depth_status": "供貨充足",
+    "price_diff": 0,
+    "price_diff_pct": 0.0,
+    "city_prices": {
+      "Caerleon": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Fort Sterling": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Martlock": {
+        "sell_min": 640,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T08:40:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      },
+      "Lymhurst": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Thetford": {
+        "sell_min": 560,
+        "buy_max": 453,
+        "updated_at": "2026-11-13T19:45:00",
+        "age_badge": "⚡ 1小時內",
+        "age_level": "fresh"
+      },
+      "Bridgewatch": {
+        "sell_min": 740,
+        "buy_max": 506,
+        "updated_at": "2026-11-13T09:30:00",
+        "age_badge": "🕒 10小時前",
+        "age_level": "recent"
+      }
+    }
+  },
+  {
+    "mat_type": "CLOTH",
+    "mat_name": "布料",
+    "tier": "4.1",
+    "api_id": "T4_CLOTH_LEVEL1@1",
+    "sell_min": 0,
+    "buy_max": 0,
+    "price": 0,
+    "caerleon_price": 0,
+    "caerleon_updated_at": "0001-01-01T00:00:00",
+    "caerleon_age_badge": "無記錄",
+    "caerleon_age_level": "unknown",
+    "caerleon_age_hours": 999.0,
+    "available_qty": 0,
+    "is_depth_sufficient": false,
+    "depth_lowest_price": 0,
+    "depth_status": "無現貨掛售",
+    "refining_city": "Lymhurst",
+    "refining_city_zh": "綠城 (Lymhurst)",
+    "refining_city_short": "綠城",
+    "refining_price": 483,
+    "refining_sell_min": 483,
+    "refining_buy_max": 383,
+    "refining_updated_at": "2026-11-13T09:50:00",
+    "refining_age_badge": "🕒 10小時前",
+    "refining_age_level": "recent",
+    "refining_age_hours": 10.0,
+    "refining_available_qty": 47618,
+    "refining_is_depth_sufficient": true,
+    "refining_depth_lowest_price": 483,
+    "refining_depth_status": "供貨充足",
+    "price_diff": 0,
+    "price_diff_pct": 0.0,
+    "city_prices": {
+      "Caerleon": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Fort Sterling": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Martlock": {
+        "sell_min": 477,
+        "buy_max": 427,
+        "updated_at": "2026-11-13T08:55:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      },
+      "Lymhurst": {
+        "sell_min": 483,
+        "buy_max": 383,
+        "updated_at": "2026-11-13T09:50:00",
+        "age_badge": "🕒 10小時前",
+        "age_level": "recent"
+      },
+      "Thetford": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Bridgewatch": {
+        "sell_min": 400,
+        "buy_max": 321,
+        "updated_at": "2026-11-13T09:15:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      }
+    }
+  },
+  {
+    "mat_type": "PLANKS",
+    "mat_name": "木材",
+    "tier": "4.2",
+    "api_id": "T4_PLANKS_LEVEL2@2",
+    "sell_min": 0,
+    "buy_max": 0,
+    "price": 0,
+    "caerleon_price": 0,
+    "caerleon_updated_at": "0001-01-01T00:00:00",
+    "caerleon_age_badge": "無記錄",
+    "caerleon_age_level": "unknown",
+    "caerleon_age_hours": 999.0,
+    "available_qty": 0,
+    "is_depth_sufficient": false,
+    "depth_lowest_price": 0,
+    "depth_status": "無現貨掛售",
+    "refining_city": "Fort Sterling",
+    "refining_city_zh": "白城 (Fort Sterling)",
+    "refining_city_short": "白城",
+    "refining_price": 1394,
+    "refining_sell_min": 1394,
+    "refining_buy_max": 1292,
+    "refining_updated_at": "2026-11-13T19:45:00",
+    "refining_age_badge": "⚡ 1小時內",
+    "refining_age_level": "fresh",
+    "refining_age_hours": 0.1,
+    "refining_available_qty": 13918,
+    "refining_is_depth_sufficient": true,
+    "refining_depth_lowest_price": 1394,
+    "refining_depth_status": "供貨充足",
+    "price_diff": 0,
+    "price_diff_pct": 0.0,
+    "city_prices": {
+      "Caerleon": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Fort Sterling": {
+        "sell_min": 1394,
+        "buy_max": 1292,
+        "updated_at": "2026-11-13T19:45:00",
+        "age_badge": "⚡ 1小時內",
+        "age_level": "fresh"
+      },
+      "Martlock": {
+        "sell_min": 1694,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T08:40:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      },
+      "Lymhurst": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Thetford": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Bridgewatch": {
+        "sell_min": 1914,
+        "buy_max": 1416,
+        "updated_at": "2026-11-13T14:10:00",
+        "age_badge": "🕒 6小時前",
+        "age_level": "recent"
+      }
+    }
+  },
+  {
+    "mat_type": "LEATHER",
+    "mat_name": "皮革",
+    "tier": "4.2",
+    "api_id": "T4_LEATHER_LEVEL2@2",
+    "sell_min": 0,
+    "buy_max": 0,
+    "price": 0,
+    "caerleon_price": 0,
+    "caerleon_updated_at": "0001-01-01T00:00:00",
+    "caerleon_age_badge": "無記錄",
+    "caerleon_age_level": "unknown",
+    "caerleon_age_hours": 999.0,
+    "available_qty": 0,
+    "is_depth_sufficient": false,
+    "depth_lowest_price": 0,
+    "depth_status": "無現貨掛售",
+    "refining_city": "Martlock",
+    "refining_city_zh": "藍城 (Martlock)",
+    "refining_city_short": "藍城",
+    "refining_price": 2500,
+    "refining_sell_min": 2500,
+    "refining_buy_max": 0,
+    "refining_updated_at": "2026-11-13T08:40:00",
+    "refining_age_badge": "🕒 11小時前",
+    "refining_age_level": "recent",
+    "refining_age_hours": 11.2,
+    "refining_available_qty": 27,
+    "refining_is_depth_sufficient": true,
+    "refining_depth_lowest_price": 2500,
+    "refining_depth_status": "供貨充足",
+    "price_diff": 0,
+    "price_diff_pct": 0.0,
+    "city_prices": {
+      "Caerleon": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Fort Sterling": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Martlock": {
+        "sell_min": 2500,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T08:40:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      },
+      "Lymhurst": {
+        "sell_min": 2287,
+        "buy_max": 2225,
+        "updated_at": "2026-11-13T09:45:00",
+        "age_badge": "🕒 10小時前",
+        "age_level": "recent"
+      },
+      "Thetford": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Bridgewatch": {
+        "sell_min": 3080,
+        "buy_max": 1829,
+        "updated_at": "2026-11-13T09:15:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      }
+    }
+  },
+  {
+    "mat_type": "METALBAR",
+    "mat_name": "金屬條",
+    "tier": "4.2",
+    "api_id": "T4_METALBAR_LEVEL2@2",
+    "sell_min": 3491,
+    "buy_max": 0,
+    "price": 3491,
+    "caerleon_price": 3491,
+    "caerleon_updated_at": "2026-11-13T04:25:00",
+    "caerleon_age_badge": "🕒 15小時前",
+    "caerleon_age_level": "recent",
+    "caerleon_age_hours": 15.5,
+    "available_qty": 102,
+    "is_depth_sufficient": true,
+    "depth_lowest_price": 3491,
+    "depth_status": "供貨充足",
+    "refining_city": "Thetford",
+    "refining_city_zh": "紫城 (Thetford)",
+    "refining_city_short": "紫城",
+    "refining_price": 2014,
+    "refining_sell_min": 2014,
+    "refining_buy_max": 1928,
+    "refining_updated_at": "2026-11-13T19:45:00",
+    "refining_age_badge": "⚡ 1小時內",
+    "refining_age_level": "fresh",
+    "refining_age_hours": 0.1,
+    "refining_available_qty": 11658,
+    "refining_is_depth_sufficient": true,
+    "refining_depth_lowest_price": 2014,
+    "refining_depth_status": "供貨充足",
+    "price_diff": 1477,
+    "price_diff_pct": 42.3,
+    "city_prices": {
+      "Caerleon": {
+        "sell_min": 3491,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T04:25:00",
+        "age_badge": "🕒 15小時前",
+        "age_level": "recent"
+      },
+      "Fort Sterling": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Martlock": {
+        "sell_min": 2200,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T08:40:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      },
+      "Lymhurst": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Thetford": {
+        "sell_min": 2014,
+        "buy_max": 1928,
+        "updated_at": "2026-11-13T19:45:00",
+        "age_badge": "⚡ 1小時內",
+        "age_level": "fresh"
+      },
+      "Bridgewatch": {
+        "sell_min": 2340,
+        "buy_max": 1624,
+        "updated_at": "2026-11-13T14:10:00",
+        "age_badge": "🕒 6小時前",
+        "age_level": "recent"
+      }
+    }
+  },
+  {
+    "mat_type": "CLOTH",
+    "mat_name": "布料",
+    "tier": "4.2",
+    "api_id": "T4_CLOTH_LEVEL2@2",
+    "sell_min": 0,
+    "buy_max": 0,
+    "price": 0,
+    "caerleon_price": 0,
+    "caerleon_updated_at": "0001-01-01T00:00:00",
+    "caerleon_age_badge": "無記錄",
+    "caerleon_age_level": "unknown",
+    "caerleon_age_hours": 999.0,
+    "available_qty": 0,
+    "is_depth_sufficient": false,
+    "depth_lowest_price": 0,
+    "depth_status": "無現貨掛售",
+    "refining_city": "Lymhurst",
+    "refining_city_zh": "綠城 (Lymhurst)",
+    "refining_city_short": "綠城",
+    "refining_price": 2250,
+    "refining_sell_min": 2250,
+    "refining_buy_max": 2002,
+    "refining_updated_at": "2026-11-13T09:45:00",
+    "refining_age_badge": "🕒 10小時前",
+    "refining_age_level": "recent",
+    "refining_age_hours": 10.1,
+    "refining_available_qty": 18511,
+    "refining_is_depth_sufficient": true,
+    "refining_depth_lowest_price": 2250,
+    "refining_depth_status": "供貨充足",
+    "price_diff": 0,
+    "price_diff_pct": 0.0,
+    "city_prices": {
+      "Caerleon": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Fort Sterling": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Martlock": {
+        "sell_min": 2594,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T08:40:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      },
+      "Lymhurst": {
+        "sell_min": 2250,
+        "buy_max": 2002,
+        "updated_at": "2026-11-13T09:45:00",
+        "age_badge": "🕒 10小時前",
+        "age_level": "recent"
+      },
+      "Thetford": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Bridgewatch": {
+        "sell_min": 2315,
+        "buy_max": 1705,
+        "updated_at": "2026-11-13T09:15:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      }
+    }
+  },
+  {
+    "mat_type": "PLANKS",
+    "mat_name": "木材",
+    "tier": "4.3",
+    "api_id": "T4_PLANKS_LEVEL3@3",
+    "sell_min": 0,
+    "buy_max": 0,
+    "price": 0,
+    "caerleon_price": 0,
+    "caerleon_updated_at": "0001-01-01T00:00:00",
+    "caerleon_age_badge": "無記錄",
+    "caerleon_age_level": "unknown",
+    "caerleon_age_hours": 999.0,
+    "available_qty": 0,
+    "is_depth_sufficient": false,
+    "depth_lowest_price": 0,
+    "depth_status": "無現貨掛售",
+    "refining_city": "Fort Sterling",
+    "refining_city_zh": "白城 (Fort Sterling)",
+    "refining_city_short": "白城",
+    "refining_price": 8876,
+    "refining_sell_min": 8876,
+    "refining_buy_max": 0,
+    "refining_updated_at": "2026-11-13T19:45:00",
+    "refining_age_badge": "⚡ 1小時內",
+    "refining_age_level": "fresh",
+    "refining_age_hours": 0.1,
+    "refining_available_qty": 1785,
+    "refining_is_depth_sufficient": true,
+    "refining_depth_lowest_price": 8876,
+    "refining_depth_status": "供貨充足",
+    "price_diff": 0,
+    "price_diff_pct": 0.0,
+    "city_prices": {
+      "Caerleon": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Fort Sterling": {
+        "sell_min": 8876,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T19:45:00",
+        "age_badge": "⚡ 1小時內",
+        "age_level": "fresh"
+      },
+      "Martlock": {
+        "sell_min": 9607,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T08:40:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      },
+      "Lymhurst": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Thetford": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Bridgewatch": {
+        "sell_min": 9998,
+        "buy_max": 7015,
+        "updated_at": "2026-11-13T09:15:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      }
+    }
+  },
+  {
+    "mat_type": "LEATHER",
+    "mat_name": "皮革",
+    "tier": "4.3",
+    "api_id": "T4_LEATHER_LEVEL3@3",
+    "sell_min": 0,
+    "buy_max": 0,
+    "price": 0,
+    "caerleon_price": 0,
+    "caerleon_updated_at": "0001-01-01T00:00:00",
+    "caerleon_age_badge": "無記錄",
+    "caerleon_age_level": "unknown",
+    "caerleon_age_hours": 999.0,
+    "available_qty": 0,
+    "is_depth_sufficient": false,
+    "depth_lowest_price": 0,
+    "depth_status": "無現貨掛售",
+    "refining_city": "Martlock",
+    "refining_city_zh": "藍城 (Martlock)",
+    "refining_city_short": "藍城",
+    "refining_price": 10135,
+    "refining_sell_min": 10135,
+    "refining_buy_max": 0,
+    "refining_updated_at": "2026-11-13T08:40:00",
+    "refining_age_badge": "🕒 11小時前",
+    "refining_age_level": "recent",
+    "refining_age_hours": 11.2,
+    "refining_available_qty": 4898,
+    "refining_is_depth_sufficient": true,
+    "refining_depth_lowest_price": 10135,
+    "refining_depth_status": "供貨充足",
+    "price_diff": 0,
+    "price_diff_pct": 0.0,
+    "city_prices": {
+      "Caerleon": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Fort Sterling": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Martlock": {
+        "sell_min": 10135,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T08:40:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      },
+      "Lymhurst": {
+        "sell_min": 10490,
+        "buy_max": 9701,
+        "updated_at": "2026-11-13T09:50:00",
+        "age_badge": "🕒 10小時前",
+        "age_level": "recent"
+      },
+      "Thetford": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Bridgewatch": {
+        "sell_min": 10480,
+        "buy_max": 3094,
+        "updated_at": "2026-11-13T09:15:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      }
+    }
+  },
+  {
+    "mat_type": "METALBAR",
+    "mat_name": "金屬條",
+    "tier": "4.3",
+    "api_id": "T4_METALBAR_LEVEL3@3",
+    "sell_min": 0,
+    "buy_max": 0,
+    "price": 0,
+    "caerleon_price": 0,
+    "caerleon_updated_at": "0001-01-01T00:00:00",
+    "caerleon_age_badge": "無記錄",
+    "caerleon_age_level": "unknown",
+    "caerleon_age_hours": 999.0,
+    "available_qty": 0,
+    "is_depth_sufficient": false,
+    "depth_lowest_price": 0,
+    "depth_status": "無現貨掛售",
+    "refining_city": "Thetford",
+    "refining_city_zh": "紫城 (Thetford)",
+    "refining_city_short": "紫城",
+    "refining_price": 9090,
+    "refining_sell_min": 9090,
+    "refining_buy_max": 0,
+    "refining_updated_at": "2026-11-13T19:45:00",
+    "refining_age_badge": "⚡ 1小時內",
+    "refining_age_level": "fresh",
+    "refining_age_hours": 0.1,
+    "refining_available_qty": 8627,
+    "refining_is_depth_sufficient": true,
+    "refining_depth_lowest_price": 9090,
+    "refining_depth_status": "供貨充足",
+    "price_diff": 0,
+    "price_diff_pct": 0.0,
+    "city_prices": {
+      "Caerleon": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Fort Sterling": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Martlock": {
+        "sell_min": 9636,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T08:40:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      },
+      "Lymhurst": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Thetford": {
+        "sell_min": 9090,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T19:45:00",
+        "age_badge": "⚡ 1小時內",
+        "age_level": "fresh"
+      },
+      "Bridgewatch": {
+        "sell_min": 9899,
+        "buy_max": 8004,
+        "updated_at": "2026-11-13T09:15:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      }
+    }
+  },
+  {
+    "mat_type": "CLOTH",
+    "mat_name": "布料",
+    "tier": "4.3",
+    "api_id": "T4_CLOTH_LEVEL3@3",
+    "sell_min": 0,
+    "buy_max": 0,
+    "price": 0,
+    "caerleon_price": 0,
+    "caerleon_updated_at": "0001-01-01T00:00:00",
+    "caerleon_age_badge": "無記錄",
+    "caerleon_age_level": "unknown",
+    "caerleon_age_hours": 999.0,
+    "available_qty": 0,
+    "is_depth_sufficient": false,
+    "depth_lowest_price": 0,
+    "depth_status": "無現貨掛售",
+    "refining_city": "Lymhurst",
+    "refining_city_zh": "綠城 (Lymhurst)",
+    "refining_city_short": "綠城",
+    "refining_price": 7321,
+    "refining_sell_min": 7321,
+    "refining_buy_max": 7000,
+    "refining_updated_at": "2026-11-13T09:45:00",
+    "refining_age_badge": "🕒 10小時前",
+    "refining_age_level": "recent",
+    "refining_age_hours": 10.1,
+    "refining_available_qty": 8519,
+    "refining_is_depth_sufficient": true,
+    "refining_depth_lowest_price": 7321,
+    "refining_depth_status": "供貨充足",
+    "price_diff": 0,
+    "price_diff_pct": 0.0,
+    "city_prices": {
+      "Caerleon": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Fort Sterling": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Martlock": {
+        "sell_min": 7998,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T08:40:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      },
+      "Lymhurst": {
+        "sell_min": 7321,
+        "buy_max": 7000,
+        "updated_at": "2026-11-13T09:45:00",
+        "age_badge": "🕒 10小時前",
+        "age_level": "recent"
+      },
+      "Thetford": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Bridgewatch": {
+        "sell_min": 8130,
+        "buy_max": 7500,
+        "updated_at": "2026-11-13T09:15:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      }
+    }
+  },
+  {
+    "mat_type": "PLANKS",
+    "mat_name": "木材",
+    "tier": "5.0",
+    "api_id": "T5_PLANKS",
+    "sell_min": 0,
+    "buy_max": 0,
+    "price": 0,
+    "caerleon_price": 0,
+    "caerleon_updated_at": "0001-01-01T00:00:00",
+    "caerleon_age_badge": "無記錄",
+    "caerleon_age_level": "unknown",
+    "caerleon_age_hours": 999.0,
+    "available_qty": 0,
+    "is_depth_sufficient": false,
+    "depth_lowest_price": 0,
+    "depth_status": "無現貨掛售",
+    "refining_city": "Fort Sterling",
+    "refining_city_zh": "白城 (Fort Sterling)",
+    "refining_city_short": "白城",
+    "refining_price": 1092,
+    "refining_sell_min": 1092,
+    "refining_buy_max": 991,
+    "refining_updated_at": "2026-11-13T19:45:00",
+    "refining_age_badge": "⚡ 1小時內",
+    "refining_age_level": "fresh",
+    "refining_age_hours": 0.1,
+    "refining_available_qty": 39612,
+    "refining_is_depth_sufficient": true,
+    "refining_depth_lowest_price": 1092,
+    "refining_depth_status": "供貨充足",
+    "price_diff": 0,
+    "price_diff_pct": 0.0,
+    "city_prices": {
+      "Caerleon": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Fort Sterling": {
+        "sell_min": 1092,
+        "buy_max": 991,
+        "updated_at": "2026-11-13T19:45:00",
+        "age_badge": "⚡ 1小時內",
+        "age_level": "fresh"
+      },
+      "Martlock": {
+        "sell_min": 1190,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T08:40:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      },
+      "Lymhurst": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Thetford": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Bridgewatch": {
+        "sell_min": 1273,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T09:15:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      }
+    }
+  },
+  {
+    "mat_type": "LEATHER",
+    "mat_name": "皮革",
+    "tier": "5.0",
+    "api_id": "T5_LEATHER",
+    "sell_min": 0,
+    "buy_max": 0,
+    "price": 0,
+    "caerleon_price": 0,
+    "caerleon_updated_at": "0001-01-01T00:00:00",
+    "caerleon_age_badge": "無記錄",
+    "caerleon_age_level": "unknown",
+    "caerleon_age_hours": 999.0,
+    "available_qty": 0,
+    "is_depth_sufficient": false,
+    "depth_lowest_price": 0,
+    "depth_status": "無現貨掛售",
+    "refining_city": "Martlock",
+    "refining_city_zh": "藍城 (Martlock)",
+    "refining_city_short": "藍城",
+    "refining_price": 1477,
+    "refining_sell_min": 1477,
+    "refining_buy_max": 0,
+    "refining_updated_at": "2026-11-13T08:40:00",
+    "refining_age_badge": "🕒 11小時前",
+    "refining_age_level": "recent",
+    "refining_age_hours": 11.2,
+    "refining_available_qty": 35832,
+    "refining_is_depth_sufficient": true,
+    "refining_depth_lowest_price": 1477,
+    "refining_depth_status": "供貨充足",
+    "price_diff": 0,
+    "price_diff_pct": 0.0,
+    "city_prices": {
+      "Caerleon": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Fort Sterling": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Martlock": {
+        "sell_min": 1477,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T08:40:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      },
+      "Lymhurst": {
+        "sell_min": 1531,
+        "buy_max": 1415,
+        "updated_at": "2026-11-13T12:00:00",
+        "age_badge": "🕒 8小時前",
+        "age_level": "recent"
+      },
+      "Thetford": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Bridgewatch": {
+        "sell_min": 1530,
+        "buy_max": 1307,
+        "updated_at": "2026-11-13T09:30:00",
+        "age_badge": "🕒 10小時前",
+        "age_level": "recent"
+      }
+    }
+  },
+  {
+    "mat_type": "METALBAR",
+    "mat_name": "金屬條",
+    "tier": "5.0",
+    "api_id": "T5_METALBAR",
+    "sell_min": 0,
+    "buy_max": 0,
+    "price": 0,
+    "caerleon_price": 0,
+    "caerleon_updated_at": "0001-01-01T00:00:00",
+    "caerleon_age_badge": "無記錄",
+    "caerleon_age_level": "unknown",
+    "caerleon_age_hours": 999.0,
+    "available_qty": 0,
+    "is_depth_sufficient": false,
+    "depth_lowest_price": 0,
+    "depth_status": "無現貨掛售",
+    "refining_city": "Thetford",
+    "refining_city_zh": "紫城 (Thetford)",
+    "refining_city_short": "紫城",
+    "refining_price": 1184,
+    "refining_sell_min": 1184,
+    "refining_buy_max": 1029,
+    "refining_updated_at": "2026-11-13T19:45:00",
+    "refining_age_badge": "⚡ 1小時內",
+    "refining_age_level": "fresh",
+    "refining_age_hours": 0.1,
+    "refining_available_qty": 36916,
+    "refining_is_depth_sufficient": true,
+    "refining_depth_lowest_price": 1184,
+    "refining_depth_status": "供貨充足",
+    "price_diff": 0,
+    "price_diff_pct": 0.0,
+    "city_prices": {
+      "Caerleon": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Fort Sterling": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Martlock": {
+        "sell_min": 1143,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T08:55:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      },
+      "Lymhurst": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Thetford": {
+        "sell_min": 1184,
+        "buy_max": 1029,
+        "updated_at": "2026-11-13T19:45:00",
+        "age_badge": "⚡ 1小時內",
+        "age_level": "fresh"
+      },
+      "Bridgewatch": {
+        "sell_min": 1199,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T09:15:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      }
+    }
+  },
+  {
+    "mat_type": "CLOTH",
+    "mat_name": "布料",
+    "tier": "5.0",
+    "api_id": "T5_CLOTH",
+    "sell_min": 0,
+    "buy_max": 0,
+    "price": 0,
+    "caerleon_price": 0,
+    "caerleon_updated_at": "0001-01-01T00:00:00",
+    "caerleon_age_badge": "無記錄",
+    "caerleon_age_level": "unknown",
+    "caerleon_age_hours": 999.0,
+    "available_qty": 0,
+    "is_depth_sufficient": false,
+    "depth_lowest_price": 0,
+    "depth_status": "無現貨掛售",
+    "refining_city": "Lymhurst",
+    "refining_city_zh": "綠城 (Lymhurst)",
+    "refining_city_short": "綠城",
+    "refining_price": 1283,
+    "refining_sell_min": 1283,
+    "refining_buy_max": 1103,
+    "refining_updated_at": "2026-11-13T11:35:00",
+    "refining_age_badge": "🕒 8小時前",
+    "refining_age_level": "recent",
+    "refining_age_hours": 8.3,
+    "refining_available_qty": 40882,
+    "refining_is_depth_sufficient": true,
+    "refining_depth_lowest_price": 1283,
+    "refining_depth_status": "供貨充足",
+    "price_diff": 0,
+    "price_diff_pct": 0.0,
+    "city_prices": {
+      "Caerleon": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Fort Sterling": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Martlock": {
+        "sell_min": 1240,
+        "buy_max": 1121,
+        "updated_at": "2026-11-13T11:30:00",
+        "age_badge": "🕒 8小時前",
+        "age_level": "recent"
+      },
+      "Lymhurst": {
+        "sell_min": 1283,
+        "buy_max": 1103,
+        "updated_at": "2026-11-13T11:35:00",
+        "age_badge": "🕒 8小時前",
+        "age_level": "recent"
+      },
+      "Thetford": {
+        "sell_min": 1218,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T11:40:00",
+        "age_badge": "🕒 8小時前",
+        "age_level": "recent"
+      },
+      "Bridgewatch": {
+        "sell_min": 1215,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T11:30:00",
+        "age_badge": "🕒 8小時前",
+        "age_level": "recent"
+      }
+    }
+  },
+  {
+    "mat_type": "PLANKS",
+    "mat_name": "木材",
+    "tier": "5.1",
+    "api_id": "T5_PLANKS_LEVEL1@1",
+    "sell_min": 0,
+    "buy_max": 0,
+    "price": 0,
+    "caerleon_price": 0,
+    "caerleon_updated_at": "0001-01-01T00:00:00",
+    "caerleon_age_badge": "無記錄",
+    "caerleon_age_level": "unknown",
+    "caerleon_age_hours": 999.0,
+    "available_qty": 0,
+    "is_depth_sufficient": false,
+    "depth_lowest_price": 0,
+    "depth_status": "無現貨掛售",
+    "refining_city": "Fort Sterling",
+    "refining_city_zh": "白城 (Fort Sterling)",
+    "refining_city_short": "白城",
+    "refining_price": 1893,
+    "refining_sell_min": 1893,
+    "refining_buy_max": 1853,
+    "refining_updated_at": "2026-11-13T19:45:00",
+    "refining_age_badge": "⚡ 1小時內",
+    "refining_age_level": "fresh",
+    "refining_age_hours": 0.1,
+    "refining_available_qty": 25494,
+    "refining_is_depth_sufficient": true,
+    "refining_depth_lowest_price": 1893,
+    "refining_depth_status": "供貨充足",
+    "price_diff": 0,
+    "price_diff_pct": 0.0,
+    "city_prices": {
+      "Caerleon": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Fort Sterling": {
+        "sell_min": 1893,
+        "buy_max": 1853,
+        "updated_at": "2026-11-13T19:45:00",
+        "age_badge": "⚡ 1小時內",
+        "age_level": "fresh"
+      },
+      "Martlock": {
+        "sell_min": 1998,
+        "buy_max": 1725,
+        "updated_at": "2026-11-13T08:40:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      },
+      "Lymhurst": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Thetford": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Bridgewatch": {
+        "sell_min": 1895,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T09:15:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      }
+    }
+  },
+  {
+    "mat_type": "LEATHER",
+    "mat_name": "皮革",
+    "tier": "5.1",
+    "api_id": "T5_LEATHER_LEVEL1@1",
+    "sell_min": 0,
+    "buy_max": 0,
+    "price": 0,
+    "caerleon_price": 0,
+    "caerleon_updated_at": "0001-01-01T00:00:00",
+    "caerleon_age_badge": "無記錄",
+    "caerleon_age_level": "unknown",
+    "caerleon_age_hours": 999.0,
+    "available_qty": 0,
+    "is_depth_sufficient": false,
+    "depth_lowest_price": 0,
+    "depth_status": "無現貨掛售",
+    "refining_city": "Martlock",
+    "refining_city_zh": "藍城 (Martlock)",
+    "refining_city_short": "藍城",
+    "refining_price": 2230,
+    "refining_sell_min": 2230,
+    "refining_buy_max": 0,
+    "refining_updated_at": "2026-11-13T08:40:00",
+    "refining_age_badge": "🕒 11小時前",
+    "refining_age_level": "recent",
+    "refining_age_hours": 11.2,
+    "refining_available_qty": 17876,
+    "refining_is_depth_sufficient": true,
+    "refining_depth_lowest_price": 2230,
+    "refining_depth_status": "供貨充足",
+    "price_diff": 0,
+    "price_diff_pct": 0.0,
+    "city_prices": {
+      "Caerleon": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Fort Sterling": {
+        "sell_min": 2898,
+        "buy_max": 1890,
+        "updated_at": "2026-11-13T02:40:00",
+        "age_badge": "🕒 17小時前",
+        "age_level": "recent"
+      },
+      "Martlock": {
+        "sell_min": 2230,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T08:40:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      },
+      "Lymhurst": {
+        "sell_min": 2198,
+        "buy_max": 2003,
+        "updated_at": "2026-11-13T09:45:00",
+        "age_badge": "🕒 10小時前",
+        "age_level": "recent"
+      },
+      "Thetford": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Bridgewatch": {
+        "sell_min": 1887,
+        "buy_max": 1579,
+        "updated_at": "2026-11-13T09:30:00",
+        "age_badge": "🕒 10小時前",
+        "age_level": "recent"
+      }
+    }
+  },
+  {
+    "mat_type": "METALBAR",
+    "mat_name": "金屬條",
+    "tier": "5.1",
+    "api_id": "T5_METALBAR_LEVEL1@1",
+    "sell_min": 0,
+    "buy_max": 0,
+    "price": 0,
+    "caerleon_price": 0,
+    "caerleon_updated_at": "0001-01-01T00:00:00",
+    "caerleon_age_badge": "無記錄",
+    "caerleon_age_level": "unknown",
+    "caerleon_age_hours": 999.0,
+    "available_qty": 0,
+    "is_depth_sufficient": false,
+    "depth_lowest_price": 0,
+    "depth_status": "無現貨掛售",
+    "refining_city": "Thetford",
+    "refining_city_zh": "紫城 (Thetford)",
+    "refining_city_short": "紫城",
+    "refining_price": 1881,
+    "refining_sell_min": 1881,
+    "refining_buy_max": 0,
+    "refining_updated_at": "2026-11-13T19:45:00",
+    "refining_age_badge": "⚡ 1小時內",
+    "refining_age_level": "fresh",
+    "refining_age_hours": 0.1,
+    "refining_available_qty": 15557,
+    "refining_is_depth_sufficient": true,
+    "refining_depth_lowest_price": 1881,
+    "refining_depth_status": "供貨充足",
+    "price_diff": 0,
+    "price_diff_pct": 0.0,
+    "city_prices": {
+      "Caerleon": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Fort Sterling": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Martlock": {
+        "sell_min": 1900,
+        "buy_max": 1000,
+        "updated_at": "2026-11-13T08:55:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      },
+      "Lymhurst": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Thetford": {
+        "sell_min": 1881,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T19:45:00",
+        "age_badge": "⚡ 1小時內",
+        "age_level": "fresh"
+      },
+      "Bridgewatch": {
+        "sell_min": 2089,
+        "buy_max": 1833,
+        "updated_at": "2026-11-13T09:30:00",
+        "age_badge": "🕒 10小時前",
+        "age_level": "recent"
+      }
+    }
+  },
+  {
+    "mat_type": "CLOTH",
+    "mat_name": "布料",
+    "tier": "5.1",
+    "api_id": "T5_CLOTH_LEVEL1@1",
+    "sell_min": 0,
+    "buy_max": 0,
+    "price": 0,
+    "caerleon_price": 0,
+    "caerleon_updated_at": "0001-01-01T00:00:00",
+    "caerleon_age_badge": "無記錄",
+    "caerleon_age_level": "unknown",
+    "caerleon_age_hours": 999.0,
+    "available_qty": 0,
+    "is_depth_sufficient": false,
+    "depth_lowest_price": 0,
+    "depth_status": "無現貨掛售",
+    "refining_city": "Lymhurst",
+    "refining_city_zh": "綠城 (Lymhurst)",
+    "refining_city_short": "綠城",
+    "refining_price": 2070,
+    "refining_sell_min": 2070,
+    "refining_buy_max": 1945,
+    "refining_updated_at": "2026-11-13T09:45:00",
+    "refining_age_badge": "🕒 10小時前",
+    "refining_age_level": "recent",
+    "refining_age_hours": 10.1,
+    "refining_available_qty": 13482,
+    "refining_is_depth_sufficient": true,
+    "refining_depth_lowest_price": 2070,
+    "refining_depth_status": "供貨充足",
+    "price_diff": 0,
+    "price_diff_pct": 0.0,
+    "city_prices": {
+      "Caerleon": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Fort Sterling": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Martlock": {
+        "sell_min": 2100,
+        "buy_max": 1821,
+        "updated_at": "2026-11-13T08:55:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      },
+      "Lymhurst": {
+        "sell_min": 2070,
+        "buy_max": 1945,
+        "updated_at": "2026-11-13T09:45:00",
+        "age_badge": "🕒 10小時前",
+        "age_level": "recent"
+      },
+      "Thetford": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Bridgewatch": {
+        "sell_min": 2050,
+        "buy_max": 1836,
+        "updated_at": "2026-11-13T09:30:00",
+        "age_badge": "🕒 10小時前",
+        "age_level": "recent"
+      }
+    }
+  },
+  {
+    "mat_type": "PLANKS",
+    "mat_name": "木材",
+    "tier": "5.2",
+    "api_id": "T5_PLANKS_LEVEL2@2",
+    "sell_min": 0,
+    "buy_max": 0,
+    "price": 0,
+    "caerleon_price": 0,
+    "caerleon_updated_at": "0001-01-01T00:00:00",
+    "caerleon_age_badge": "無記錄",
+    "caerleon_age_level": "unknown",
+    "caerleon_age_hours": 999.0,
+    "available_qty": 0,
+    "is_depth_sufficient": false,
+    "depth_lowest_price": 0,
+    "depth_status": "無現貨掛售",
+    "refining_city": "Fort Sterling",
+    "refining_city_zh": "白城 (Fort Sterling)",
+    "refining_city_short": "白城",
+    "refining_price": 5894,
+    "refining_sell_min": 5894,
+    "refining_buy_max": 5708,
+    "refining_updated_at": "2026-11-13T19:45:00",
+    "refining_age_badge": "⚡ 1小時內",
+    "refining_age_level": "fresh",
+    "refining_age_hours": 0.1,
+    "refining_available_qty": 11857,
+    "refining_is_depth_sufficient": true,
+    "refining_depth_lowest_price": 5894,
+    "refining_depth_status": "供貨充足",
+    "price_diff": 0,
+    "price_diff_pct": 0.0,
+    "city_prices": {
+      "Caerleon": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Fort Sterling": {
+        "sell_min": 5894,
+        "buy_max": 5708,
+        "updated_at": "2026-11-13T19:45:00",
+        "age_badge": "⚡ 1小時內",
+        "age_level": "fresh"
+      },
+      "Martlock": {
+        "sell_min": 6870,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T08:40:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      },
+      "Lymhurst": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Thetford": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Bridgewatch": {
+        "sell_min": 6497,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T09:15:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      }
+    }
+  },
+  {
+    "mat_type": "LEATHER",
+    "mat_name": "皮革",
+    "tier": "5.2",
+    "api_id": "T5_LEATHER_LEVEL2@2",
+    "sell_min": 0,
+    "buy_max": 0,
+    "price": 0,
+    "caerleon_price": 0,
+    "caerleon_updated_at": "0001-01-01T00:00:00",
+    "caerleon_age_badge": "無記錄",
+    "caerleon_age_level": "unknown",
+    "caerleon_age_hours": 999.0,
+    "available_qty": 0,
+    "is_depth_sufficient": false,
+    "depth_lowest_price": 0,
+    "depth_status": "無現貨掛售",
+    "refining_city": "Martlock",
+    "refining_city_zh": "藍城 (Martlock)",
+    "refining_city_short": "藍城",
+    "refining_price": 8206,
+    "refining_sell_min": 8206,
+    "refining_buy_max": 0,
+    "refining_updated_at": "2026-11-13T08:40:00",
+    "refining_age_badge": "🕒 11小時前",
+    "refining_age_level": "recent",
+    "refining_age_hours": 11.2,
+    "refining_available_qty": 7759,
+    "refining_is_depth_sufficient": true,
+    "refining_depth_lowest_price": 8206,
+    "refining_depth_status": "供貨充足",
+    "price_diff": 0,
+    "price_diff_pct": 0.0,
+    "city_prices": {
+      "Caerleon": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Fort Sterling": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Martlock": {
+        "sell_min": 8206,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T08:40:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      },
+      "Lymhurst": {
+        "sell_min": 8167,
+        "buy_max": 3150,
+        "updated_at": "2026-11-13T09:45:00",
+        "age_badge": "🕒 10小時前",
+        "age_level": "recent"
+      },
+      "Thetford": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Bridgewatch": {
+        "sell_min": 7987,
+        "buy_max": 2200,
+        "updated_at": "2026-11-13T09:30:00",
+        "age_badge": "🕒 10小時前",
+        "age_level": "recent"
+      }
+    }
+  },
+  {
+    "mat_type": "METALBAR",
+    "mat_name": "金屬條",
+    "tier": "5.2",
+    "api_id": "T5_METALBAR_LEVEL2@2",
+    "sell_min": 0,
+    "buy_max": 0,
+    "price": 0,
+    "caerleon_price": 0,
+    "caerleon_updated_at": "0001-01-01T00:00:00",
+    "caerleon_age_badge": "無記錄",
+    "caerleon_age_level": "unknown",
+    "caerleon_age_hours": 999.0,
+    "available_qty": 0,
+    "is_depth_sufficient": false,
+    "depth_lowest_price": 0,
+    "depth_status": "無現貨掛售",
+    "refining_city": "Thetford",
+    "refining_city_zh": "紫城 (Thetford)",
+    "refining_city_short": "紫城",
+    "refining_price": 7748,
+    "refining_sell_min": 7748,
+    "refining_buy_max": 6813,
+    "refining_updated_at": "2026-11-13T19:45:00",
+    "refining_age_badge": "⚡ 1小時內",
+    "refining_age_level": "fresh",
+    "refining_age_hours": 0.1,
+    "refining_available_qty": 9517,
+    "refining_is_depth_sufficient": true,
+    "refining_depth_lowest_price": 7748,
+    "refining_depth_status": "供貨充足",
+    "price_diff": 0,
+    "price_diff_pct": 0.0,
+    "city_prices": {
+      "Caerleon": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Fort Sterling": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Martlock": {
+        "sell_min": 7992,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T08:40:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      },
+      "Lymhurst": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Thetford": {
+        "sell_min": 7748,
+        "buy_max": 6813,
+        "updated_at": "2026-11-13T19:45:00",
+        "age_badge": "⚡ 1小時內",
+        "age_level": "fresh"
+      },
+      "Bridgewatch": {
+        "sell_min": 7905,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T09:15:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      }
+    }
+  },
+  {
+    "mat_type": "CLOTH",
+    "mat_name": "布料",
+    "tier": "5.2",
+    "api_id": "T5_CLOTH_LEVEL2@2",
+    "sell_min": 6499,
+    "buy_max": 0,
+    "price": 6499,
+    "caerleon_price": 6499,
+    "caerleon_updated_at": "2026-11-13T09:55:00",
+    "caerleon_age_badge": "🕒 10小時前",
+    "caerleon_age_level": "recent",
+    "caerleon_age_hours": 10.0,
+    "available_qty": 660,
+    "is_depth_sufficient": true,
+    "depth_lowest_price": 6499,
+    "depth_status": "供貨充足",
+    "refining_city": "Lymhurst",
+    "refining_city_zh": "綠城 (Lymhurst)",
+    "refining_city_short": "綠城",
+    "refining_price": 4799,
+    "refining_sell_min": 4799,
+    "refining_buy_max": 4162,
+    "refining_updated_at": "2026-11-13T09:45:00",
+    "refining_age_badge": "🕒 10小時前",
+    "refining_age_level": "recent",
+    "refining_age_hours": 10.1,
+    "refining_available_qty": 11634,
+    "refining_is_depth_sufficient": true,
+    "refining_depth_lowest_price": 4799,
+    "refining_depth_status": "供貨充足",
+    "price_diff": 1700,
+    "price_diff_pct": 26.2,
+    "city_prices": {
+      "Caerleon": {
+        "sell_min": 6499,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T09:55:00",
+        "age_badge": "🕒 10小時前",
+        "age_level": "recent"
+      },
+      "Fort Sterling": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Martlock": {
+        "sell_min": 4993,
+        "buy_max": 3778,
+        "updated_at": "2026-11-13T09:00:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      },
+      "Lymhurst": {
+        "sell_min": 4799,
+        "buy_max": 4162,
+        "updated_at": "2026-11-13T09:45:00",
+        "age_badge": "🕒 10小時前",
+        "age_level": "recent"
+      },
+      "Thetford": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Bridgewatch": {
+        "sell_min": 4910,
+        "buy_max": 4104,
+        "updated_at": "2026-11-13T09:40:00",
+        "age_badge": "🕒 10小時前",
+        "age_level": "recent"
+      }
+    }
+  },
+  {
+    "mat_type": "PLANKS",
+    "mat_name": "木材",
+    "tier": "5.3",
+    "api_id": "T5_PLANKS_LEVEL3@3",
+    "sell_min": 0,
+    "buy_max": 0,
+    "price": 0,
+    "caerleon_price": 0,
+    "caerleon_updated_at": "0001-01-01T00:00:00",
+    "caerleon_age_badge": "無記錄",
+    "caerleon_age_level": "unknown",
+    "caerleon_age_hours": 999.0,
+    "available_qty": 0,
+    "is_depth_sufficient": false,
+    "depth_lowest_price": 0,
+    "depth_status": "無現貨掛售",
+    "refining_city": "Fort Sterling",
+    "refining_city_zh": "白城 (Fort Sterling)",
+    "refining_city_short": "白城",
+    "refining_price": 29793,
+    "refining_sell_min": 29793,
+    "refining_buy_max": 0,
+    "refining_updated_at": "2026-11-13T19:45:00",
+    "refining_age_badge": "⚡ 1小時內",
+    "refining_age_level": "fresh",
+    "refining_age_hours": 0.1,
+    "refining_available_qty": 3126,
+    "refining_is_depth_sufficient": true,
+    "refining_depth_lowest_price": 29793,
+    "refining_depth_status": "供貨充足",
+    "price_diff": 0,
+    "price_diff_pct": 0.0,
+    "city_prices": {
+      "Caerleon": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Fort Sterling": {
+        "sell_min": 29793,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T19:45:00",
+        "age_badge": "⚡ 1小時內",
+        "age_level": "fresh"
+      },
+      "Martlock": {
+        "sell_min": 29950,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T08:40:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      },
+      "Lymhurst": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Thetford": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Bridgewatch": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      }
+    }
+  },
+  {
+    "mat_type": "LEATHER",
+    "mat_name": "皮革",
+    "tier": "5.3",
+    "api_id": "T5_LEATHER_LEVEL3@3",
+    "sell_min": 0,
+    "buy_max": 0,
+    "price": 0,
+    "caerleon_price": 0,
+    "caerleon_updated_at": "0001-01-01T00:00:00",
+    "caerleon_age_badge": "無記錄",
+    "caerleon_age_level": "unknown",
+    "caerleon_age_hours": 999.0,
+    "available_qty": 0,
+    "is_depth_sufficient": false,
+    "depth_lowest_price": 0,
+    "depth_status": "無現貨掛售",
+    "refining_city": "Martlock",
+    "refining_city_zh": "藍城 (Martlock)",
+    "refining_city_short": "藍城",
+    "refining_price": 29097,
+    "refining_sell_min": 29097,
+    "refining_buy_max": 0,
+    "refining_updated_at": "2026-11-13T08:40:00",
+    "refining_age_badge": "🕒 11小時前",
+    "refining_age_level": "recent",
+    "refining_age_hours": 11.2,
+    "refining_available_qty": 7759,
+    "refining_is_depth_sufficient": true,
+    "refining_depth_lowest_price": 29097,
+    "refining_depth_status": "供貨充足",
+    "price_diff": 0,
+    "price_diff_pct": 0.0,
+    "city_prices": {
+      "Caerleon": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Fort Sterling": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Martlock": {
+        "sell_min": 29097,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T08:40:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      },
+      "Lymhurst": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Thetford": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Bridgewatch": {
+        "sell_min": 27993,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T09:15:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      }
+    }
+  },
+  {
+    "mat_type": "METALBAR",
+    "mat_name": "金屬條",
+    "tier": "5.3",
+    "api_id": "T5_METALBAR_LEVEL3@3",
+    "sell_min": 0,
+    "buy_max": 0,
+    "price": 0,
+    "caerleon_price": 0,
+    "caerleon_updated_at": "0001-01-01T00:00:00",
+    "caerleon_age_badge": "無記錄",
+    "caerleon_age_level": "unknown",
+    "caerleon_age_hours": 999.0,
+    "available_qty": 0,
+    "is_depth_sufficient": false,
+    "depth_lowest_price": 0,
+    "depth_status": "無現貨掛售",
+    "refining_city": "Thetford",
+    "refining_city_zh": "紫城 (Thetford)",
+    "refining_city_short": "紫城",
+    "refining_price": 29497,
+    "refining_sell_min": 29497,
+    "refining_buy_max": 26000,
+    "refining_updated_at": "2026-11-13T19:45:00",
+    "refining_age_badge": "⚡ 1小時內",
+    "refining_age_level": "fresh",
+    "refining_age_hours": 0.1,
+    "refining_available_qty": 1841,
+    "refining_is_depth_sufficient": true,
+    "refining_depth_lowest_price": 29497,
+    "refining_depth_status": "供貨充足",
+    "price_diff": 0,
+    "price_diff_pct": 0.0,
+    "city_prices": {
+      "Caerleon": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Fort Sterling": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Martlock": {
+        "sell_min": 31997,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T08:40:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      },
+      "Lymhurst": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Thetford": {
+        "sell_min": 29497,
+        "buy_max": 26000,
+        "updated_at": "2026-11-13T19:45:00",
+        "age_badge": "⚡ 1小時內",
+        "age_level": "fresh"
+      },
+      "Bridgewatch": {
+        "sell_min": 28995,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T09:15:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      }
+    }
+  },
+  {
+    "mat_type": "CLOTH",
+    "mat_name": "布料",
+    "tier": "5.3",
+    "api_id": "T5_CLOTH_LEVEL3@3",
+    "sell_min": 0,
+    "buy_max": 0,
+    "price": 0,
+    "caerleon_price": 0,
+    "caerleon_updated_at": "0001-01-01T00:00:00",
+    "caerleon_age_badge": "無記錄",
+    "caerleon_age_level": "unknown",
+    "caerleon_age_hours": 999.0,
+    "available_qty": 0,
+    "is_depth_sufficient": false,
+    "depth_lowest_price": 0,
+    "depth_status": "無現貨掛售",
+    "refining_city": "Lymhurst",
+    "refining_city_zh": "綠城 (Lymhurst)",
+    "refining_city_short": "綠城",
+    "refining_price": 18297,
+    "refining_sell_min": 18297,
+    "refining_buy_max": 16501,
+    "refining_updated_at": "2026-11-13T09:45:00",
+    "refining_age_badge": "🕒 10小時前",
+    "refining_age_level": "recent",
+    "refining_age_hours": 10.1,
+    "refining_available_qty": 6267,
+    "refining_is_depth_sufficient": true,
+    "refining_depth_lowest_price": 18297,
+    "refining_depth_status": "供貨充足",
+    "price_diff": 0,
+    "price_diff_pct": 0.0,
+    "city_prices": {
+      "Caerleon": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Fort Sterling": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Martlock": {
+        "sell_min": 17799,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T08:40:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      },
+      "Lymhurst": {
+        "sell_min": 18297,
+        "buy_max": 16501,
+        "updated_at": "2026-11-13T09:45:00",
+        "age_badge": "🕒 10小時前",
+        "age_level": "recent"
+      },
+      "Thetford": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Bridgewatch": {
+        "sell_min": 19850,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T09:15:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      }
+    }
+  },
+  {
+    "mat_type": "PLANKS",
+    "mat_name": "木材",
+    "tier": "6.0",
+    "api_id": "T6_PLANKS",
+    "sell_min": 0,
+    "buy_max": 0,
+    "price": 0,
+    "caerleon_price": 0,
+    "caerleon_updated_at": "0001-01-01T00:00:00",
+    "caerleon_age_badge": "無記錄",
+    "caerleon_age_level": "unknown",
+    "caerleon_age_hours": 999.0,
+    "available_qty": 0,
+    "is_depth_sufficient": false,
+    "depth_lowest_price": 0,
+    "depth_status": "無現貨掛售",
+    "refining_city": "Fort Sterling",
+    "refining_city_zh": "白城 (Fort Sterling)",
+    "refining_city_short": "白城",
+    "refining_price": 3338,
+    "refining_sell_min": 3338,
+    "refining_buy_max": 3033,
+    "refining_updated_at": "2026-11-13T19:45:00",
+    "refining_age_badge": "⚡ 1小時內",
+    "refining_age_level": "fresh",
+    "refining_age_hours": 0.1,
+    "refining_available_qty": 19199,
+    "refining_is_depth_sufficient": true,
+    "refining_depth_lowest_price": 3338,
+    "refining_depth_status": "供貨充足",
+    "price_diff": 0,
+    "price_diff_pct": 0.0,
+    "city_prices": {
+      "Caerleon": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Fort Sterling": {
+        "sell_min": 3338,
+        "buy_max": 3033,
+        "updated_at": "2026-11-13T19:45:00",
+        "age_badge": "⚡ 1小時內",
+        "age_level": "fresh"
+      },
+      "Martlock": {
+        "sell_min": 3567,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T08:40:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      },
+      "Lymhurst": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Thetford": {
+        "sell_min": 3378,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T19:45:00",
+        "age_badge": "⚡ 1小時內",
+        "age_level": "fresh"
+      },
+      "Bridgewatch": {
+        "sell_min": 3830,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T09:15:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      }
+    }
+  },
+  {
+    "mat_type": "LEATHER",
+    "mat_name": "皮革",
+    "tier": "6.0",
+    "api_id": "T6_LEATHER",
+    "sell_min": 0,
+    "buy_max": 0,
+    "price": 0,
+    "caerleon_price": 0,
+    "caerleon_updated_at": "0001-01-01T00:00:00",
+    "caerleon_age_badge": "無記錄",
+    "caerleon_age_level": "unknown",
+    "caerleon_age_hours": 999.0,
+    "available_qty": 0,
+    "is_depth_sufficient": false,
+    "depth_lowest_price": 0,
+    "depth_status": "無現貨掛售",
+    "refining_city": "Martlock",
+    "refining_city_zh": "藍城 (Martlock)",
+    "refining_city_short": "藍城",
+    "refining_price": 4880,
+    "refining_sell_min": 4880,
+    "refining_buy_max": 4340,
+    "refining_updated_at": "2026-11-13T08:55:00",
+    "refining_age_badge": "🕒 11小時前",
+    "refining_age_level": "recent",
+    "refining_age_hours": 11.0,
+    "refining_available_qty": 53740,
+    "refining_is_depth_sufficient": true,
+    "refining_depth_lowest_price": 4880,
+    "refining_depth_status": "供貨充足",
+    "price_diff": 0,
+    "price_diff_pct": 0.0,
+    "city_prices": {
+      "Caerleon": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Fort Sterling": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Martlock": {
+        "sell_min": 4880,
+        "buy_max": 4340,
+        "updated_at": "2026-11-13T08:55:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      },
+      "Lymhurst": {
+        "sell_min": 5041,
+        "buy_max": 4360,
+        "updated_at": "2026-11-13T09:55:00",
+        "age_badge": "🕒 10小時前",
+        "age_level": "recent"
+      },
+      "Thetford": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Bridgewatch": {
+        "sell_min": 4994,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T09:15:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      }
+    }
+  },
+  {
+    "mat_type": "METALBAR",
+    "mat_name": "金屬條",
+    "tier": "6.0",
+    "api_id": "T6_METALBAR",
+    "sell_min": 0,
+    "buy_max": 0,
+    "price": 0,
+    "caerleon_price": 0,
+    "caerleon_updated_at": "0001-01-01T00:00:00",
+    "caerleon_age_badge": "無記錄",
+    "caerleon_age_level": "unknown",
+    "caerleon_age_hours": 999.0,
+    "available_qty": 0,
+    "is_depth_sufficient": false,
+    "depth_lowest_price": 0,
+    "depth_status": "無現貨掛售",
+    "refining_city": "Thetford",
+    "refining_city_zh": "紫城 (Thetford)",
+    "refining_city_short": "紫城",
+    "refining_price": 2845,
+    "refining_sell_min": 2845,
+    "refining_buy_max": 2602,
+    "refining_updated_at": "2026-11-13T19:45:00",
+    "refining_age_badge": "⚡ 1小時內",
+    "refining_age_level": "fresh",
+    "refining_age_hours": 0.1,
+    "refining_available_qty": 33588,
+    "refining_is_depth_sufficient": true,
+    "refining_depth_lowest_price": 2845,
+    "refining_depth_status": "供貨充足",
+    "price_diff": 0,
+    "price_diff_pct": 0.0,
+    "city_prices": {
+      "Caerleon": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Fort Sterling": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Martlock": {
+        "sell_min": 2846,
+        "buy_max": 1878,
+        "updated_at": "2026-11-13T08:55:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      },
+      "Lymhurst": {
+        "sell_min": 2987,
+        "buy_max": 2580,
+        "updated_at": "2026-11-13T09:55:00",
+        "age_badge": "🕒 10小時前",
+        "age_level": "recent"
+      },
+      "Thetford": {
+        "sell_min": 2845,
+        "buy_max": 2602,
+        "updated_at": "2026-11-13T19:45:00",
+        "age_badge": "⚡ 1小時內",
+        "age_level": "fresh"
+      },
+      "Bridgewatch": {
+        "sell_min": 2830,
+        "buy_max": 2345,
+        "updated_at": "2026-11-13T09:30:00",
+        "age_badge": "🕒 10小時前",
+        "age_level": "recent"
+      }
+    }
+  },
+  {
+    "mat_type": "CLOTH",
+    "mat_name": "布料",
+    "tier": "6.0",
+    "api_id": "T6_CLOTH",
+    "sell_min": 0,
+    "buy_max": 0,
+    "price": 0,
+    "caerleon_price": 0,
+    "caerleon_updated_at": "0001-01-01T00:00:00",
+    "caerleon_age_badge": "無記錄",
+    "caerleon_age_level": "unknown",
+    "caerleon_age_hours": 999.0,
+    "available_qty": 0,
+    "is_depth_sufficient": false,
+    "depth_lowest_price": 0,
+    "depth_status": "無現貨掛售",
+    "refining_city": "Lymhurst",
+    "refining_city_zh": "綠城 (Lymhurst)",
+    "refining_city_short": "綠城",
+    "refining_price": 3326,
+    "refining_sell_min": 3326,
+    "refining_buy_max": 3070,
+    "refining_updated_at": "2026-11-13T12:20:00",
+    "refining_age_badge": "🕒 8小時前",
+    "refining_age_level": "recent",
+    "refining_age_hours": 7.5,
+    "refining_available_qty": 50695,
+    "refining_is_depth_sufficient": true,
+    "refining_depth_lowest_price": 3326,
+    "refining_depth_status": "供貨充足",
+    "price_diff": 0,
+    "price_diff_pct": 0.0,
+    "city_prices": {
+      "Caerleon": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Fort Sterling": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Martlock": {
+        "sell_min": 3785,
+        "buy_max": 3003,
+        "updated_at": "2026-11-13T11:40:00",
+        "age_badge": "🕒 8小時前",
+        "age_level": "recent"
+      },
+      "Lymhurst": {
+        "sell_min": 3326,
+        "buy_max": 3070,
+        "updated_at": "2026-11-13T12:20:00",
+        "age_badge": "🕒 8小時前",
+        "age_level": "recent"
+      },
+      "Thetford": {
+        "sell_min": 3422,
+        "buy_max": 3109,
+        "updated_at": "2026-11-13T11:40:00",
+        "age_badge": "🕒 8小時前",
+        "age_level": "recent"
+      },
+      "Bridgewatch": {
+        "sell_min": 3484,
+        "buy_max": 2817,
+        "updated_at": "2026-11-13T11:35:00",
+        "age_badge": "🕒 8小時前",
+        "age_level": "recent"
+      }
+    }
+  },
+  {
+    "mat_type": "PLANKS",
+    "mat_name": "木材",
+    "tier": "6.1",
+    "api_id": "T6_PLANKS_LEVEL1@1",
+    "sell_min": 0,
+    "buy_max": 0,
+    "price": 0,
+    "caerleon_price": 0,
+    "caerleon_updated_at": "0001-01-01T00:00:00",
+    "caerleon_age_badge": "無記錄",
+    "caerleon_age_level": "unknown",
+    "caerleon_age_hours": 999.0,
+    "available_qty": 0,
+    "is_depth_sufficient": false,
+    "depth_lowest_price": 0,
+    "depth_status": "無現貨掛售",
+    "refining_city": "Fort Sterling",
+    "refining_city_zh": "白城 (Fort Sterling)",
+    "refining_city_short": "白城",
+    "refining_price": 5886,
+    "refining_sell_min": 5886,
+    "refining_buy_max": 5350,
+    "refining_updated_at": "2026-11-13T19:45:00",
+    "refining_age_badge": "⚡ 1小時內",
+    "refining_age_level": "fresh",
+    "refining_age_hours": 0.1,
+    "refining_available_qty": 9110,
+    "refining_is_depth_sufficient": true,
+    "refining_depth_lowest_price": 5886,
+    "refining_depth_status": "供貨充足",
+    "price_diff": 0,
+    "price_diff_pct": 0.0,
+    "city_prices": {
+      "Caerleon": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Fort Sterling": {
+        "sell_min": 5886,
+        "buy_max": 5350,
+        "updated_at": "2026-11-13T19:45:00",
+        "age_badge": "⚡ 1小時內",
+        "age_level": "fresh"
+      },
+      "Martlock": {
+        "sell_min": 6776,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T08:40:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      },
+      "Lymhurst": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Thetford": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Bridgewatch": {
+        "sell_min": 7496,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T09:15:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      }
+    }
+  },
+  {
+    "mat_type": "LEATHER",
+    "mat_name": "皮革",
+    "tier": "6.1",
+    "api_id": "T6_LEATHER_LEVEL1@1",
+    "sell_min": 0,
+    "buy_max": 0,
+    "price": 0,
+    "caerleon_price": 0,
+    "caerleon_updated_at": "0001-01-01T00:00:00",
+    "caerleon_age_badge": "無記錄",
+    "caerleon_age_level": "unknown",
+    "caerleon_age_hours": 999.0,
+    "available_qty": 0,
+    "is_depth_sufficient": false,
+    "depth_lowest_price": 0,
+    "depth_status": "無現貨掛售",
+    "refining_city": "Martlock",
+    "refining_city_zh": "藍城 (Martlock)",
+    "refining_city_short": "藍城",
+    "refining_price": 10700,
+    "refining_sell_min": 10700,
+    "refining_buy_max": 9045,
+    "refining_updated_at": "2026-11-13T08:55:00",
+    "refining_age_badge": "🕒 11小時前",
+    "refining_age_level": "recent",
+    "refining_age_hours": 11.0,
+    "refining_available_qty": 14947,
+    "refining_is_depth_sufficient": true,
+    "refining_depth_lowest_price": 10700,
+    "refining_depth_status": "供貨充足",
+    "price_diff": 0,
+    "price_diff_pct": 0.0,
+    "city_prices": {
+      "Caerleon": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Fort Sterling": {
+        "sell_min": 10800,
+        "buy_max": 7888,
+        "updated_at": "2026-11-13T02:40:00",
+        "age_badge": "🕒 17小時前",
+        "age_level": "recent"
+      },
+      "Martlock": {
+        "sell_min": 10700,
+        "buy_max": 9045,
+        "updated_at": "2026-11-13T08:55:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      },
+      "Lymhurst": {
+        "sell_min": 11388,
+        "buy_max": 9000,
+        "updated_at": "2026-11-13T09:45:00",
+        "age_badge": "🕒 10小時前",
+        "age_level": "recent"
+      },
+      "Thetford": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Bridgewatch": {
+        "sell_min": 10964,
+        "buy_max": 8112,
+        "updated_at": "2026-11-13T09:30:00",
+        "age_badge": "🕒 10小時前",
+        "age_level": "recent"
+      }
+    }
+  },
+  {
+    "mat_type": "METALBAR",
+    "mat_name": "金屬條",
+    "tier": "6.1",
+    "api_id": "T6_METALBAR_LEVEL1@1",
+    "sell_min": 0,
+    "buy_max": 0,
+    "price": 0,
+    "caerleon_price": 0,
+    "caerleon_updated_at": "0001-01-01T00:00:00",
+    "caerleon_age_badge": "無記錄",
+    "caerleon_age_level": "unknown",
+    "caerleon_age_hours": 999.0,
+    "available_qty": 0,
+    "is_depth_sufficient": false,
+    "depth_lowest_price": 0,
+    "depth_status": "無現貨掛售",
+    "refining_city": "Thetford",
+    "refining_city_zh": "紫城 (Thetford)",
+    "refining_city_short": "紫城",
+    "refining_price": 7314,
+    "refining_sell_min": 7314,
+    "refining_buy_max": 6988,
+    "refining_updated_at": "2026-11-13T19:45:00",
+    "refining_age_badge": "⚡ 1小時內",
+    "refining_age_level": "fresh",
+    "refining_age_hours": 0.1,
+    "refining_available_qty": 6136,
+    "refining_is_depth_sufficient": true,
+    "refining_depth_lowest_price": 7314,
+    "refining_depth_status": "供貨充足",
+    "price_diff": 0,
+    "price_diff_pct": 0.0,
+    "city_prices": {
+      "Caerleon": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Fort Sterling": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Martlock": {
+        "sell_min": 7416,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T08:40:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      },
+      "Lymhurst": {
+        "sell_min": 7390,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T09:55:00",
+        "age_badge": "🕒 10小時前",
+        "age_level": "recent"
+      },
+      "Thetford": {
+        "sell_min": 7314,
+        "buy_max": 6988,
+        "updated_at": "2026-11-13T19:45:00",
+        "age_badge": "⚡ 1小時內",
+        "age_level": "fresh"
+      },
+      "Bridgewatch": {
+        "sell_min": 8295,
+        "buy_max": 7014,
+        "updated_at": "2026-11-13T09:30:00",
+        "age_badge": "🕒 10小時前",
+        "age_level": "recent"
+      }
+    }
+  },
+  {
+    "mat_type": "CLOTH",
+    "mat_name": "布料",
+    "tier": "6.1",
+    "api_id": "T6_CLOTH_LEVEL1@1",
+    "sell_min": 0,
+    "buy_max": 0,
+    "price": 0,
+    "caerleon_price": 0,
+    "caerleon_updated_at": "0001-01-01T00:00:00",
+    "caerleon_age_badge": "無記錄",
+    "caerleon_age_level": "unknown",
+    "caerleon_age_hours": 999.0,
+    "available_qty": 0,
+    "is_depth_sufficient": false,
+    "depth_lowest_price": 0,
+    "depth_status": "無現貨掛售",
+    "refining_city": "Lymhurst",
+    "refining_city_zh": "綠城 (Lymhurst)",
+    "refining_city_short": "綠城",
+    "refining_price": 5787,
+    "refining_sell_min": 5787,
+    "refining_buy_max": 5371,
+    "refining_updated_at": "2026-11-13T09:50:00",
+    "refining_age_badge": "🕒 10小時前",
+    "refining_age_level": "recent",
+    "refining_age_hours": 10.0,
+    "refining_available_qty": 26027,
+    "refining_is_depth_sufficient": true,
+    "refining_depth_lowest_price": 5787,
+    "refining_depth_status": "供貨充足",
+    "price_diff": 0,
+    "price_diff_pct": 0.0,
+    "city_prices": {
+      "Caerleon": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Fort Sterling": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Martlock": {
+        "sell_min": 5681,
+        "buy_max": 5112,
+        "updated_at": "2026-11-13T11:40:00",
+        "age_badge": "🕒 8小時前",
+        "age_level": "recent"
+      },
+      "Lymhurst": {
+        "sell_min": 5787,
+        "buy_max": 5371,
+        "updated_at": "2026-11-13T09:50:00",
+        "age_badge": "🕒 10小時前",
+        "age_level": "recent"
+      },
+      "Thetford": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Bridgewatch": {
+        "sell_min": 5917,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T09:15:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      }
+    }
+  },
+  {
+    "mat_type": "PLANKS",
+    "mat_name": "木材",
+    "tier": "6.2",
+    "api_id": "T6_PLANKS_LEVEL2@2",
+    "sell_min": 0,
+    "buy_max": 0,
+    "price": 0,
+    "caerleon_price": 0,
+    "caerleon_updated_at": "0001-01-01T00:00:00",
+    "caerleon_age_badge": "無記錄",
+    "caerleon_age_level": "unknown",
+    "caerleon_age_hours": 999.0,
+    "available_qty": 0,
+    "is_depth_sufficient": false,
+    "depth_lowest_price": 0,
+    "depth_status": "無現貨掛售",
+    "refining_city": "Fort Sterling",
+    "refining_city_zh": "白城 (Fort Sterling)",
+    "refining_city_short": "白城",
+    "refining_price": 23962,
+    "refining_sell_min": 23962,
+    "refining_buy_max": 0,
+    "refining_updated_at": "2026-11-13T19:45:00",
+    "refining_age_badge": "⚡ 1小時內",
+    "refining_age_level": "fresh",
+    "refining_age_hours": 0.1,
+    "refining_available_qty": 4196,
+    "refining_is_depth_sufficient": true,
+    "refining_depth_lowest_price": 23962,
+    "refining_depth_status": "供貨充足",
+    "price_diff": 0,
+    "price_diff_pct": 0.0,
+    "city_prices": {
+      "Caerleon": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Fort Sterling": {
+        "sell_min": 23962,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T19:45:00",
+        "age_badge": "⚡ 1小時內",
+        "age_level": "fresh"
+      },
+      "Martlock": {
+        "sell_min": 27661,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T08:40:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      },
+      "Lymhurst": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Thetford": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Bridgewatch": {
+        "sell_min": 23995,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T09:15:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      }
+    }
+  },
+  {
+    "mat_type": "LEATHER",
+    "mat_name": "皮革",
+    "tier": "6.2",
+    "api_id": "T6_LEATHER_LEVEL2@2",
+    "sell_min": 0,
+    "buy_max": 0,
+    "price": 0,
+    "caerleon_price": 0,
+    "caerleon_updated_at": "0001-01-01T00:00:00",
+    "caerleon_age_badge": "無記錄",
+    "caerleon_age_level": "unknown",
+    "caerleon_age_hours": 999.0,
+    "available_qty": 0,
+    "is_depth_sufficient": false,
+    "depth_lowest_price": 0,
+    "depth_status": "無現貨掛售",
+    "refining_city": "Martlock",
+    "refining_city_zh": "藍城 (Martlock)",
+    "refining_city_short": "藍城",
+    "refining_price": 28095,
+    "refining_sell_min": 28095,
+    "refining_buy_max": 0,
+    "refining_updated_at": "2026-11-13T08:40:00",
+    "refining_age_badge": "🕒 11小時前",
+    "refining_age_level": "recent",
+    "refining_age_hours": 11.2,
+    "refining_available_qty": 6806,
+    "refining_is_depth_sufficient": true,
+    "refining_depth_lowest_price": 28095,
+    "refining_depth_status": "供貨充足",
+    "price_diff": 0,
+    "price_diff_pct": 0.0,
+    "city_prices": {
+      "Caerleon": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Fort Sterling": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Martlock": {
+        "sell_min": 28095,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T08:40:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      },
+      "Lymhurst": {
+        "sell_min": 28599,
+        "buy_max": 24444,
+        "updated_at": "2026-11-13T09:45:00",
+        "age_badge": "🕒 10小時前",
+        "age_level": "recent"
+      },
+      "Thetford": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Bridgewatch": {
+        "sell_min": 28595,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T09:15:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      }
+    }
+  },
+  {
+    "mat_type": "METALBAR",
+    "mat_name": "金屬條",
+    "tier": "6.2",
+    "api_id": "T6_METALBAR_LEVEL2@2",
+    "sell_min": 0,
+    "buy_max": 0,
+    "price": 0,
+    "caerleon_price": 0,
+    "caerleon_updated_at": "0001-01-01T00:00:00",
+    "caerleon_age_badge": "無記錄",
+    "caerleon_age_level": "unknown",
+    "caerleon_age_hours": 999.0,
+    "available_qty": 0,
+    "is_depth_sufficient": false,
+    "depth_lowest_price": 0,
+    "depth_status": "無現貨掛售",
+    "refining_city": "Thetford",
+    "refining_city_zh": "紫城 (Thetford)",
+    "refining_city_short": "紫城",
+    "refining_price": 27000,
+    "refining_sell_min": 27000,
+    "refining_buy_max": 23003,
+    "refining_updated_at": "2026-11-13T19:45:00",
+    "refining_age_badge": "⚡ 1小時內",
+    "refining_age_level": "fresh",
+    "refining_age_hours": 0.1,
+    "refining_available_qty": 4408,
+    "refining_is_depth_sufficient": true,
+    "refining_depth_lowest_price": 27000,
+    "refining_depth_status": "供貨充足",
+    "price_diff": 0,
+    "price_diff_pct": 0.0,
+    "city_prices": {
+      "Caerleon": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Fort Sterling": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Martlock": {
+        "sell_min": 26991,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T08:40:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      },
+      "Lymhurst": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Thetford": {
+        "sell_min": 27000,
+        "buy_max": 23003,
+        "updated_at": "2026-11-13T19:45:00",
+        "age_badge": "⚡ 1小時內",
+        "age_level": "fresh"
+      },
+      "Bridgewatch": {
+        "sell_min": 27977,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T09:15:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      }
+    }
+  },
+  {
+    "mat_type": "CLOTH",
+    "mat_name": "布料",
+    "tier": "6.2",
+    "api_id": "T6_CLOTH_LEVEL2@2",
+    "sell_min": 0,
+    "buy_max": 0,
+    "price": 0,
+    "caerleon_price": 0,
+    "caerleon_updated_at": "0001-01-01T00:00:00",
+    "caerleon_age_badge": "無記錄",
+    "caerleon_age_level": "unknown",
+    "caerleon_age_hours": 999.0,
+    "available_qty": 0,
+    "is_depth_sufficient": false,
+    "depth_lowest_price": 0,
+    "depth_status": "無現貨掛售",
+    "refining_city": "Lymhurst",
+    "refining_city_zh": "綠城 (Lymhurst)",
+    "refining_city_short": "綠城",
+    "refining_price": 17255,
+    "refining_sell_min": 17255,
+    "refining_buy_max": 16224,
+    "refining_updated_at": "2026-11-13T09:45:00",
+    "refining_age_badge": "🕒 10小時前",
+    "refining_age_level": "recent",
+    "refining_age_hours": 10.1,
+    "refining_available_qty": 5032,
+    "refining_is_depth_sufficient": true,
+    "refining_depth_lowest_price": 17255,
+    "refining_depth_status": "供貨充足",
+    "price_diff": 0,
+    "price_diff_pct": 0.0,
+    "city_prices": {
+      "Caerleon": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Fort Sterling": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Martlock": {
+        "sell_min": 20494,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T08:40:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      },
+      "Lymhurst": {
+        "sell_min": 17255,
+        "buy_max": 16224,
+        "updated_at": "2026-11-13T09:45:00",
+        "age_badge": "🕒 10小時前",
+        "age_level": "recent"
+      },
+      "Thetford": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Bridgewatch": {
+        "sell_min": 17088,
+        "buy_max": 14450,
+        "updated_at": "2026-11-13T09:30:00",
+        "age_badge": "🕒 10小時前",
+        "age_level": "recent"
+      }
+    }
+  },
+  {
+    "mat_type": "PLANKS",
+    "mat_name": "木材",
+    "tier": "6.3",
+    "api_id": "T6_PLANKS_LEVEL3@3",
+    "sell_min": 93757,
+    "buy_max": 0,
+    "price": 93757,
+    "caerleon_price": 93757,
+    "caerleon_updated_at": "2026-11-13T04:10:00",
+    "caerleon_age_badge": "🕒 16小時前",
+    "caerleon_age_level": "recent",
+    "caerleon_age_hours": 15.7,
+    "available_qty": 119,
+    "is_depth_sufficient": true,
+    "depth_lowest_price": 93757,
+    "depth_status": "供貨充足",
+    "refining_city": "Fort Sterling",
+    "refining_city_zh": "白城 (Fort Sterling)",
+    "refining_city_short": "白城",
+    "refining_price": 84989,
+    "refining_sell_min": 84989,
+    "refining_buy_max": 74409,
+    "refining_updated_at": "2026-11-13T19:45:00",
+    "refining_age_badge": "⚡ 1小時內",
+    "refining_age_level": "fresh",
+    "refining_age_hours": 0.1,
+    "refining_available_qty": 3695,
+    "refining_is_depth_sufficient": true,
+    "refining_depth_lowest_price": 84989,
+    "refining_depth_status": "供貨充足",
+    "price_diff": 8768,
+    "price_diff_pct": 9.4,
+    "city_prices": {
+      "Caerleon": {
+        "sell_min": 93757,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T04:10:00",
+        "age_badge": "🕒 16小時前",
+        "age_level": "recent"
+      },
+      "Fort Sterling": {
+        "sell_min": 84989,
+        "buy_max": 74409,
+        "updated_at": "2026-11-13T19:45:00",
+        "age_badge": "⚡ 1小時內",
+        "age_level": "fresh"
+      },
+      "Martlock": {
+        "sell_min": 90996,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T08:40:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      },
+      "Lymhurst": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Thetford": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Bridgewatch": {
+        "sell_min": 88963,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T09:15:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      }
+    }
+  },
+  {
+    "mat_type": "LEATHER",
+    "mat_name": "皮革",
+    "tier": "6.3",
+    "api_id": "T6_LEATHER_LEVEL3@3",
+    "sell_min": 144441,
+    "buy_max": 0,
+    "price": 144441,
+    "caerleon_price": 144441,
+    "caerleon_updated_at": "2026-11-13T04:10:00",
+    "caerleon_age_badge": "🕒 16小時前",
+    "caerleon_age_level": "recent",
+    "caerleon_age_hours": 15.7,
+    "available_qty": 90,
+    "is_depth_sufficient": true,
+    "depth_lowest_price": 144441,
+    "depth_status": "供貨充足",
+    "refining_city": "Martlock",
+    "refining_city_zh": "藍城 (Martlock)",
+    "refining_city_short": "藍城",
+    "refining_price": 88500,
+    "refining_sell_min": 88500,
+    "refining_buy_max": 0,
+    "refining_updated_at": "2026-11-13T08:40:00",
+    "refining_age_badge": "🕒 11小時前",
+    "refining_age_level": "recent",
+    "refining_age_hours": 11.2,
+    "refining_available_qty": 3397,
+    "refining_is_depth_sufficient": true,
+    "refining_depth_lowest_price": 88500,
+    "refining_depth_status": "供貨充足",
+    "price_diff": 55941,
+    "price_diff_pct": 38.7,
+    "city_prices": {
+      "Caerleon": {
+        "sell_min": 144441,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T04:10:00",
+        "age_badge": "🕒 16小時前",
+        "age_level": "recent"
+      },
+      "Fort Sterling": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Martlock": {
+        "sell_min": 88500,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T08:40:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      },
+      "Lymhurst": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Thetford": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Bridgewatch": {
+        "sell_min": 94497,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T09:15:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      }
+    }
+  },
+  {
+    "mat_type": "METALBAR",
+    "mat_name": "金屬條",
+    "tier": "6.3",
+    "api_id": "T6_METALBAR_LEVEL3@3",
+    "sell_min": 87530,
+    "buy_max": 0,
+    "price": 87530,
+    "caerleon_price": 87530,
+    "caerleon_updated_at": "2026-11-13T04:10:00",
+    "caerleon_age_badge": "🕒 16小時前",
+    "caerleon_age_level": "recent",
+    "caerleon_age_hours": 15.7,
+    "available_qty": 57,
+    "is_depth_sufficient": true,
+    "depth_lowest_price": 87530,
+    "depth_status": "供貨充足",
+    "refining_city": "Thetford",
+    "refining_city_zh": "紫城 (Thetford)",
+    "refining_city_short": "紫城",
+    "refining_price": 86500,
+    "refining_sell_min": 86500,
+    "refining_buy_max": 0,
+    "refining_updated_at": "2026-11-13T19:50:00",
+    "refining_age_badge": "⚡ 1小時內",
+    "refining_age_level": "fresh",
+    "refining_age_hours": 0.0,
+    "refining_available_qty": 3564,
+    "refining_is_depth_sufficient": true,
+    "refining_depth_lowest_price": 86500,
+    "refining_depth_status": "供貨充足",
+    "price_diff": 1030,
+    "price_diff_pct": 1.2,
+    "city_prices": {
+      "Caerleon": {
+        "sell_min": 87530,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T04:10:00",
+        "age_badge": "🕒 16小時前",
+        "age_level": "recent"
+      },
+      "Fort Sterling": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Martlock": {
+        "sell_min": 92949,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T08:40:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      },
+      "Lymhurst": {
+        "sell_min": 92090,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T09:55:00",
+        "age_badge": "🕒 10小時前",
+        "age_level": "recent"
+      },
+      "Thetford": {
+        "sell_min": 86500,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T19:50:00",
+        "age_badge": "⚡ 1小時內",
+        "age_level": "fresh"
+      },
+      "Bridgewatch": {
+        "sell_min": 91498,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T09:15:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      }
+    }
+  },
+  {
+    "mat_type": "CLOTH",
+    "mat_name": "布料",
+    "tier": "6.3",
+    "api_id": "T6_CLOTH_LEVEL3@3",
+    "sell_min": 70000,
+    "buy_max": 0,
+    "price": 70000,
+    "caerleon_price": 70000,
+    "caerleon_updated_at": "2026-11-13T04:10:00",
+    "caerleon_age_badge": "🕒 16小時前",
+    "caerleon_age_level": "recent",
+    "caerleon_age_hours": 15.7,
+    "available_qty": 89,
+    "is_depth_sufficient": true,
+    "depth_lowest_price": 70000,
+    "depth_status": "供貨充足",
+    "refining_city": "Lymhurst",
+    "refining_city_zh": "綠城 (Lymhurst)",
+    "refining_city_short": "綠城",
+    "refining_price": 67655,
+    "refining_sell_min": 67655,
+    "refining_buy_max": 63001,
+    "refining_updated_at": "2026-11-13T09:45:00",
+    "refining_age_badge": "🕒 10小時前",
+    "refining_age_level": "recent",
+    "refining_age_hours": 10.1,
+    "refining_available_qty": 2551,
+    "refining_is_depth_sufficient": true,
+    "refining_depth_lowest_price": 67655,
+    "refining_depth_status": "供貨充足",
+    "price_diff": 2345,
+    "price_diff_pct": 3.4,
+    "city_prices": {
+      "Caerleon": {
+        "sell_min": 70000,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T04:10:00",
+        "age_badge": "🕒 16小時前",
+        "age_level": "recent"
+      },
+      "Fort Sterling": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Martlock": {
+        "sell_min": 86990,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T08:40:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      },
+      "Lymhurst": {
+        "sell_min": 67655,
+        "buy_max": 63001,
+        "updated_at": "2026-11-13T09:45:00",
+        "age_badge": "🕒 10小時前",
+        "age_level": "recent"
+      },
+      "Thetford": {
+        "sell_min": 0,
+        "buy_max": 0,
+        "updated_at": "0001-01-01T00:00:00",
+        "age_badge": "無記錄",
+        "age_level": "unknown"
+      },
+      "Bridgewatch": {
+        "sell_min": 79995,
+        "buy_max": 0,
+        "updated_at": "2026-11-13T09:15:00",
+        "age_badge": "🕒 11小時前",
+        "age_level": "recent"
+      }
+    }
+  }
+]
