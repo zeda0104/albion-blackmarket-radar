@@ -85,7 +85,7 @@ class MarketScanner:
         self.materials_cache: List[Dict[str, Any]] = []
         self.equipment_cache: List[Dict[str, Any]] = []
         self.orderbook_cache: Dict[tuple, Dict[str, Any]] = {}
-        self.custom_rune_prices: Dict[str, Optional[int]] = {"T4": None, "T5": None, "T6": None}
+        self.custom_rune_prices: Dict[str, Optional[int]] = {"T4": None, "T5": None, "T6": None, "T7": None, "T8": None}
         self.rune_prices_cache: Dict[str, Dict[str, Any]] = {}
         self.is_scanning: bool = False
         self.scan_progress: str = "就緒"
@@ -237,24 +237,25 @@ class MarketScanner:
             except Exception as e:
                 print(f"Error fetching materials: {e}")
 
-        # 抓取紅城 48 款原物料即時訂單簿深度 (僅耗時 ~1 秒)
+        # 抓取紅城原物料即時訂單簿深度 (分批抓取確保不超長)
         caer_depth_map = {}
         try:
-            caer_ob_url = f"{self.base_url}/orderbook/{','.join(all_ids)}?locations=Caerleon&qualities=1"
-            ob_resp = requests.get(caer_ob_url, headers=headers, timeout=12)
-            if ob_resp.status_code == 200:
-                now_ts = time.time()
-                for entry in ob_resp.json():
-                    eid = entry.get("item_id")
-                    sells = entry.get("sell", [])
-                    buys = entry.get("buy", [])
-                    ck = (self.server_key, "Caerleon", eid)
-                    self.orderbook_cache[ck] = {
-                        "timestamp": now_ts,
-                        "sell": sells,
-                        "buy": buys
-                    }
-                    caer_depth_map[eid] = sells
+            now_ts = time.time()
+            for ch in [all_ids[i:i + 50] for i in range(0, len(all_ids), 50)]:
+                caer_ob_url = f"{self.base_url}/orderbook/{','.join(ch)}?locations=Caerleon&qualities=1"
+                ob_resp = requests.get(caer_ob_url, headers=headers, timeout=12)
+                if ob_resp.status_code == 200:
+                    for entry in ob_resp.json():
+                        eid = entry.get("item_id")
+                        sells = entry.get("sell", [])
+                        buys = entry.get("buy", [])
+                        ck = (self.server_key, "Caerleon", eid)
+                        self.orderbook_cache[ck] = {
+                            "timestamp": now_ts,
+                            "sell": sells,
+                            "buy": buys
+                        }
+                        caer_depth_map[eid] = sells
         except Exception as e:
             print(f"[警告] 抓取紅城原料訂單簿失敗: {e}")
 
@@ -466,7 +467,7 @@ class MarketScanner:
     def fetch_journal_prices(self) -> Dict[str, int]:
         """抓取紅城集市日誌（空本與滿本）即時掛賣最低價，提供最精確的日誌折現補貼依據"""
         journal_types = ["HUNTER", "MAGE", "WARRIOR", "TOOLMAKER"]
-        tiers = [4, 5, 6]
+        tiers = [4, 5, 6, 7, 8]
         ids = []
         for j in journal_types:
             for t in tiers:
@@ -490,23 +491,27 @@ class MarketScanner:
 
     def fetch_rune_prices(self) -> Dict[str, Dict[str, Any]]:
         """
-        抓取紅城集市 T4、T5、T6 符石行情（掛單收購價 buy_price_max 與 直購價 sell_price_min）。
-        若 API 無買單價則退回賣單價，若完全無數據則採用保底行情 (T4: 14, T5: 50, T6: 320)。
+        抓取紅城集市 T4、T5、T6、T7、T8 符石行情（掛單收購價 buy_price_max 與 直購價 sell_price_min）。
+        若 API 無買單價則退回賣單價，若完全無數據則採用保底行情 (T4: 14, T5: 50, T6: 320, T7: 1500, T8: 6000)。
         """
-        rune_ids = ["T4_RUNE", "T5_RUNE", "T6_RUNE"]
+        rune_ids = ["T4_RUNE", "T5_RUNE", "T6_RUNE", "T7_RUNE", "T8_RUNE"]
         headers = {'User-Agent': 'AlbionRadar/2.0'}
         url = f"{self.base_url}/prices/{','.join(rune_ids)}?locations=Caerleon"
         
         fallback_map = {
             "T4": 14,
             "T5": 50,
-            "T6": 320
+            "T6": 320,
+            "T7": 1500,
+            "T8": 6000
         }
         
         results = {
             "T4": {"api_buy": 0, "api_sell": 0, "effective_price": fallback_map["T4"], "updated_at": "", "is_custom": False},
             "T5": {"api_buy": 0, "api_sell": 0, "effective_price": fallback_map["T5"], "updated_at": "", "is_custom": False},
             "T6": {"api_buy": 0, "api_sell": 0, "effective_price": fallback_map["T6"], "updated_at": "", "is_custom": False},
+            "T7": {"api_buy": 0, "api_sell": 0, "effective_price": fallback_map["T7"], "updated_at": "", "is_custom": False},
+            "T8": {"api_buy": 0, "api_sell": 0, "effective_price": fallback_map["T8"], "updated_at": "", "is_custom": False},
         }
         
         try:
@@ -1316,7 +1321,7 @@ class MarketScanner:
                     best_buy = fallback_price
                 if best_buy <= 0:
                     t_k = api_id.split("_")[0]
-                    best_buy = {"T4": 14, "T5": 50, "T6": 320}.get(t_k, 50)
+                    best_buy = {"T4": 14, "T5": 50, "T6": 320, "T7": 1500, "T8": 6000}.get(t_k, 50)
 
                 total_cost = needed_qty * best_buy
                 results[api_id] = {

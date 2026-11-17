@@ -3,7 +3,7 @@
   "multigraph": false,
   "graph": {
     "name": "Albion Black Market Radar Architecture Graph",
-    "updated_at": "2026-10-28"
+    "updated_at": "2026-11-17"
   },
   "nodes": [
     {
@@ -162,7 +162,7 @@
     },
     {
       "id": "db_960items",
-      "label": "960 件裝備配方庫 (T4.0~T6.3)",
+      "label": "1600 件裝備配方庫 (T4.0~T8.3)",
       "community": 3,
       "community_name": "裝備配方與常數資料庫",
       "type": "Database"

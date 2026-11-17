@@ -54,7 +54,7 @@
           <span class="text-xs px-2 py-0.5 rounded bg-amber-950 text-amber-400 border border-amber-800/60 font-medium">
             {{ serverNameText }}
           </span>
-          <span class="text-xs text-gray-400 hidden sm:inline">4.0 ~ 6.3 無神器</span>
+          <span class="text-xs text-gray-400 hidden sm:inline">4.0 ~ 8.3 無神器</span>
         </div>
 
         <div class="flex items-center space-x-2">
@@ -167,7 +167,7 @@
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <div class="bg-albion-panel border border-albion-border rounded-lg p-3">
             <div class="text-[11px] text-gray-400">總監控品項</div>
-            <div class="text-xl font-bold text-white mt-0.5">{{ equipments.length }} <span class="text-xs text-gray-500 font-normal">件 (4.0~6.3)</span></div>
+            <div class="text-xl font-bold text-white mt-0.5">{{ equipments.length }} <span class="text-xs text-gray-500 font-normal">件 (4.0~8.3)</span></div>
             <div class="text-[10px] text-gray-400 mt-0.5">實效手續費: <span class="text-amber-400 font-bold font-mono">{{ effectiveTaxPct.toFixed(1) }}%</span> (掛單制)</div>
           </div>
 
@@ -438,7 +438,7 @@
                       class="px-2.5 py-0.5 rounded transition">
                 全部系列
               </button>
-              <button v-for="m in ['4', '5', '6']" :key="'major_' + m"
+              <button v-for="m in ['4', '5', '6', '7', '8']" :key="'major_' + m"
                       @click="toggleMajorTier(m)"
                       :class="selectedMajorTiers.includes(m) ? 'bg-indigo-600 text-white font-bold shadow-sm ring-1 ring-indigo-400' : 'bg-albion-card text-gray-300 hover:bg-albion-hover border border-albion-border'"
                       class="px-2.5 py-0.5 rounded font-bold font-mono transition">
@@ -1092,7 +1092,7 @@
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <div class="bg-albion-panel border border-albion-border rounded-lg p-3">
             <div class="text-[11px] text-gray-400">總監控 / 可獲利品項</div>
-            <div class="text-xl font-bold text-white mt-0.5">{{ equipments.length }} <span class="text-xs text-gray-500 font-normal">件 (4.0~6.3)</span></div>
+            <div class="text-xl font-bold text-white mt-0.5">{{ equipments.length }} <span class="text-xs text-gray-500 font-normal">件 (4.0~8.3)</span></div>
             <div class="text-[10px] text-emerald-400 mt-0.5 font-bold">
               可獲利: {{ profitableRoyalCount }} 件 ({{ ((profitableRoyalCount / (equipments.length || 1)) * 100).toFixed(0) }}%)
             </div>
@@ -1173,7 +1173,7 @@
                       class="px-2.5 py-0.5 rounded transition">
                 全部系列
               </button>
-              <button v-for="m in ['4', '5', '6']" :key="'royal_major_' + m"
+              <button v-for="m in ['4', '5', '6', '7', '8']" :key="'royal_major_' + m"
                       @click="toggleRoyalMajorTier(m)"
                       :class="royalSelectedMajorTiers.includes(m) ? 'bg-amber-600 text-white font-bold shadow-sm ring-1 ring-amber-400' : 'bg-albion-card text-gray-300 hover:bg-albion-hover border border-albion-border'"
                       class="px-2.5 py-0.5 rounded font-bold font-mono transition">
@@ -1273,7 +1273,7 @@
             <table class="w-full text-left text-xs">
               <thead class="bg-albion-card text-gray-400 border-b border-albion-border font-semibold">
                 <tr>
-                  <th class="py-2.5 px-3 min-w-[190px]">裝備品項 (4.0~6.3)</th>
+                  <th class="py-2.5 px-3 min-w-[190px]">裝備品項 (4.0~8.3)</th>
                   <th class="py-2.5 px-2 min-w-[130px]">建議製造城市</th>
                   <th class="py-2.5 px-2 min-w-[130px]">隨身日誌產出</th>
                   <th class="py-2.5 px-2 text-right min-w-[110px]">產地原料採購</th>
@@ -2255,40 +2255,64 @@
               🔄 重設為 API 行情
             </button>
           </div>
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5 pt-1">
             <div class="p-2.5 rounded bg-albion-panel/80 border border-sky-800/40 flex items-center justify-between">
               <div>
-                <span class="font-bold text-sky-300">T4 符石 (T4_RUNE)</span>
-                <div class="text-[10px] text-gray-400 mt-0.5">API買單: {{ runePrices.T4?.api_buy || 13 }} 銀 | 實效: {{ getEffectiveRunePrice('T4') }} 銀</div>
+                <span class="font-bold text-sky-300">T4 符石</span>
+                <div class="text-[10px] text-gray-400 mt-0.5">API: {{ runePrices.T4?.api_buy || 13 }} | 實效: {{ getEffectiveRunePrice('T4') }} 銀</div>
               </div>
               <div class="flex items-center space-x-1.5">
                 <input type="number" min="1" step="1" v-model.number="customRunePrices.T4" placeholder="自動API"
                        @change="saveCustomRunePrices"
-                       class="w-24 p-1.5 bg-albion-card border border-sky-600/40 rounded text-sky-200 text-right font-mono font-bold text-xs">
+                       class="w-20 p-1.5 bg-albion-card border border-sky-600/40 rounded text-sky-200 text-right font-mono font-bold text-xs">
                 <span class="text-gray-400 text-xs">銀</span>
               </div>
             </div>
             <div class="p-2.5 rounded bg-albion-panel/80 border border-red-800/40 flex items-center justify-between">
               <div>
-                <span class="font-bold text-red-300">T5 符石 (T5_RUNE)</span>
-                <div class="text-[10px] text-gray-400 mt-0.5">API買單: {{ runePrices.T5?.api_buy || 48 }} 銀 | 實效: {{ getEffectiveRunePrice('T5') }} 銀</div>
+                <span class="font-bold text-red-300">T5 符石</span>
+                <div class="text-[10px] text-gray-400 mt-0.5">API: {{ runePrices.T5?.api_buy || 48 }} | 實效: {{ getEffectiveRunePrice('T5') }} 銀</div>
               </div>
               <div class="flex items-center space-x-1.5">
                 <input type="number" min="1" step="1" v-model.number="customRunePrices.T5" placeholder="自動API"
                        @change="saveCustomRunePrices"
-                       class="w-24 p-1.5 bg-albion-card border border-red-600/40 rounded text-red-200 text-right font-mono font-bold text-xs">
+                       class="w-20 p-1.5 bg-albion-card border border-red-600/40 rounded text-red-200 text-right font-mono font-bold text-xs">
                 <span class="text-gray-400 text-xs">銀</span>
               </div>
             </div>
             <div class="p-2.5 rounded bg-albion-panel/80 border border-amber-800/40 flex items-center justify-between">
               <div>
-                <span class="font-bold text-amber-300">T6 符石 (T6_RUNE)</span>
-                <div class="text-[10px] text-gray-400 mt-0.5">API買單: {{ runePrices.T6?.api_buy || 308 }} 銀 | 實效: {{ getEffectiveRunePrice('T6') }} 銀</div>
+                <span class="font-bold text-amber-300">T6 符石</span>
+                <div class="text-[10px] text-gray-400 mt-0.5">API: {{ runePrices.T6?.api_buy || 308 }} | 實效: {{ getEffectiveRunePrice('T6') }} 銀</div>
               </div>
               <div class="flex items-center space-x-1.5">
                 <input type="number" min="1" step="1" v-model.number="customRunePrices.T6" placeholder="自動API"
                        @change="saveCustomRunePrices"
-                       class="w-24 p-1.5 bg-albion-card border border-amber-600/40 rounded text-amber-200 text-right font-mono font-bold text-xs">
+                       class="w-20 p-1.5 bg-albion-card border border-amber-600/40 rounded text-amber-200 text-right font-mono font-bold text-xs">
+                <span class="text-gray-400 text-xs">銀</span>
+              </div>
+            </div>
+            <div class="p-2.5 rounded bg-albion-panel/80 border border-purple-800/40 flex items-center justify-between">
+              <div>
+                <span class="font-bold text-purple-300">T7 符石</span>
+                <div class="text-[10px] text-gray-400 mt-0.5">API: {{ runePrices.T7?.api_buy || 1500 }} | 實效: {{ getEffectiveRunePrice('T7') }} 銀</div>
+              </div>
+              <div class="flex items-center space-x-1.5">
+                <input type="number" min="1" step="1" v-model.number="customRunePrices.T7" placeholder="自動API"
+                       @change="saveCustomRunePrices"
+                       class="w-20 p-1.5 bg-albion-card border border-purple-600/40 rounded text-purple-200 text-right font-mono font-bold text-xs">
+                <span class="text-gray-400 text-xs">銀</span>
+              </div>
+            </div>
+            <div class="p-2.5 rounded bg-albion-panel/80 border border-yellow-700/40 flex items-center justify-between">
+              <div>
+                <span class="font-bold text-yellow-300">T8 符石</span>
+                <div class="text-[10px] text-gray-400 mt-0.5">API: {{ runePrices.T8?.api_buy || 6000 }} | 實效: {{ getEffectiveRunePrice('T8') }} 銀</div>
+              </div>
+              <div class="flex items-center space-x-1.5">
+                <input type="number" min="1" step="1" v-model.number="customRunePrices.T8" placeholder="自動API"
+                       @change="saveCustomRunePrices"
+                       class="w-20 p-1.5 bg-albion-card border border-yellow-500/40 rounded text-yellow-200 text-right font-mono font-bold text-xs">
                 <span class="text-gray-400 text-xs">銀</span>
               </div>
             </div>
@@ -2887,7 +2911,7 @@
             <span class="font-bold text-amber-300">🔮 紅城符石收單成本 (掛單製程)</span>
             <button @click="resetRunePrices" class="text-[10px] text-gray-400 hover:text-white underline">重設為 API 行情</button>
           </div>
-          <div class="grid grid-cols-3 gap-2 text-center">
+          <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 text-center">
             <div>
               <label class="block text-gray-400 text-[10px] mb-0.5 font-bold">T4 符石</label>
               <input type="number" v-model.number="customRunePrices.T4" :placeholder="`API: ${runePrices.T4?.api_buy || 13}`"
@@ -2908,6 +2932,20 @@
                      @change="saveCustomRunePrices"
                      class="w-full p-1 bg-albion-card border border-albion-border rounded text-white text-center font-mono text-xs font-bold">
               <span class="text-[9px] text-gray-400 block mt-0.5">實效: {{ getEffectiveRunePrice('T6') }} 銀</span>
+            </div>
+            <div>
+              <label class="block text-purple-300 text-[10px] mb-0.5 font-bold">T7 符石</label>
+              <input type="number" v-model.number="customRunePrices.T7" :placeholder="`API: ${runePrices.T7?.api_buy || 1500}`"
+                     @change="saveCustomRunePrices"
+                     class="w-full p-1 bg-albion-card border border-purple-800/60 rounded text-purple-200 text-center font-mono text-xs font-bold">
+              <span class="text-[9px] text-gray-400 block mt-0.5">實效: {{ getEffectiveRunePrice('T7') }} 銀</span>
+            </div>
+            <div>
+              <label class="block text-yellow-300 text-[10px] mb-0.5 font-bold">T8 符石</label>
+              <input type="number" v-model.number="customRunePrices.T8" :placeholder="`API: ${runePrices.T8?.api_buy || 6000}`"
+                     @change="saveCustomRunePrices"
+                     class="w-full p-1 bg-albion-card border border-yellow-700/60 rounded text-yellow-200 text-center font-mono text-xs font-bold">
+              <span class="text-[9px] text-gray-400 block mt-0.5">實效: {{ getEffectiveRunePrice('T8') }} 銀</span>
             </div>
           </div>
           <span class="text-[10px] text-gray-500 block">留空自動採用 AODP 紅城掛單買價；自訂輸入即刻鎖價。</span>
@@ -3060,17 +3098,19 @@
         const runePrices = ref({
           T4: { api_buy: 13, api_sell: 15, effective_price: 13 },
           T5: { api_buy: 48, api_sell: 74, effective_price: 48 },
-          T6: { api_buy: 308, api_sell: 385, effective_price: 308 }
+          T6: { api_buy: 308, api_sell: 385, effective_price: 308 },
+          T7: { api_buy: 1500, api_sell: 1900, effective_price: 1500 },
+          T8: { api_buy: 6000, api_sell: 7500, effective_price: 6000 }
         });
         const savedCustomRunes = localStorage.getItem('albion_custom_rune_prices');
-        const customRunePrices = ref(savedCustomRunes ? JSON.parse(savedCustomRunes) : { T4: null, T5: null, T6: null });
+        const customRunePrices = ref(savedCustomRunes ? JSON.parse(savedCustomRunes) : { T4: null, T5: null, T6: null, T7: null, T8: null });
 
         const getEffectiveRunePrice = (tierKey) => {
           const tKey = String(tierKey).startsWith('T') ? tierKey : ('T' + tierKey);
           if (customRunePrices.value && customRunePrices.value[tKey] !== null && customRunePrices.value[tKey] !== undefined && customRunePrices.value[tKey] > 0) {
             return Number(customRunePrices.value[tKey]);
           }
-          return runePrices.value[tKey]?.effective_price || (tKey === 'T4' ? 14 : (tKey === 'T5' ? 50 : 320));
+          return runePrices.value[tKey]?.effective_price || (tKey === 'T4' ? 14 : (tKey === 'T5' ? 50 : (tKey === 'T6' ? 320 : (tKey === 'T7' ? 1500 : 6000))));
         };
 
         const recomputeItemRuneEnchant = (item) => {
@@ -3149,7 +3189,7 @@
         };
 
         const resetRunePrices = () => {
-          customRunePrices.value = { T4: null, T5: null, T6: null };
+          customRunePrices.value = { T4: null, T5: null, T6: null, T7: null, T8: null };
           localStorage.removeItem('albion_custom_rune_prices');
           equipments.value.forEach(recomputeItemRuneEnchant);
           saveCustomRunePrices();
@@ -4140,7 +4180,7 @@
           { label: '🎒 工匠/配件', value: '工匠' }
         ];
 
-        const tierOptions = ['4.0', '4.1', '4.2', '4.3', '5.0', '5.1', '5.2', '5.3', '6.0', '6.1', '6.2', '6.3'];
+        const tierOptions = ['4.0', '4.1', '4.2', '4.3', '5.0', '5.1', '5.2', '5.3', '6.0', '6.1', '6.2', '6.3', '7.0', '7.1', '7.2', '7.3', '8.0', '8.1', '8.2', '8.3'];
         const allTiers = ['T4.0', 'T4.1', 'T4.2', 'T4.3', 'T5.0', 'T5.1', 'T5.2', 'T5.3', 'T6.0', 'T6.1', 'T6.2', 'T6.3', 'T7.0', 'T7.1', 'T7.2', 'T7.3', 'T8.0', 'T8.1', 'T8.2', 'T8.3', 'T8.4'];
 
         const formatNumber = (num) => {
@@ -5550,6 +5590,8 @@
           if (cleanTier.startsWith('4')) return 'bg-sky-950 text-sky-400 border border-sky-800';
           if (cleanTier.startsWith('5')) return 'bg-red-950 text-red-400 border border-red-800';
           if (cleanTier.startsWith('6')) return 'bg-amber-950 text-amber-400 border border-amber-800';
+          if (cleanTier.startsWith('7')) return 'bg-purple-950 text-purple-300 border border-purple-800';
+          if (cleanTier.startsWith('8')) return 'bg-amber-400/20 text-yellow-300 border border-yellow-600';
           return 'bg-gray-800 text-gray-300';
         };
 

@@ -1,13 +1,15 @@
 """
 Albion Online 黑市套利雷達 - 裝備與材料資料庫
-包含 4.0 ~ 6.3 所有無神器裝備（獵人小屋、法師之塔、戰士鐵匠鋪、冒險者配件）
+包含 4.0 ~ 8.3 所有無神器裝備（獵人小屋、法師之塔、戰士鐵匠鋪、冒險者配件）
 """
 
-# 支援的階級與附魔等級
+# 支援的階級與附魔等級 (擴充至 4.0 ~ 8.3 全系列)
 TIERS = [
     "4.0", "4.1", "4.2", "4.3",
     "5.0", "5.1", "5.2", "5.3",
-    "6.0", "6.1", "6.2", "6.3"
+    "6.0", "6.1", "6.2", "6.3",
+    "7.0", "7.1", "7.2", "7.3",
+    "8.0", "8.1", "8.2", "8.3"
 ]
 
 QUALITY_MAP = {
@@ -239,7 +241,7 @@ def get_material_api_id(mat_type: str, tier: str) -> str:
     return f"T{base_tier}_{mat_type}{suffix}"
 
 def get_all_material_ids():
-    """獲取 4.0~6.3 全部材料 ID 字典 (mat_type, tier) -> api_id"""
+    """獲取 4.0~8.3 全部材料 ID 字典 (mat_type, tier) -> api_id"""
     mat_ids = {}
     for tier in TIERS:
         for mat_type in MATERIAL_TYPES.keys():
@@ -259,7 +261,7 @@ def get_equipment_rune_requirement(recipe: dict) -> int:
     return total_mats * 12
 
 def get_all_equipment_items():
-    """獲取全部 80 項裝備在 12 個階級下的完整清單 (共 960 項)"""
+    """獲取全部 80 項裝備在 20 個階級下的完整清單 (共 1600 項)"""
     load_definitions_from_excel()
     all_items = []
     for eq in EQUIPMENT_DEFINITIONS:
@@ -415,6 +417,8 @@ def get_journal_stats(cat: str, tier: str, recipe: dict, journal_prices: dict = 
         4: {"full": 5800, "empty": 2000, "net": 3400},
         5: {"full": 11500, "empty": 3500, "net": 7200},
         6: {"full": 28500, "empty": 8500, "net": 18100},
+        7: {"full": 68000, "empty": 18000, "net": 45000},
+        8: {"full": 165000, "empty": 45000, "net": 110000},
     }.get(base_tier, {"full": 5800, "empty": 2000, "net": 3400})
 
     full_id = f"T{base_tier}_JOURNAL_{j_type}_FULL"

@@ -64,7 +64,7 @@ _init_specs = load_saved_specs()
 scanner.inner_spec = _init_specs.get("inner_spec", 100)
 scanner.outer_spec = _init_specs.get("outer_spec", 100)
 scanner.food = _init_specs.get("food_type", "kraken")
-scanner.custom_rune_prices = _init_specs.get("rune_custom_prices", {"T4": None, "T5": None, "T6": None})
+scanner.custom_rune_prices = _init_specs.get("rune_custom_prices", {"T4": None, "T5": None, "T6": None, "T7": None, "T8": None})
 os.makedirs("static", exist_ok=True)
 
 @asynccontextmanager
