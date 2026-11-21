@@ -1777,7 +1777,10 @@
                       </span>
                     </div>
                     <div class="flex items-center space-x-1.5 text-[10px] text-purple-300">
-                      <span>專精 內{{ getBatchItemFocus(b).inner }}/外{{ getBatchItemFocus(b).outer }}</span>
+                      <span :title="`總效率 FCE: ${formatNumber(getBatchItemFocus(b).eff)}（內圈 ${getBatchItemFocus(b).inner}×30 + 單品 ${getBatchItemFocus(b).outer}×250 + 同系共享 ${getBatchItemFocus(b).mutualSpecSum}×30；不含神器專精）`"
+                            class="cursor-help underline decoration-dotted decoration-purple-400/60">
+                        專精 內{{ getBatchItemFocus(b).inner }}/外{{ getBatchItemFocus(b).outer }}
+                      </span>
                       <span v-if="getBatchItemFocus(b).useRuneEnchant" class="px-1 py-0.2 rounded bg-purple-950/80 text-purple-200 border border-purple-800/60">
                         .0附魔計
                       </span>
@@ -3868,14 +3871,12 @@
         };
 
         const getBatchItemFocus = (b) => {
-          if (!b) return { unitFocus: 0, subtotalFocus: 0, potentialSubtotalFocus: 0, isFocus: false, useRuneEnchant: false, effectiveCraftTier: '4.0', inner: 100, outer: 100 };
+          if (!b) return { unitFocus: 0, subtotalFocus: 0, potentialSubtotalFocus: 0, isFocus: false, useRuneEnchant: false, effectiveCraftTier: '4.0', inner: 100, outer: 100, eff: 0, mutualSpecSum: 100 };
           const fullEq = equipments.value.find(e => e.api_id === b.api_id);
           const isRoyal = b.is_royal || (b.craft_city && b.craft_city !== 'Caerleon');
           const useRuneEnchant = !!(fullEq && fullEq.rune_enchant && (isRoyal ? fullEq.rune_enchant.royal_is_cheaper : fullEq.rune_enchant.is_cheaper));
           const effectiveCraftTier = useRuneEnchant ? (String(b.tier || '4.0').split('.')[0] + '.0') : (b.tier || '4.0');
-          const baseId = (fullEq && (fullEq.base_id || fullEq.id)) || (b.api_id ? b.api_id.replace(/^T\d+_/, '').replace(/@\d+$/, '') : '');
-          const inner = getMasterySpec(b.subcat);
-          const outer = getItemSpec(baseId);
+          const { eff, inner, outer, mutualSpecSum } = getItemFocusEfficiency(fullEq || b);
           const unitFocus = getItemFocusCost(fullEq || b, effectiveCraftTier);
           const qty = b.qty || 1;
           const isFocus = b.costMode === 'focus';
@@ -3887,7 +3888,9 @@
             useRuneEnchant,
             effectiveCraftTier,
             inner,
-            outer
+            outer,
+            eff,
+            mutualSpecSum
           };
         };
 
@@ -4494,6 +4497,20 @@
           9: 879.625, 10: 1539.375, 11: 2693.875, 12: 4714.375
         };
 
+        // 計算單件裝備總專注效率點數 (FCE): 內圈×30 + 自身單品×250 + 同系所有非神器單品共享×30
+        const getItemFocusEfficiency = (item) => {
+          if (!item) return { eff: 0, inner: 100, outer: 100, mutualSpecSum: 100, siblingCount: 1 };
+          const baseId = item.base_id || item.id || (item.api_id ? item.api_id.replace(/^T\d+_/, '').replace(/@\d+$/, '') : '');
+          const inner = getMasterySpec(item.subcat);
+          const outer = getItemSpec(baseId);
+          const siblings = equipmentDefinitions.value.filter(eq => eq.subcat === item.subcat && (!item.cat || eq.cat === item.cat));
+          const mutualSpecSum = siblings.length > 0
+            ? siblings.reduce((sum, sib) => sum + getItemSpec(sib.id), 0)
+            : outer;
+          const eff = (inner * 30) + (outer * 250) + (mutualSpecSum * 30);
+          return { eff, inner, outer, mutualSpecSum, siblingCount: siblings.length || 1 };
+        };
+
         // 依據阿爾比恩官方公式與當前星盤專精動態計算單件製造所需專注點
         const getItemFocusCost = (item, overrideTier = null) => {
           if (!item) return 0;
@@ -4521,10 +4538,7 @@
           }
           const baseFocus = totalMats * basePerMat;
 
-          const baseId = item.base_id || item.id || (item.api_id ? item.api_id.replace(/^T\d+_/, '').replace(/@\d+$/, '') : '');
-          const inner = getMasterySpec(item.subcat);
-          const outer = getItemSpec(baseId);
-          const eff = (inner * 30) + (outer * 250);
+          const { eff } = getItemFocusEfficiency(item);
 
           const ratio = Math.pow(0.5, eff / 10000.0);
           return Math.max(1, Math.round(baseFocus * ratio));
