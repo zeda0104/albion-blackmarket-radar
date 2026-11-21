@@ -1766,6 +1766,24 @@
                     </div>
                   </div>
 
+                  <!-- 🎯 專注點數消耗與專精練度追蹤 -->
+                  <div class="mt-1.5 pt-1.5 border-t border-albion-border/30 flex flex-wrap items-center justify-between text-[11px] gap-2 font-mono">
+                    <div class="flex items-center space-x-2" :class="b.costMode === 'focus' ? 'text-sky-300' : 'text-gray-400'">
+                      <span v-if="b.costMode === 'focus'">
+                        🎯 專注消耗: 單件 <b class="text-white">{{ formatNumber(getBatchItemFocus(b).unitFocus) }}</b> 點 · 本款小計 <b class="text-sky-200">{{ formatNumber(getBatchItemFocus(b).subtotalFocus) }}</b> 點
+                      </span>
+                      <span v-else>
+                        🎯 專注參考: 單件 <b>{{ formatNumber(getBatchItemFocus(b).unitFocus) }}</b> 點 (未開專注 · 若開需 {{ formatNumber(getBatchItemFocus(b).potentialSubtotalFocus) }} 點)
+                      </span>
+                    </div>
+                    <div class="flex items-center space-x-1.5 text-[10px] text-purple-300">
+                      <span>專精 內{{ getBatchItemFocus(b).inner }}/外{{ getBatchItemFocus(b).outer }}</span>
+                      <span v-if="getBatchItemFocus(b).useRuneEnchant" class="px-1 py-0.2 rounded bg-purple-950/80 text-purple-200 border border-purple-800/60">
+                        .0附魔計
+                      </span>
+                    </div>
+                  </div>
+
                 </div>
             </div>
           </div>
@@ -1794,6 +1812,28 @@
                   </span>
                 </div>
                 <div v-else class="text-gray-500 text-[11px]">無日誌需求</div>
+              </div>
+
+              <!-- 每日 15 本 T6 獵人日誌 KPI 進度條 -->
+              <div class="border-t border-sky-800/30 pt-2">
+                <div class="flex items-center justify-between text-[11px] mb-1">
+                  <span class="font-bold text-amber-300 flex items-center space-x-1">
+                    <span>🎯</span>
+                    <span>每日 T6 獵人日誌 KPI (目標 15 本)</span>
+                  </span>
+                  <span class="font-mono font-bold" :class="batchDetails.t6HunterJournalsRaw >= 15 ? 'text-emerald-400' : 'text-amber-300'">
+                    {{ batchDetails.t6HunterJournalsRaw }} / 15 本
+                    <span class="ml-1 text-[10px]">
+                      {{ batchDetails.t6HunterJournalsRaw >= 15 ? '✅ 已達標！' : `(還差 ${(15 - batchDetails.t6HunterJournalsRaw).toFixed(1)} 本)` }}
+                    </span>
+                  </span>
+                </div>
+                <div class="w-full h-2 bg-albion-dark rounded-full overflow-hidden border border-sky-900/60">
+                  <div class="h-full transition-all duration-300 rounded-full"
+                       :class="batchDetails.t6HunterJournalsRaw >= 15 ? 'bg-emerald-500' : 'bg-amber-500'"
+                       :style="{ width: Math.min(100, (batchDetails.t6HunterJournalsRaw / 15) * 100) + '%' }">
+                  </div>
+                </div>
               </div>
 
               <!-- 獵人工人產出回補材料 -->
@@ -1857,6 +1897,38 @@
                   <span class="font-mono font-bold text-sky-300">
                     +{{ formatNumber(batchDetails.totalJournalBenefit) }} 銀幣
                   </span>
+                </div>
+              </div>
+
+              <!-- 🎯 專注點數規劃總計 -->
+              <div class="border-t border-albion-border/60 pt-2 space-y-1.5">
+                <div class="flex justify-between items-center">
+                  <span class="text-sky-300 font-bold flex items-center space-x-1">
+                    <span>🎯</span>
+                    <span>專注點數規劃總計:</span>
+                  </span>
+                  <span class="font-mono font-bold"
+                        :class="batchDetails.totalFocusCost === 0 ? 'text-gray-400' : (batchDetails.totalFocusCost <= 10000 ? 'text-emerald-400' : (batchDetails.totalFocusCost <= 30000 ? 'text-amber-300' : 'text-rose-400'))">
+                    {{ formatNumber(batchDetails.totalFocusCost) }} 點
+                    <span v-if="batchDetails.totalFocusCost > 30000" class="ml-1 text-[10px] px-1 py-0.2 rounded bg-rose-950 border border-rose-800">
+                      超過 30,000 上限
+                    </span>
+                  </span>
+                </div>
+                <div v-if="batchDetails.totalFocusCost > 0" class="space-y-1">
+                  <div class="text-[11px] text-gray-400 font-mono flex justify-between">
+                    <span>均耗 {{ formatNumber(batchDetails.avgFocusPerPiece) }} 點/件</span>
+                    <span>佔每日 10,000 回復 {{ batchDetails.dailyFocusPct }}% (約 {{ batchDetails.focusDaysNeeded }} 天份)</span>
+                  </div>
+                  <div class="w-full h-1.5 bg-albion-dark rounded-full overflow-hidden border border-albion-border/60">
+                    <div class="h-full transition-all duration-300 rounded-full"
+                         :class="batchDetails.totalFocusCost <= 10000 ? 'bg-emerald-500' : (batchDetails.totalFocusCost <= 30000 ? 'bg-amber-500' : 'bg-rose-500')"
+                         :style="{ width: Math.min(100, (batchDetails.totalFocusCost / 10000) * 100) + '%' }">
+                    </div>
+                  </div>
+                </div>
+                <div v-else-if="batchDetails.totalPotentialFocusCost > 0" class="text-[11px] text-gray-400 font-mono">
+                  目前皆為無專注（若全部開啟專注約需 {{ formatNumber(batchDetails.totalPotentialFocusCost) }} 點）
                 </div>
               </div>
 
@@ -3795,6 +3867,30 @@
           };
         };
 
+        const getBatchItemFocus = (b) => {
+          if (!b) return { unitFocus: 0, subtotalFocus: 0, potentialSubtotalFocus: 0, isFocus: false, useRuneEnchant: false, effectiveCraftTier: '4.0', inner: 100, outer: 100 };
+          const fullEq = equipments.value.find(e => e.api_id === b.api_id);
+          const isRoyal = b.is_royal || (b.craft_city && b.craft_city !== 'Caerleon');
+          const useRuneEnchant = !!(fullEq && fullEq.rune_enchant && (isRoyal ? fullEq.rune_enchant.royal_is_cheaper : fullEq.rune_enchant.is_cheaper));
+          const effectiveCraftTier = useRuneEnchant ? (String(b.tier || '4.0').split('.')[0] + '.0') : (b.tier || '4.0');
+          const baseId = (fullEq && (fullEq.base_id || fullEq.id)) || (b.api_id ? b.api_id.replace(/^T\d+_/, '').replace(/@\d+$/, '') : '');
+          const inner = getMasterySpec(b.subcat);
+          const outer = getItemSpec(baseId);
+          const unitFocus = getItemFocusCost(fullEq || b, effectiveCraftTier);
+          const qty = b.qty || 1;
+          const isFocus = b.costMode === 'focus';
+          return {
+            unitFocus,
+            subtotalFocus: isFocus ? unitFocus * qty : 0,
+            potentialSubtotalFocus: unitFocus * qty,
+            isFocus,
+            useRuneEnchant,
+            effectiveCraftTier,
+            inner,
+            outer
+          };
+        };
+
         const batchSourceMode = ref('buy'); // 'buy' (市場直購) or 'gather' (自備採集)
         const marketDepthMap = ref({});
         const isFetchingDepth = ref(false);
@@ -4399,9 +4495,10 @@
         };
 
         // 依據阿爾比恩官方公式與當前星盤專精動態計算單件製造所需專注點
-        const getItemFocusCost = (item) => {
+        const getItemFocusCost = (item, overrideTier = null) => {
           if (!item) return 0;
-          const parts = (item.tier || '4.0').split('.');
+          const tierStr = overrideTier || item.tier || '4.0';
+          const parts = String(tierStr).split('.');
           const t = parseInt(parts[0]) || 4;
           const e = parseInt(parts[1]) || 0;
           const eqTier = t + e;
@@ -4424,7 +4521,7 @@
           }
           const baseFocus = totalMats * basePerMat;
 
-          const baseId = item.base_id || item.id;
+          const baseId = item.base_id || item.id || (item.api_id ? item.api_id.replace(/^T\d+_/, '').replace(/@\d+$/, '') : '');
           const inner = getMasterySpec(item.subcat);
           const outer = getItemSpec(baseId);
           const eff = (inner * 30) + (outer * 250);
@@ -4606,6 +4703,9 @@
           let totalStationFee = 0;
           let totalNetCost = 0;
           let totalPieces = 0;
+          let totalFocusCost = 0;
+          let totalPotentialFocusCost = 0;
+          let focusPiecesCount = 0;
           let instantSellCount = 0;
           let orderSellCount = 0;
           let estInstantRev = 0;
@@ -4634,6 +4734,11 @@
             totalPieces += qty;
             const itemStationFee = unitStationFee * qty;
             totalStationFee += itemStationFee;
+
+            const fInfo = getBatchItemFocus(bItem);
+            totalFocusCost += fInfo.subtotalFocus;
+            totalPotentialFocusCost += fInfo.potentialSubtotalFocus;
+            if (fInfo.isFocus) focusPiecesCount += qty;
 
             // 全部採用掛單制出貨 (6.5% 稅費，不再使用立即售出)
             orderSellCount += qty;
@@ -4826,6 +4931,13 @@
             raw_count: count.toFixed(1)
           }));
 
+          let t6HunterJournalsRaw = 0;
+          for (const [name, count] of Object.entries(journalSummary)) {
+            if (name.includes('T6') && name.includes('獵人')) {
+              t6HunterJournalsRaw += count;
+            }
+          }
+
           let t6HunterJournalsCount = 0;
           let totalJournalBenefit = 0;
           let islandLaborerBenefit = 0;
@@ -4833,10 +4945,9 @@
 
           // 計算日誌效益 (紅城島 15 獵人工人上限 15 本 + 超額部分市場直售折現)
           if (journalSubsidyMode.value !== 'off') {
+            t6HunterJournalsCount = t6HunterJournalsRaw;
             for (const [name, count] of Object.entries(journalSummary)) {
-              if (name.includes('T6') && name.includes('獵人')) {
-                t6HunterJournalsCount += count;
-              } else {
+              if (!(name.includes('T6') && name.includes('獵人'))) {
                 const sampleEq = equipments.value.find(e => e.journal && e.journal.journal_name === name);
                 const unitNet = sampleEq && sampleEq.journal ? sampleEq.journal.unit_net_journal : 3500;
                 surplusJournalCash += Math.round(count * unitNet);
@@ -4865,6 +4976,7 @@
             journals: journalList,
             laborerReturns: [],
             t6HunterJournalsCount: t6HunterJournalsCount.toFixed(1),
+            t6HunterJournalsRaw: Number(t6HunterJournalsRaw.toFixed(1)),
             islandLaborerBenefit,
             surplusJournalCash,
             totalJournalBenefit,
@@ -4875,6 +4987,12 @@
             netProfit,
             roi,
             totalPieces,
+            totalFocusCost,
+            totalPotentialFocusCost,
+            focusPiecesCount,
+            avgFocusPerPiece: focusPiecesCount > 0 ? Math.round(totalFocusCost / focusPiecesCount) : 0,
+            dailyFocusPct: (totalFocusCost / 10000 * 100).toFixed(1),
+            focusDaysNeeded: (totalFocusCost / 10000).toFixed(2),
             instantSellCount,
             orderSellCount,
             estInstantRev,
@@ -4892,7 +5010,9 @@
           batchList.value.forEach(b => {
             const rEnchant = getBatchItemRuneEnchant(b);
             const enchantNote = rEnchant ? ` - ✨建議搓.0後工坊附魔 (省${formatNumber(rEnchant.savedSilver)}銀/件)` : '';
-            text += `  • ${b.name} x ${b.qty} 件 [${b.craft_city_zh || '紅城'}, ${b.costMode === 'focus' ? '下專注' : '無專注'}${enchantNote}]\n`;
+            const fInfo = getBatchItemFocus(b);
+            const focusNote = b.costMode === 'focus' ? `, 耗專注 ${formatNumber(fInfo.unitFocus)}/件 (共 ${formatNumber(fInfo.subtotalFocus)} 點)` : '';
+            text += `  • ${b.name} x ${b.qty} 件 [${b.craft_city_zh || '紅城'}, ${b.costMode === 'focus' ? '下專注' : '無專注'}${focusNote}${enchantNote}]\n`;
           });
 
           if (bd.journals.length > 0) {
@@ -4929,6 +5049,7 @@
           if (enableStationFee.value) {
             text += `  • 城市工坊店稅: ${formatNumber(bd.totalStationFee)} 銀幣\n`;
           }
+          text += `  • 總計專注消耗: ${formatNumber(bd.totalFocusCost)} 點 (約 ${bd.dailyFocusPct}% 日回復量 / ${bd.focusDaysNeeded} 天份)\n`;
           text += `  • 預估黑市總營收: ${formatNumber(bd.totalRevenue)} 銀幣\n`;
           text += `  • 預估總淨利: ${bd.netProfit >= 0 ? '+' : ''}${formatNumber(bd.netProfit)} 銀幣 (ROI: ${bd.roi}%)\n`;
           text += `生成時間: ${new Date().toLocaleString()}`;
@@ -5823,6 +5944,7 @@
           selectedBatchCount,
           toggleSelectAllBatch,
           getBatchItemProfit,
+          getBatchItemFocus,
           exportAppSettings,
           importAppSettings,
           safeBatchPct,
